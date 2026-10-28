@@ -51,6 +51,8 @@ export default defineConfig(({ mode }) => {
     test: {
       environment: 'node',
       include: ['tests/**/*.test.js'],
+      // 미로 수백 개를 만들어 보는 테스트가 있어서, 컴퓨터가 바쁠 때도 시간 초과로 실패하지 않게 넉넉히
+      testTimeout: 60000,
     },
   };
 });

@@ -1,7 +1,7 @@
 import { LOOP, MATCH } from '../src/config.js';
 import { createRng } from '../src/core/rng.js';
 import { DIR_LIST } from '../src/game/dir.js';
-import { canMove, cellIndex, createMazeFromWalls, distanceAt } from '../src/game/maze.js';
+import { canMove, cellIndex, createMazeFromWalls } from '../src/game/maze.js';
 import { assembleMatch, updateMatch } from '../src/game/match.js';
 import { TRAP } from '../src/game/placement.js';
 
@@ -64,9 +64,21 @@ export function skipCountdown(match) {
 
 /** 보물 쪽으로 한 칸 가까워지는 방향 */
 export function towardTreasure(maze, x, y) {
-  const d = distanceAt(maze, x, y);
-  return DIR_LIST.find((dir) => canMove(maze, x, y, dir.name) && distanceAt(maze, x + dir.dx, y + dir.dy) === d - 1)
-    ?.name;
+  return downhill(maze, maze.distToTreasure, x, y);
+}
+
+/** dist(칸 번호 → 거리)가 한 칸 줄어드는 방향 */
+export function downhill(maze, dist, x, y) {
+  const d = dist[cellIndex(maze.width, x, y)];
+  return DIR_LIST.find(
+    (dir) => canMove(maze, x, y, dir.name) && dist[cellIndex(maze.width, x + dir.dx, y + dir.dy)] === d - 1,
+  )?.name;
+}
+
+/** i번 플레이어가 지금 가야 할 방향: 보석 전이면 보석 쪽, 보석을 만졌으면 집 쪽 */
+export function towardGoal(match, i) {
+  const p = match.players[i];
+  return downhill(match.maze, p.hasGem ? match.homeDist[i] : match.maze.distToTreasure, p.x, p.y);
 }
 
 export const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };

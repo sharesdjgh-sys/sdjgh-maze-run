@@ -27,7 +27,7 @@ import { distanceAt } from './game/maze.js';
 import { createMatch, pauseMatch, resumeMatch, updateMatch } from './game/match.js';
 import { createSeries, recordResult, seriesWinner, startNextRound } from './game/series.js';
 import { MAZE_POOL } from './data/mazePool.js';
-import { CHARACTERS, preloadCharacters, installCharacterAnimationElements } from './render/characters.js';
+import { CHARACTERS, preloadCharacters } from './render/characters.js';
 import { createRenderer } from './render/renderer.js';
 import { createVfx, handleVfxEvent, updateVfx } from './render/vfx.js';
 import { errorScreen } from './ui/error.js';
@@ -48,9 +48,7 @@ PLAYERS.forEach((p, i) => {
   document.documentElement.style.setProperty(`--p${i + 1}`, p.color);
   document.documentElement.style.setProperty(`--p${i + 1}-soft`, p.soft);
 });
-document.fonts?.load('32px Jua').catch(() => {});
 preloadCharacters();
-installCharacterAnimationElements();
 
 const settings = loadSettings();
 const app = {
@@ -364,6 +362,7 @@ function soundFor(event) {
     case 'countdown':
     case 'go':
     case 'pickup':
+    case 'gem':
     case 'bagFull':
     case 'immune':
       return event.type;
@@ -397,7 +396,7 @@ function processEvents(dt) {
     if (player.bump && player.bump !== app.bumps[i]) audio.play('bump');
     app.bumps[i] = player.bump;
   });
-  // 누군가 보물 근처에 오면 두근두근
+  // 누군가 보석을 들고 집 근처에 오면 두근두근
   if (match.phase === 'playing' && match.near.some(Boolean)) {
     app.heartbeatIn -= dt;
     if (app.heartbeatIn <= 0) {
@@ -464,5 +463,12 @@ startLoop({
   },
 });
 
+// 글꼴(Jua)이 준비된 뒤에 첫 화면을 띄워서 글자 모양이 바뀌며 덜컹거리지 않게 합니다. (최대 0.8초 기다림)
 if (PLAY_NOW) startSeries();
-else showTitle();
+else {
+  Promise.race([document.fonts?.load('32px Jua'), new Promise((r) => setTimeout(r, 800))])
+    .catch(() => {})
+    .then(() => {
+      if (app.scene === 'title') showTitle();
+    });
+}

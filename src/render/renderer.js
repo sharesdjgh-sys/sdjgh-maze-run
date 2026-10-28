@@ -15,7 +15,7 @@ import { trailBrightness, visionRadius } from '../game/vision.js';
 import { clearSpriteCache, getCharacterSprite, getIconSprite } from './characters.js';
 
 const COLORS = {
-  sideTints: ['#f7dfe4', '#d9e9f5'],
+  sideTints: ['#efe4c4', '#cfe2bd'], // 풍경 그림을 불러오기 전에 보이는 바탕 (풍경과 비슷한 색)
   frameShadow: 'rgba(40, 70, 40, 0.28)',
   // 흙길 바닥
   floor: '#f1e2c2',
@@ -45,27 +45,46 @@ const BUBBLE_TONES = { warn: '#f0a020', near: '#ffc43d', web: '#9a8fb0', portal:
 const CONFETTI_COLORS = ['#ff6b81', '#3fa7f5', '#ffc43d', '#7ed957', '#b48cff', '#ffffff'];
 const UI_FONT = '"Jua", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
 const MIN_PLAYER_RADIUS = 11; // px. 어려움 난이도를 작은 화면에서 해도 캐릭터가 보이도록
-const CHARACTER_SCALE = 2.75; // 캐릭터 그림 크기 = 기준 반지름 × 이 값 (발밑 고리 위에 서 있는 크기)
+// v11: 캐릭터를 키우는 대신 미로 칸 수를 줄여 칸 자체를 크게 그립니다. 캐릭터는 칸보다 조금만 크게 그려서
+// 주변 벽(생울타리)을 가리지 않게 합니다.
+const CHARACTER_SCALE = 3.0; // 캐릭터 그림 크기 = 기준 반지름 × 이 값 (칸의 약 1.3배)
+const BACKDROP_FADE = 450; // 풍경 그림이 나타나는 시간 (ms)
+const HEADROOM = 0.4; // 맨 윗줄 캐릭터의 머리와 1P 배지가 화면 밖으로 잘리지 않도록 미로 위에 비워 두는 칸 수
+const FEET = 0.83; // 캐릭터 그림에서 발이 있는 높이 (위에서부터 비율)
+
+/**
+ * 캐릭터 한 명을 그릴 때 쓰는 크기와 위치 (칸 가운데 기준, 아래가 +)
+ * r: 기준 반지름, size: 그림 크기, ringDy: 발밑 고리, centerDy: 그림 가운데, headDy: 머리 꼭대기
+ */
+export function figure(cell) {
+  const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
+  const size = r * CHARACTER_SCALE;
+  const ringDy = r * 0.55;
+  const centerDy = ringDy - (FEET - 0.5) * size;
+  return { r, size, ringDy, centerDy, headDy: centerDy - size * 0.4 };
+}
 
 /**
  * 창 크기와 미로 크기(칸 수)로 화면 배치를 계산합니다. (v8)
  * 위쪽 정보 표시줄 없이 미로를 화면 가득 채웁니다. 아이템 칸은 캐릭터 발밑에 그리고, 시간은 결과 화면에만 보여 줍니다.
+ * 캐릭터가 칸보다 크게 그려지므로 미로 위쪽에 머리가 들어갈 자리(HEADROOM)를 조금 남깁니다. (v11)
  */
 export function computeLayout(width, height, mazeWidth, mazeHeight) {
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const margin = Math.round(clamp(Math.min(width, height) * 0.015, 8, 18));
   const availW = Math.max(0, width - margin * 2);
   const availH = Math.max(0, height - margin * 2);
-  const cell = Math.max(4, Math.floor(Math.min(availW / mazeWidth, availH / mazeHeight)));
+  const cell = Math.max(4, Math.floor(Math.min(availW / mazeWidth, availH / (mazeHeight + HEADROOM))));
   const mazePxW = cell * mazeWidth;
   const mazePxH = cell * mazeHeight;
+  const headroom = Math.round(cell * HEADROOM);
   return {
     width,
     height,
     cell,
     maze: {
       x: Math.round((width - mazePxW) / 2),
-      y: Math.round((height - mazePxH) / 2),
+      y: Math.round((height - mazePxH + headroom) / 2),
       width: mazePxW,
       height: mazePxH,
       cell,
@@ -82,6 +101,9 @@ export function createRenderer(canvas, { debug = false } = {}) {
   let traps = null;
   let trapCells = [];
   let mazeImage = null;
+  let staticLayer = null; // 움직이지 않는 배경(풍경 + 미로)을 화면 크기 그대로 한 장에 합쳐 둔 그림
+  let lastKind = null; // 지난번에 그린 화면 종류 ('menu' | 'game')
+  let menuDirty = true; // 메뉴 배경을 다시 그려야 하는지
   let fogLayer = null;
   let confetti = [];
   let series = null; // 3판 2선승 점수 (카운트다운 때 보여 줌)
@@ -103,6 +125,46 @@ export function createRenderer(canvas, { debug = false } = {}) {
   function relayout() {
     layout = computeLayout(window.innerWidth, window.innerHeight, maze?.width ?? 33, maze?.height ?? 19);
     mazeImage = maze ? buildMazeImage(maze, traps, layout.cell, dpr, garden) : null;
+    staticLayer = null;
+    menuDirty = true;
+  }
+
+  // 풍경 그림을 화면 크기로 늘려 그리는 일은 무거워서, 화면 크기·미로가 바뀔 때만 한 번 합쳐 둡니다.
+  // 매 프레임에는 이 그림 한 장을 늘리지 않고 그대로 찍기만 합니다.
+  function staticCanvas(kind) {
+    if (staticLayer?.kind === kind) return staticLayer.canvas;
+    const layer = staticLayer?.canvas ?? document.createElement('canvas');
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    const g = layer.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const bg = g.createLinearGradient(0, 0, layout.width, 0);
+    bg.addColorStop(0, COLORS.sideTints[0]);
+    bg.addColorStop(1, COLORS.sideTints[1]);
+    g.fillStyle = bg;
+    g.fillRect(0, 0, layout.width, layout.height);
+    if (garden.backdrop) {
+      const image = garden.backdrop;
+      const scale = Math.max(layout.width / image.width, layout.height / image.height);
+      const w = image.width * scale;
+      const h = image.height * scale;
+      g.imageSmoothingQuality = 'high';
+      g.drawImage(image, (layout.width - w) / 2, (layout.height - h) / 2, w, h);
+      if (kind === 'game') {
+        g.fillStyle = 'rgba(33, 56, 43, 0.24)';
+        g.fillRect(0, 0, layout.width, layout.height);
+      }
+    }
+    if (kind === 'game') {
+      const m = layout.maze;
+      g.fillStyle = COLORS.frameShadow;
+      g.beginPath();
+      g.roundRect(m.x - 4, m.y + 3, m.width + 8, m.height + 8, m.cell * 0.4);
+      g.fill();
+      g.drawImage(mazeImage.canvas, m.x - mazeImage.pad, m.y - mazeImage.pad, mazeImage.cssWidth, mazeImage.cssHeight);
+    }
+    staticLayer = { kind, canvas: layer };
+    return layer;
   }
 
   function setMaze(nextMaze, nextTraps = null) {
@@ -122,43 +184,30 @@ export function createRenderer(canvas, { debug = false } = {}) {
   }
 
   function render(match, alpha, now, vfx, frameDt) {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const bg = ctx.createLinearGradient(0, 0, layout.width, 0);
-    bg.addColorStop(0, COLORS.sideTints[0]);
-    bg.addColorStop(1, COLORS.sideTints[1]);
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, layout.width, layout.height);
-    if (garden.backdrop) {
-      const image = garden.backdrop;
-      const scale = Math.max(layout.width / image.width, layout.height / image.height);
-      const w = image.width * scale, h = image.height * scale;
-      ctx.drawImage(image, (layout.width - w) / 2, (layout.height - h) / 2, w, h);
-      if (match) {
-        ctx.fillStyle = 'rgba(33, 56, 43, 0.24)';
-        ctx.fillRect(0, 0, layout.width, layout.height);
-      }
+    const kind = match && mazeImage ? 'game' : 'menu';
+    // 메뉴 화면은 풍경이 다 나타난 뒤에는 움직이는 것이 없으므로 다시 그리지 않습니다. (타이틀이 버벅이지 않게)
+    const fade = garden.backdrop ? Math.min(1, (performance.now() - garden.readyAt.backdrop) / BACKDROP_FADE) : 0;
+    const still = kind === 'menu' && lastKind === 'menu' && !menuDirty && fade >= 1 && confetti.length === 0;
+    lastKind = kind;
+    if (still) return;
+    menuDirty = false;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (kind === 'menu' && fade < 1) {
+      // 풍경 그림을 막 불러왔으면 바탕색 위로 서서히 나타나게
+      ctx.fillStyle = COLORS.sideTints[1];
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalAlpha = fade;
     }
-    if (match && mazeImage) {
+    ctx.drawImage(staticCanvas(kind), 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (kind === 'game') {
       const extraTime = match.phase === 'playing' ? alpha * LOOP.step : 0;
       drawScene(match, extraTime, now, vfx);
       drawProjectiles(match, extraTime);
-    } else if (maze && mazeImage && !garden.backdrop) {
-      drawBackdrop(now);
     }
     updateConfetti(frameDt);
     drawConfetti();
-  }
-
-  // 메뉴 화면 뒤에 깔리는 장식용 미로 (main.js가 setMaze로 넘겨 줌)
-  function drawBackdrop(now) {
-    const m = layout.maze;
-    ctx.fillStyle = COLORS.frameShadow;
-    ctx.beginPath();
-    ctx.roundRect(m.x - 4, m.y + 3, m.width + 8, m.height + 8, m.cell * 0.4);
-    ctx.fill();
-    ctx.drawImage(mazeImage.canvas, m.x - mazeImage.pad, m.y - mazeImage.pad, mazeImage.cssWidth, mazeImage.cssHeight);
-    drawTraps(m.cell, now);
-    drawTreasure(toPx(maze.treasure.x, maze.treasure.y), m.cell, now, { phase: 'menu', near: [false, false] });
   }
 
   function toPx(x, y) {
@@ -166,15 +215,10 @@ export function createRenderer(canvas, { debug = false } = {}) {
     return { x: m.x + (x + 0.5) * m.cell, y: m.y + (y + 0.5) * m.cell };
   }
 
+  // 풍경·미로(staticCanvas) 위에 매 프레임 움직이는 것들을 그립니다.
   function drawScene(match, extraTime, now, vfx) {
     const m = layout.maze;
     const { cell } = m;
-
-    ctx.fillStyle = COLORS.frameShadow;
-    ctx.beginPath();
-    ctx.roundRect(m.x - 4, m.y + 3, m.width + 8, m.height + 8, cell * 0.4);
-    ctx.fill();
-    ctx.drawImage(mazeImage.canvas, m.x - mazeImage.pad, m.y - mazeImage.pad, mazeImage.cssWidth, mazeImage.cssHeight);
 
     drawTraps(cell, now);
     drawBoxes(match, cell, now);
@@ -182,7 +226,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
     drawFog(match, extraTime);
     drawDarkClouds(match, cell, extraTime);
     drawFlashlights(match, cell, extraTime);
-    drawTreasure(toPx(match.maze.treasure.x, match.maze.treasure.y), cell, now, match);
+    drawTreasure(toPx(match.maze.treasure.x, match.maze.treasure.y), cell, now);
+    drawHomes(match, cell, now);
     for (const player of match.players) drawPlayer(player, cell, extraTime, now, match.time + extraTime);
     for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
     if (vfx) {
@@ -195,12 +240,12 @@ export function createRenderer(canvas, { debug = false } = {}) {
   // ── 캐릭터 발밑의 아이템 칸 2개 (v8: 위쪽 표시줄 대신) ──
   function slotPositions(player, cell, extraTime) {
     const p = toPxOf(player, extraTime);
-    const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
+    const f = figure(cell);
     const size = Math.max(cell * 0.56, 22);
     const gap = size * 0.16;
-    let y = p.y + r + size * 0.62;
+    let y = p.y + f.r + size * 0.62;
     // 화면 아래 끝이라 칸이 잘리면 캐릭터 머리 위(1P/2P 배지 위)로 올립니다.
-    if (y + size / 2 > layout.height - 2) y = p.y - r * 2.25 - size * 0.9;
+    if (y + size / 2 > layout.height - 2) y = p.y + f.headDy - f.r * 0.6 - size * 0.75;
     return [-1, 1].map((side) => ({ x: p.x + (side * (size + gap)) / 2, y, size }));
   }
 
@@ -391,10 +436,10 @@ export function createRenderer(canvas, { debug = false } = {}) {
     }
   }
 
-  function drawTreasure(p, cell, now, match) {
-    const excited = match.phase === 'playing' && match.near.some(Boolean);
-    const pulse = 1 + Math.sin(now * (excited ? 9 : 4)) * (excited ? 0.12 : 0.06);
-    const glowR = cell * (excited ? 1.5 : 0.95) * pulse;
+  // 가운데 보석. 두 사람 모두 만질 수 있도록 만져도 그 자리에 남습니다. (두근두근 연출은 집에서: drawHomes)
+  function drawTreasure(p, cell, now) {
+    const pulse = 1 + Math.sin(now * 4) * 0.06;
+    const glowR = cell * 0.95 * pulse;
     const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
     glow.addColorStop(0, `rgba(${COLORS.glow}, 0.75)`);
     glow.addColorStop(1, `rgba(${COLORS.glow}, 0)`);
@@ -412,6 +457,38 @@ export function createRenderer(canvas, { debug = false } = {}) {
       const twinkle = 0.5 + 0.5 * Math.sin(now * 5 + k * 2);
       drawTwinkle(p.x + Math.cos(a) * cell * 0.42, p.y - cell * 0.12 + Math.sin(a) * cell * 0.22, cell * 0.12 * twinkle);
     }
+  }
+
+  // 집(출발점) 표시: 안개 위에도 보이게 그립니다. 보석을 만진 뒤에는 크게 반짝이며 '여기로 돌아와!'
+  function drawHomes(match, cell, now) {
+    match.maze.starts.forEach((home, i) => {
+      const player = match.players[i];
+      const config = PLAYERS[i];
+      const p = toPx(home.x, home.y);
+      const calling = player.hasGem && !player.finished;
+      const pulse = calling ? 1 + Math.sin(now * (match.near[i] ? 9 : 4)) * 0.12 : 1;
+      if (calling) {
+        const glowR = cell * 1.25 * pulse;
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
+        glow.addColorStop(0, config.soft);
+        glow.addColorStop(0.45, `${config.color}88`);
+        glow.addColorStop(1, `${config.color}00`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = calling ? 1 : 0.8;
+      ctx.lineWidth = Math.max(2, cell * 0.06);
+      ctx.strokeStyle = config.color;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, cell * 0.36 * pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      drawSprite(getIconSprite('home', cell * 0.6 * pulse, dpr), p.x, p.y - cell * 0.02, 1, ctx.globalAlpha);
+      ctx.globalAlpha = 1;
+    });
   }
 
   // 네 갈래 별빛
@@ -450,10 +527,11 @@ export function createRenderer(canvas, { debug = false } = {}) {
     const stepT = player.moveTimer > 0 ? 1 - Math.max(0, player.moveTimer - extraTime) / player.moveDuration : 0;
     const pose = characterAnimation(player, animationTime, extraTime, { reducedMotion: motionPreference.matches });
     const hop = pose.walking ? Math.sin(stepT * Math.PI) * cell * 0.06 : 0;
-    const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
+    const f = figure(cell);
+    const { r } = f;
     const top = y - hop;
 
-    const ringY = y + r * 0.55;
+    const ringY = y + f.ringDy;
     if (fx.slowDown > 0) {
       ctx.fillStyle = 'rgba(150, 220, 110, 0.6)';
       ellipse(x, ringY, r * 1.2, r * 0.45);
@@ -487,34 +565,53 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.beginPath();
     ctx.ellipse(x, ringY, r * 0.95, r * 0.36, 0, 0, Math.PI * 2);
     ctx.stroke();
-    const sprite = getCharacterSprite(player.character, r * CHARACTER_SCALE, dpr, pose.frame);
+    const centerY = top + f.centerDy;
+    const headY = top + f.headDy;
+    const sprite = getCharacterSprite(player.character, f.size, dpr, pose.frame, { outline: true });
     if (sprite) {
+      // 가만히 서 있으면 발을 기준으로 숨쉬듯 살짝 늘었다 줄었다
+      const still = !pose.walking && !motionPreference.matches && fx.freeze <= 0;
+      const breathe = still ? Math.sin(animationTime * 2.4 + player.index * 1.7) * 0.025 : 0;
       ctx.save();
-      ctx.translate(x, top - r * 0.35);
-      ctx.scale(pose.flip ? -1 : 1, 1);
-      drawSprite(sprite, 0, 0, 1, blink);
+      ctx.translate(x, ringY);
+      ctx.scale((pose.flip ? -1 : 1) * (1 - breathe * 0.5), 1 + breathe);
+      drawSprite(sprite, 0, centerY - ringY, 1, blink);
       ctx.restore();
     }
     ctx.globalAlpha = 1;
 
-    if (fx.slowDown > 0) drawSprite(getIconSprite('slowDown', r * 0.95, dpr), x + r * 0.95, ringY - r * 0.1);
-    if (fx.freeze > 0) drawIceBlock(x, top - r * 0.3, r * 1.1, fx.freeze);
-    if (player.stuck > 0) drawSprite(getIconSprite('web', r * 2.3, dpr), x, top - r * 0.25, 1, 0.9);
+    if (fx.slowDown > 0) drawSprite(getIconSprite('slowDown', r * 0.95, dpr), x + r * 1.05, ringY - r * 0.1);
+    if (fx.freeze > 0) drawIceBlock(x, centerY + f.size * 0.04, f.size * 0.4, fx.freeze);
+    if (player.stuck > 0) drawSprite(getIconSprite('web', f.size * 0.85, dpr), x, centerY + f.size * 0.05, 1, 0.9);
+
+    // 보석을 만졌으면 머리 옆에 보석이 반짝이며 따라다님 (이제 집으로!)
+    if (player.hasGem) {
+      const gx = x + f.size * 0.3;
+      const gy = headY + f.size * 0.12 + Math.sin(now * 3 + player.index) * r * 0.08;
+      const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r * 0.75);
+      glow.addColorStop(0, `rgba(${COLORS.glow}, 0.7)`);
+      glow.addColorStop(1, `rgba(${COLORS.glow}, 0)`);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(gx, gy, r * 0.75, 0, Math.PI * 2);
+      ctx.fill();
+      drawSprite(getIconSprite('treasure', r * 0.95, dpr), gx, gy);
+    }
 
     let badgeLift = 0;
     if (fx.reverse > 0) {
       ctx.save();
-      ctx.translate(x, top - r * 1.75);
+      ctx.translate(x, headY - r * 0.35);
       ctx.rotate(now * 4);
       drawSprite(getIconSprite('dizzy', r * 1.05, dpr), 0, 0);
       ctx.restore();
       badgeLift = r * 0.75;
     }
     if (fx.dark > 0) {
-      drawSprite(getIconSprite('dark', r * 1.05, dpr), x + Math.sin(now * 2) * r * 0.2, top - r * 1.75);
+      drawSprite(getIconSprite('dark', r * 1.05, dpr), x + Math.sin(now * 2) * r * 0.2, headY - r * 0.35);
       badgeLift = r * 0.85;
     }
-    drawBadge(config.label, x, top - r * 1.72 - badgeLift, config.color, cell);
+    drawBadge(config.label, x, headY - r * 0.05 - badgeLift, config.color, cell);
   }
 
   function drawIceBlock(x, y, r, remaining) {
@@ -594,16 +691,16 @@ export function createRenderer(canvas, { debug = false } = {}) {
       const t = 1 - b.life / b.maxLife;
       const scale = t < 0.15 ? 0.6 + (t / 0.15) * 0.4 : 1;
       const fontSize = Math.min(26, Math.max(13, cell * 0.42)) * scale;
-      const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
+      const f = figure(cell);
       ctx.font = `${fontSize}px ${UI_FONT}`;
       const iconSize = b.icon ? fontSize * 1.35 : 0;
       const textW = ctx.measureText(b.text).width;
       const w = textW + fontSize * 1.1 + (b.icon ? iconSize + fontSize * 0.2 : 0);
       const h = fontSize * 1.7;
       const cx = p.x;
-      let cy = p.y - r * 1.8 - h * 0.5 - fontSize * 1.4 - t * cell * 0.25;
+      let cy = p.y + f.headDy - f.r * 0.7 - h * 0.5 - fontSize * 0.5 - t * cell * 0.25;
       // 미로 맨 윗줄 근처라 화면 위로 잘리면 캐릭터 아래(아이템 칸 아래)에 띄웁니다.
-      if (cy - h / 2 < 2) cy = p.y + r + Math.max(cell * 0.56, 22) * 1.35 + h * 0.6 + t * cell * 0.25;
+      if (cy - h / 2 < 2) cy = p.y + f.r + Math.max(cell * 0.56, 22) * 1.35 + h * 0.6 + t * cell * 0.25;
       ctx.globalAlpha = b.life < 0.25 ? b.life / 0.25 : 1;
       ctx.save();
       ctx.shadowColor = 'rgba(40, 30, 60, 0.25)';
@@ -708,7 +805,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.setLineDash([cell * 0.2, cell * 0.2]);
     ctx.globalAlpha = 0.6;
     for (const player of match.players) {
-      const path = shortestPath(match.maze, player);
+      const path = shortestPath(match.maze, player, player.hasGem ? match.homeDist[player.index] : undefined);
       ctx.strokeStyle = PLAYERS[player.index].color;
       ctx.beginPath();
       path.forEach((c, k) => {

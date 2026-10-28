@@ -17,7 +17,7 @@ describe('캐릭터', () => {
     for (const id of DEFAULT_SETTINGS.characters) expect(CHARACTERS.some((c) => c.id === id)).toBe(true);
   });
 });
-import { computeLayout } from '../src/render/renderer.js';
+import { computeLayout, figure } from '../src/render/renderer.js';
 import { formatTime } from '../src/ui/format.js';
 
 describe('시간 표시', () => {
@@ -59,11 +59,19 @@ describe('화면 배치', () => {
     }
   });
 
-  it('1920×1080에서 칸 크기: 쉬움 52px 이상, 보통 43px 이상, 어려움 36px 이상 (위쪽 표시줄이 없어서)', () => {
+  it('1920×1080에서 칸 크기: 쉬움 66px 이상, 보통 58px 이상, 어려움 46px 이상 (v11: 칸 수를 줄여 칸을 키움)', () => {
     const cell = (d) => computeLayout(1920, 1080, d.width, d.height).cell;
-    expect(cell(DIFFICULTIES.easy)).toBeGreaterThanOrEqual(52);
-    expect(cell(DIFFICULTIES.normal)).toBeGreaterThanOrEqual(43);
-    expect(cell(DIFFICULTIES.hard)).toBeGreaterThanOrEqual(36);
+    expect(cell(DIFFICULTIES.easy)).toBeGreaterThanOrEqual(66);
+    expect(cell(DIFFICULTIES.normal)).toBeGreaterThanOrEqual(58);
+    expect(cell(DIFFICULTIES.hard)).toBeGreaterThanOrEqual(46);
+  });
+
+  it('캐릭터는 칸보다 조금만 커서 주변 벽을 가리지 않는다 (그림 1.4칸 이하, 머리는 위 칸으로 1/4칸까지만)', () => {
+    for (const cell of [34, 48, 68]) {
+      const f = figure(cell);
+      expect(f.size / cell).toBeLessThanOrEqual(1.4);
+      expect(f.headDy / cell).toBeGreaterThanOrEqual(-0.75);
+    }
   });
 });
 

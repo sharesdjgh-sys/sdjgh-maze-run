@@ -15,6 +15,13 @@ body:has(.title-screen) #sound-toggle { display: none; }
   color: #314f3b;
   text-align: center;
   word-break: keep-all;
+  animation: title-in 0.5s ease-out both;
+}
+@keyframes title-in {
+  from { opacity: 0; transform: translateY(8px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .title-screen { animation: none; }
 }
 .title-screen::before {
   content: '';
@@ -138,7 +145,6 @@ body:has(.title-screen) #sound-toggle { display: none; }
   width: 100%;
   aspect-ratio: 1;
   object-fit: contain;
-  filter: drop-shadow(0 10px 9px #33463030);
 }
 .title-companion figcaption {
   display: inline-flex;

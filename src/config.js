@@ -2,23 +2,24 @@
 
 // 미로는 화면 하나에 크게 그리므로 16:9에 가까운 직사각형입니다. 가로·세로는 홀수여야 정가운데 칸이 생깁니다.
 // 난이도가 오를수록 미로가 커지고, 시야가 좁아지고, 지나온 길이 빨리 사라지고, 함정이 많아집니다.
+// v11: 보석을 찍고 집까지 돌아오는 왕복 규칙이 되어, 칸 수를 줄여 칸(과 캐릭터)을 크게 그립니다. (한 판 길이는 비슷하게)
 // traps의 숫자는 '대칭 짝' 개수입니다. (거미줄 1 = 2칸, 소용돌이 1 = 서로 이어진 2쌍 4칸, 얼음 1 = 얼음 길 2개)
 // vision: 시야 반경(칸)과 지나온 길이 완전히 사라지는 시간(초). 적지 않은 값은 아래 VISION을 따릅니다.
 export const DIFFICULTIES = {
   easy: {
-    label: '쉬움', width: 33, height: 19, windiness: 0.5, braidRatio: 0.05,
+    label: '쉬움', width: 27, height: 15, windiness: 0.5, braidRatio: 0.05,
     vision: { radius: 2.0, trailFade: 4 },
-    boxPairs: 5, traps: { web: 4, portal: 2, ice: 3 },
+    boxPairs: 4, traps: { web: 3, portal: 1, ice: 2 },
   },
   normal: {
-    label: '보통', width: 41, height: 23, windiness: 0.5, braidRatio: 0.05,
+    label: '보통', width: 31, height: 17, windiness: 0.5, braidRatio: 0.05,
     vision: { radius: 1.8, trailFade: 3 },
-    boxPairs: 6, traps: { web: 6, portal: 3, ice: 4 },
+    boxPairs: 5, traps: { web: 4, portal: 2, ice: 3 },
   },
   hard: {
-    label: '어려움', width: 49, height: 27, windiness: 0.45, braidRatio: 0.05,
+    label: '어려움', width: 39, height: 21, windiness: 0.45, braidRatio: 0.05,
     vision: { radius: 1.6, trailFade: 2 },
-    boxPairs: 8, traps: { web: 9, portal: 4, ice: 6 },
+    boxPairs: 6, traps: { web: 6, portal: 3, ice: 4 },
   },
 };
 export const DIFFICULTY_ORDER = ['easy', 'normal', 'hard'];
@@ -90,7 +91,7 @@ export const ITEM_RULES = {
   freezeImmunity: 2, // 얼음이 풀린 뒤 얼음이 통하지 않는 시간 (초)
   projectileTime: 0.4, // 아이템이 상대에게 날아가는 시간 (초)
   bagFullNotice: 1.5, // "가방이 가득 찼어요!" 반복 간격 (초)
-  catchUp: { enabled: true, minGap: 4, attackBoost: 1.5 }, // 보물까지 4칸 이상 뒤처지면 공격 아이템 확률 1.5배
+  catchUp: { enabled: true, minGap: 4, attackBoost: 1.5 }, // 승리까지 남은 거리(보석 → 집)가 4칸 이상 뒤처지면 공격 아이템 확률 1.5배
 };
 
 // 함정 3종. 안개 속에 숨어 있다가 가까이 가면 보입니다.
@@ -109,7 +110,7 @@ export const PLACEMENT = {
 export const MATCH = {
   countdown: 3, // 3-2-1 카운트다운 (초)
   goDisplayTime: 0.7, // "GO!" 표시 시간 (초)
-  nearDistance: 5, // 보물까지 이 칸 수 이내면 두근두근 연출
+  nearDistance: 5, // 보석을 들고 집까지 이 칸 수 이내로 오면 두근두근 연출
 };
 
 export const VFX = {

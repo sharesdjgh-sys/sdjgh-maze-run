@@ -1,30 +1,30 @@
-/* 스프라이트 시트의 실제 프레임을 잘라서 재생합니다. */
-.char-animation { position: relative; display: inline-block; overflow: hidden; vertical-align: middle; isolation: isolate; }
-.char-animation > .character-still { display: block; width: 100%; height: 100%; object-fit: contain; }
-.char-animation > .character-atlas {
-  position: absolute; inset: 0 auto auto 0; display: block; width: 400%; height: 200%;
-  max-width: none; object-fit: fill; visibility: hidden;
-  animation: character-idle-frames 3s steps(1, end) infinite;
+/* 메뉴 화면의 캐릭터: 정지 그림을 부드럽게 숨쉬듯 움직입니다. (v11)
+   프레임을 툭툭 바꾸는 방식은 자세가 갑자기 바뀌어 어색해 보여서, 크기·기울기만 천천히 바꿉니다.
+   transform만 바꾸므로 화면을 다시 그리지 않고 가볍게 움직입니다. */
+.char-idle {
+  transform-origin: 50% 92%;
+  animation: character-breathe 2.8s ease-in-out infinite;
+  will-change: transform;
 }
-.char-animation[data-animation-ready="true"] > .character-still { visibility: hidden; }
-.char-animation[data-animation-ready="true"] > .character-atlas { visibility: visible; }
-.char-animation[data-motion="walk"] > .character-atlas { animation: character-walk-frames 0.48s steps(1, end) infinite; }
-.title-companion-right .character-atlas { animation-delay: -0.41s; }
-@keyframes character-idle-frames {
-  0%, 32% { transform: translate(0, 0); }
-  33%, 40% { transform: translate(-25%, 0); }
-  41%, 49% { transform: translate(0, 0); }
-  50%, 57% { transform: translate(-50%, 0); }
-  58%, 65% { transform: translate(0, 0); }
-  66%, 74% { transform: translate(-75%, 0); }
-  75%, 100% { transform: translate(0, 0); }
+.title-companion-right .char-idle,
+.result-hero > .char-idle:nth-child(2) { animation-delay: -1.4s; }
+
+/* 고르는 중인 캐릭터는 조금 더 신나게 들썩 */
+.char-img.char-idle { animation: character-hop 0.9s ease-in-out infinite; }
+
+@keyframes character-breathe {
+  0%, 100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  30% { transform: translateY(-2.5%) rotate(-1.5deg) scale(0.99, 1.02); }
+  60% { transform: translateY(-1%) rotate(1.2deg) scale(1.01, 0.995); }
 }
-@keyframes character-walk-frames {
-  0%, 24% { transform: translate(0, -50%); }
-  25%, 49% { transform: translate(-25%, -50%); }
-  50%, 74% { transform: translate(-50%, -50%); }
-  75%, 100% { transform: translate(-75%, -50%); }
+@keyframes character-hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(0) scale(1.05, 0.95); }
+  45% { transform: translateY(-9%) scale(0.97, 1.04); }
+  75% { transform: translateY(0) scale(1.03, 0.97); }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .char-animation > .character-atlas { animation: none; transform: translate(0, 0); }
+  .char-idle,
+  .char-img.char-idle { animation: none; }
 }

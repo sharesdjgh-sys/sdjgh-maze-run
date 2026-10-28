@@ -14,7 +14,7 @@ export function titleScreen({ settings, muted, record }) {
       <header class="title-brand">
         <p class="title-eyebrow"><span></span>둘이서 떠나는 정원 속 보물찾기<span></span></p>
         <h1 id="garden-title" class="title-wordmark">귀염뽀짝<span>미로 레이스</span></h1>
-        <p class="title-description">신비로운 미로 끝, 보물의 주인공은 누구?</p>
+        <p class="title-description">한가운데 보석을 찜하고 집까지 먼저 돌아오면 승리!</p>
       </header>
 
       <figure class="title-companion title-companion-left">

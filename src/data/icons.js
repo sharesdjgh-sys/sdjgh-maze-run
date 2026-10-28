@@ -17,4 +17,5 @@ export const ICONS = {
   dizzy: 'Dizzy/3D/dizzy_3d.png',
   trophy: 'Trophy/3D/trophy_3d.png',
   sparkles: 'Sparkles/3D/sparkles_3d.png',
+  home: 'House with garden/3D/house_with_garden_3d.png',
 };

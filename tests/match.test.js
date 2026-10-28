@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { MOVE } from '../src/config.js';
-import { distanceAt } from '../src/game/maze.js';
+import { distanceAt, distancesFrom } from '../src/game/maze.js';
 import { createMatch, pauseMatch, resumeMatch, updateMatch } from '../src/game/match.js';
 import { createPlayer, stepPlayer } from '../src/game/player.js';
 import {
   DT,
   OPPOSITE,
   buildMaze,
+  corridorMatch,
+  downhill,
   emptyTraps,
   eventsOf,
   hold,
@@ -14,7 +16,7 @@ import {
   press,
   run,
   skipCountdown,
-  towardTreasure,
+  towardGoal,
 } from './helpers.js';
 
 // 맨 윗줄 복도 (0,0)-(1,0)-(2,0)-(3,0)-(4,0)과 (1,0)에서 아래로 내려가는 갈림길 (1,1)
@@ -93,15 +95,47 @@ describe('한 판 진행', () => {
     expect(eventsOf(match, 'go')).toHaveLength(1);
   });
 
-  it('보물에 먼저 도착한 사람이 이긴다 (함정·상자가 있어도 결국 도착)', () => {
+  it('보석을 만지고 집으로 먼저 돌아온 사람이 이긴다 (함정·상자가 있어도 결국 도착)', () => {
     const match = createMatch({ difficulty: 'normal', seed: 7 });
     skipCountdown(match);
     const shortest = distanceAt(match.maze, 0, 0);
-    run(match, 20000, () => [idle(), hold(towardTreasure(match.maze, match.players[1].x, match.players[1].y))]);
+    run(match, 40000, () => (match.phase === 'playing' ? [idle(), hold(towardGoal(match, 1))] : [idle(), idle()]));
     expect(match.phase).toBe('result');
     expect(match.result.winner).toBe(1);
-    expect(match.result.players[1].shortest).toBe(shortest);
+    expect(match.result.players[1]).toMatchObject({ shortest: shortest * 2, hasGem: true });
+    expect(eventsOf(match, 'gem').map((e) => e.player)).toEqual([1]);
     expect(eventsOf(match, 'finish')).toEqual([{ type: 'finish', winner: 1 }]);
+  });
+
+  it('보석을 만지지 않고는 집에 돌아와도 이기지 못하고, 보석은 그 자리에 남는다', () => {
+    const match = corridorMatch();
+    match.maze.treasure = { x: 3, y: 0 };
+    match.maze.distToTreasure = distancesFrom(match.maze, match.maze.treasure);
+    run(match, 15, [hold('right'), idle()]); // (0,0) → (2,0)까지만 감
+    expect(match.players[0]).toMatchObject({ x: 2, hasGem: false });
+    run(match, 60, [hold('left'), idle()]); // 집으로 돌아와도 그대로 진행 중
+    expect(match.players[0]).toMatchObject({ x: 0, finished: false });
+    expect(match.phase).toBe('playing');
+
+    run(match, 80, [hold('right'), idle()]); // 보석 (3,0)을 지나 복도 끝 (6,0)까지
+    expect(match.players[0]).toMatchObject({ x: 6, hasGem: true });
+    expect(eventsOf(match, 'gem')).toHaveLength(1);
+    run(match, 80, [hold('left'), idle()]); // 보석 칸을 다시 지나도 사건은 한 번뿐, 집에 오면 승리
+    expect(eventsOf(match, 'gem')).toHaveLength(1);
+    expect(match.phase).toBe('result');
+    expect(match.result.winner).toBe(0);
+  });
+
+  it('보석을 든 채 집 근처에 오면 두근두근(near) 사건이 한 번 나온다', () => {
+    const match = createMatch({ difficulty: 'easy', seed: 3 });
+    skipCountdown(match);
+    run(match, 40000, () => {
+      if (match.phase !== 'playing') return [idle(), idle()];
+      return [hold(towardGoal(match, 0)), idle()];
+    });
+    const near = eventsOf(match, 'near');
+    expect(near).toEqual([{ type: 'near', player: 0 }]);
+    expect(match.events.indexOf(near[0])).toBeGreaterThan(match.events.indexOf(eventsOf(match, 'gem')[0]));
   });
 
   it.each([1, 2, 3, 4, 5])('대칭 미로라서 똑같이(대칭으로) 움직이면 같은 순간 도착해 무승부 (seed %i)', (seed) => {
@@ -109,14 +143,17 @@ describe('한 판 진행', () => {
     const { maze } = match;
     const [lastX, lastY] = [maze.width - 1, maze.height - 1];
     skipCountdown(match);
-    run(match, 20000, () => {
+    run(match, 40000, () => {
+      if (match.phase !== 'playing') return [idle(), idle()];
       const [p1, p2] = match.players;
       // 2P는 '1P가 2P 자리를 180° 돌린 곳에 있다면 갈 방향'의 반대로 움직임 = 완전히 대칭
-      const mirrored = towardTreasure(maze, lastX - p2.x, lastY - p2.y);
-      return [hold(towardTreasure(maze, p1.x, p1.y)), hold(mirrored && OPPOSITE[mirrored])];
+      const goal1 = p2.hasGem ? match.homeDist[0] : maze.distToTreasure;
+      const mirrored = downhill(maze, goal1, lastX - p2.x, lastY - p2.y);
+      return [hold(towardGoal(match, 0)), hold(mirrored && OPPOSITE[mirrored])];
     });
     expect(match.phase).toBe('result');
     expect(match.result.winner).toBeNull();
+    expect(match.players.every((p) => p.hasGem)).toBe(true);
   });
 
   it('일시정지 중에는 시간이 흐르지 않고, 다시 하면 원래 상태로 돌아간다', () => {

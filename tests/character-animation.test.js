@@ -4,9 +4,11 @@ import { characterAnimation } from '../src/render/character-animation.js';
 const player = (changes = {}) => ({ index: 0, facing: 'right', moveTimer: 0, moveDuration: 1 / 6, stats: { moves: 0 }, effects: { freeze: 0 }, stuck: 0, ...changes });
 
 describe('캐릭터 애니메이션', () => {
-  it('대기 중 눈 깜빡임을 포함한 4프레임을 반복한다', () => {
-    expect(new Set(Array.from({ length: 12 }, (_, i) => characterAnimation(player(), i * 0.25).frame))).toEqual(new Set([0, 1, 2, 3]));
-    expect(characterAnimation(player(), 0)).toEqual(characterAnimation(player(), 3));
+  it('대기 중에는 기본 자세로 있다가 4초마다 한 번 눈을 깜빡인다', () => {
+    const frames = Array.from({ length: 16 }, (_, i) => characterAnimation(player(), i * 0.25).frame);
+    expect(new Set(frames)).toEqual(new Set([0, 2]));
+    expect(frames.filter((f) => f === 2)).toHaveLength(1);
+    expect(characterAnimation(player(), 0)).toEqual(characterAnimation(player(), 4));
   });
   it('두 발걸음 동안 걷기 4프레임을 순서대로 재생한다', () => {
     const frames = [1, 2].flatMap(moves => [0, 0.6].map(progress => characterAnimation(player({ stats: { moves }, moveTimer: (1 - progress) / 6 }), 0).frame));

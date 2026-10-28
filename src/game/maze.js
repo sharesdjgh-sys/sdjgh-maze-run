@@ -77,15 +77,19 @@ export function distanceAt(maze, x, y) {
   return maze.distToTreasure[cellIndex(maze.width, x, y)];
 }
 
-/** from 칸에서 보물까지의 최단 경로 (from과 보물 칸 포함) */
-export function shortestPath(maze, from) {
+/**
+ * from 칸에서 보물까지의 최단 경로 (from과 보물 칸 포함)
+ * dist를 주면 그 거리표(칸 번호 → 거리)가 0인 칸까지 갑니다. (예: 집까지의 거리표)
+ */
+export function shortestPath(maze, from, dist = maze.distToTreasure) {
+  const at = (x, y) => dist[cellIndex(maze.width, x, y)];
   const path = [{ x: from.x, y: from.y }];
   let { x, y } = from;
-  let d = distanceAt(maze, x, y);
+  let d = at(x, y);
   if (d < 0) return [];
   while (d > 0) {
     const next = DIR_LIST.find(
-      (dir) => canMove(maze, x, y, dir.name) && distanceAt(maze, x + dir.dx, y + dir.dy) === d - 1,
+      (dir) => canMove(maze, x, y, dir.name) && at(x + dir.dx, y + dir.dy) === d - 1,
     );
     x += next.dx;
     y += next.dy;

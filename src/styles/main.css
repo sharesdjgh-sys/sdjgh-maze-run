@@ -303,7 +303,26 @@ button {
 }
 
 .select-panel h3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 0.5em;
+  white-space: nowrap;
+}
+
+/* 지금 고른 캐릭터를 이름 옆에 크게 */
+.select-panel h3 .inline-avatar {
+  width: clamp(64px, 13vh, 120px);
+  height: clamp(64px, 13vh, 120px);
+}
+
+/* 글줄 안에 들어가는 캐릭터 얼굴 (결과 표 머리글 등) */
+.inline-avatar {
+  width: 1.8em;
+  height: 1.8em;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .char-grid {
@@ -417,9 +436,49 @@ button {
   background: var(--lilac);
 }
 
-.howto-list .big {
+.howto-list .howto-icon {
   grid-row: span 2;
-  font-size: 32px;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+/* 글줄 안에 들어가는 작은 3D 아이콘 */
+.inline-icon {
+  width: 1.35em;
+  height: 1.35em;
+  object-fit: contain;
+  vertical-align: -0.3em;
+}
+
+/* 승리 조건 두 단계: 보석 → 집 */
+.howto-steps {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 0 0 0.35em;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+  font-size: 1.12em;
+}
+
+.howto-steps li {
+  counter-increment: step;
+}
+
+.howto-steps li::before {
+  content: counter(step);
+  display: inline-grid;
+  place-items: center;
+  width: 1.4em;
+  height: 1.4em;
+  margin-right: 0.35em;
+  border-radius: 50%;
+  background: var(--ink, #4a3b5c);
+  color: #fff;
+  font-size: 0.8em;
 }
 
 .howto-list small {
@@ -559,8 +618,9 @@ button {
     gap: 5px;
   }
 
-  .howto-list .big {
-    font-size: 26px;
+  .howto-list .howto-icon {
+    width: 32px;
+    height: 32px;
   }
 
   .howto-list small {

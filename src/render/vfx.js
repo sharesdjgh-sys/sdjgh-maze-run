@@ -67,8 +67,12 @@ export function handleVfxEvent(vfx, event, match) {
     case 'boxRespawn':
       burst(vfx, event.x, event.y, { colors: SPARKLE, count: 6, speed: 1.5 });
       break;
+    case 'gem':
+      bubble(vfx, event.player, '보석 찜! 이제 집으로!', 'near', 'treasure');
+      burst(vfx, event.x, event.y, { colors: SPARKLE, count: 22, speed: 4 });
+      break;
     case 'near':
-      bubble(vfx, event.player, '보물이 코앞이야!', 'near', 'treasure');
+      bubble(vfx, event.player, '집이 코앞이야!', 'near', 'home');
       break;
   }
 }

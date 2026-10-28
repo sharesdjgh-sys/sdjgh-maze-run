@@ -68,6 +68,7 @@ export function createAudio({ muted = false } = {}) {
     go: () => notes([784, 1047], { gap: 0.06, time: 0.3, type: 'square', gain: 0.12 }),
     bump: () => tone({ freq: 150, to: 90, time: 0.08, type: 'triangle', gain: 0.2 }),
     pickup: () => notes([660, 990], { gap: 0.07, time: 0.12, type: 'triangle', gain: 0.22 }),
+    gem: () => notes([784, 988, 1175, 1568], { gap: 0.07, time: 0.2, type: 'triangle', gain: 0.2 }),
     bagFull: () => tone({ freq: 190, time: 0.2, type: 'sawtooth', gain: 0.1 }),
     shoot: () => noise({ time: 0.3, freq: 500, to: 3200, gain: 0.14 }),
     speedUp: () => tone({ freq: 380, to: 1300, time: 0.3, type: 'sawtooth', gain: 0.1 }),

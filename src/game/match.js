@@ -1,12 +1,14 @@
 // 한 판 진행: 카운트다운 → 진행 → 결과 (기획서 기능 2~6)
 // 아이템 줍기·사용·발사, 함정, 효과, 상자 재생성, 승리·무승부 판정을 처리합니다.
+// 승리 규칙 (v11): 가운데 보석을 만진 뒤 자기 출발점(집)으로 먼저 돌아온 사람이 이깁니다.
+// 지나온 길은 서서히 어두워지므로, 돌아오는 길은 머릿속에 기억해 두어야 합니다.
 // 화면·소리는 match.events에 쌓인 사건을 main.js가 꺼내 가서 처리합니다. (이 파일은 그리지 않음)
 
 import { DIFFICULTIES, ITEMS, ITEM_RULES, MATCH, MAZE, MOVE, TRAPS } from '../config.js';
 import { createRng } from '../core/rng.js';
 import { applyEffect, tickEffects } from './effects.js';
 import { addToBag, rollItem, takeFromBag } from './items.js';
-import { cellIndex, distanceAt, generateMaze } from './maze.js';
+import { cellIndex, distanceAt, distancesFrom, generateMaze } from './maze.js';
 import { TRAP, placeSpecials } from './placement.js';
 import { EMPTY_COMMAND, createPlayer, stepPlayer, teleportPlayer } from './player.js';
 import { markSeen, visionFor, visionRadius } from './vision.js';
@@ -78,8 +80,9 @@ export function assembleMatch({
     countdownShown: null,
     time: 0, // GO 이후 흐른 시간 (일시정지 시간 제외)
     players,
+    homeDist: maze.starts.map((start) => distancesFrom(maze, start)), // 칸마다 각자 집(출발점)까지의 거리
     projectiles: [], // 날아가는 중인 아이템 { from, to, item, slot, t, duration }
-    near: [false, false], // 보물까지 nearDistance 이내로 들어온 적이 있는지
+    near: [false, false], // 보석을 들고 집까지 nearDistance 이내로 들어온 적이 있는지
     events: [],
     result: null,
   };
@@ -137,7 +140,8 @@ export function updateMatch(match, dt, commands = []) {
   updateProjectiles(match, dt);
   updateBoxes(match, dt);
   players.forEach((player, i) => {
-    const remaining = distanceAt(maze, player.x, player.y);
+    if (!player.hasGem) return;
+    const remaining = journeyLeft(match, i);
     if (!match.near[i] && remaining >= 0 && remaining <= MATCH.nearDistance) {
       match.near[i] = true;
       emit(match, 'near', { player: i });
@@ -147,10 +151,18 @@ export function updateMatch(match, dt, commands = []) {
   if (finished.length > 0) finishMatch(match, finished.length === 1 ? finished[0] : null);
 }
 
-/** 새 칸에 도착했을 때: 보물, 아이템 상자, 함정 */
+/** 새 칸에 도착했을 때: 보석, 집, 아이템 상자, 함정 */
 function handleArrival(match, player) {
   const { maze, traps } = match;
-  if (player.x === maze.treasure.x && player.y === maze.treasure.y) {
+  if (!player.hasGem && player.x === maze.treasure.x && player.y === maze.treasure.y) {
+    // 보석은 그 자리에 남아 있어서 상대도 만질 수 있습니다.
+    player.hasGem = true;
+    player.gemAt = match.time;
+    emit(match, 'gem', { player: player.index, x: player.x, y: player.y });
+    return;
+  }
+  const home = maze.starts[player.index];
+  if (player.hasGem && player.x === home.x && player.y === home.y) {
     player.finished = true;
     return;
   }
@@ -185,8 +197,7 @@ function handleArrival(match, player) {
 }
 
 function pickUpBox(match, player, box) {
-  const opponent = match.players[1 - player.index];
-  const gap = distanceAt(match.maze, player.x, player.y) - distanceAt(match.maze, opponent.x, opponent.y);
+  const gap = journeyLeft(match, player.index) - journeyLeft(match, 1 - player.index);
   const behind = ITEM_RULES.catchUp.enabled && gap >= ITEM_RULES.catchUp.minGap;
   if (!player.bag.includes(null)) {
     // 가방이 가득 차면 상자는 그 자리에 남습니다.
@@ -270,25 +281,34 @@ export function resumeMatch(match) {
   match.pausedFrom = null;
 }
 
-/** 지금 보물까지 남은 최단 거리 */
-export function remainingDistance(match, playerIndex) {
+/** 승리까지 남은 최단 거리: 보석 전이면 '보석까지 + 보석에서 집까지', 보석을 만졌으면 '집까지' */
+export function journeyLeft(match, playerIndex) {
+  const { maze } = match;
   const p = match.players[playerIndex];
-  return distanceAt(match.maze, p.x, p.y);
+  const here = cellIndex(maze.width, p.x, p.y);
+  if (p.hasGem) return match.homeDist[playerIndex][here];
+  const home = maze.starts[playerIndex];
+  return maze.distToTreasure[here] + distanceAt(maze, home.x, home.y);
+}
+
+/** 출발 → 보석 → 집 왕복 최단 거리 */
+export function roundTrip(match, playerIndex) {
+  const home = match.maze.starts[playerIndex];
+  return distanceAt(match.maze, home.x, home.y) * 2;
 }
 
 function finishMatch(match, winner) {
-  const { maze } = match;
   match.phase = 'result';
   match.projectiles = [];
   match.result = {
     winner, // 무승부면 null
     time: match.time,
     players: match.players.map((player) => {
-      const start = maze.starts[player.index];
-      const shortest = distanceAt(maze, start.x, start.y);
-      const progress = shortest - distanceAt(maze, player.x, player.y);
+      const shortest = roundTrip(match, player.index);
+      const progress = shortest - journeyLeft(match, player.index);
       return {
         ...player.stats,
+        hasGem: player.hasGem,
         shortest,
         wandered: Math.max(0, player.stats.moves - progress), // 헤맨 칸 = 이동 칸 − 실제로 가까워진 칸
       };
