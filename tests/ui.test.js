@@ -77,7 +77,7 @@ describe('화면 배치', () => {
 
 describe('난이도', () => {
   const levels = DIFFICULTY_ORDER.map((key) => DIFFICULTIES[key]);
-  const trapTotal = (d) => d.traps.web + d.traps.portal + d.traps.ice;
+  const trapTotal = (d) => d.traps.web + d.traps.ice;
 
   it('어려울수록 미로가 크고, 시야가 좁고, 지나온 길이 빨리 사라지고, 함정이 많다', () => {
     for (let i = 1; i < levels.length; i++) {

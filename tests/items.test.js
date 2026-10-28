@@ -198,14 +198,6 @@ describe('함정', () => {
     expect(eventsOf(match, 'trap')[0]).toMatchObject({ trap: 'web', player: 0 });
   });
 
-  it('소용돌이에 들어가면 짝꿍 소용돌이로 순간이동한다', () => {
-    const match = corridorMatch({ traps: { portal: [[[1, 0], [5, 0]]] } });
-    run(match, 10, [hold('right'), idle()]); // (1,0)으로 출발만 하고 키를 뗌
-    run(match, 5);
-    expect(match.players[0]).toMatchObject({ x: 5, y: 0 });
-    expect(eventsOf(match, 'trap')[0]).toMatchObject({ trap: 'portal', from: { x: 1, y: 0 }, to: { x: 5, y: 0 } });
-  });
-
   it('얼음 바닥에서는 키를 떼도 얼음이 끝날 때까지 미끄러진다', () => {
     const match = corridorMatch({ traps: { ice: [[2, 0], [3, 0], [4, 0]] } });
     run(match, 20, [hold('right'), idle()]); // (2,0) 얼음으로 들어설 때까지만 누름
@@ -245,27 +237,21 @@ describe('상자·함정 배치', () => {
       if (boxes.length !== diff.boxPairs * 2) problems.push(`상자 ${boxes.length}개`);
       for (const i of boxSet) if (!boxSet.has(rot(i))) problems.push('상자 비대칭');
       const special = [...boxSet];
-      let portals = 0;
       for (let i = 0; i < count; i++) {
         const k = traps.kind[i];
         if (k === TRAP.NONE) continue;
         special.push(i);
         if (boxSet.has(i)) problems.push('상자와 함정 겹침');
         if (traps.kind[rot(i)] !== k) problems.push('함정 비대칭');
-        if (k === TRAP.PORTAL) {
-          portals++;
-          const to = traps.portalTo[i];
-          if (traps.portalTo[to] !== i) problems.push('소용돌이 짝 안 맞음');
-          if (traps.portalTo[rot(i)] !== rot(to)) problems.push('소용돌이 연결 비대칭');
-        }
       }
+      const webs = traps.kind.filter((k) => k === TRAP.WEB).length;
+      if (webs !== diff.traps.web * 2) problems.push(`거미줄 ${webs}칸`);
       for (const i of special) {
         const x = i % width;
         const y = Math.floor(i / width);
         if (Math.min(fromStart[i], fromStart[rot(i)]) < PLACEMENT.minDistFromStart) problems.push('출발점에 너무 가까움');
         if (distanceAt(maze, x, y) < PLACEMENT.minDistFromTreasure) problems.push('보물에 너무 가까움');
       }
-      if (portals !== diff.traps.portal * 4) problems.push(`소용돌이 ${portals}칸`);
       if (problems.length) failures.push(`seed ${seed}: ${[...new Set(problems)].join(', ')}`);
     }
     expect(failures).toEqual([]);

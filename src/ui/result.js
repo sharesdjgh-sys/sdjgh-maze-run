@@ -34,7 +34,7 @@ export function resultScreen({ match, series, idleLeft }) {
       : '';
 
   const rows = [
-    ['보석', (s) => (s.hasGem ? '찜 완료' : '아직 못 만짐')],
+    ['학교', (s) => (s.visitedSchool ? '등교 완료' : '아직 못 감')],
     ['이동한 칸', (s) => `${s.moves}칸`],
     ['헤맨 칸', (s) => `${s.wandered}칸`],
     ['아이템 사용', (s) => `${s.itemsUsed}개 (명중 ${s.itemsHit})`],
@@ -54,7 +54,7 @@ export function resultScreen({ match, series, idleLeft }) {
         <thead><tr><th></th>${[0, 1].map((i) => `<th>${badge(i)} ${characterImg(characters[i].id, 'inline-avatar')}</th>`).join('')}</tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      <p class="note">이번 미로의 최단 거리: 보석까지 갔다가 집까지 ${result.players[0].shortest}칸</p>
+      <p class="note">이번 판의 최단 거리: 학교 들렀다가 집까지 ${result.players[0].shortest}칸 (두 사람 똑같음)</p>
       <div class="menu row">
         <button class="primary" data-action="next">${nextLabel} <kbd>Enter</kbd></button>
         <button data-action="setup">캐릭터 다시 고르기 <kbd>C</kbd></button>

@@ -9,14 +9,13 @@ import { CHARACTER_SHEET } from './character-animation.js';
 
 export { CHARACTERS };
 
-export const TREASURE_EMOJI = '💎';
 export const BOX_EMOJI = '🎁';
 export const STAR_EMOJI = '⭐';
 export const CLOUD_EMOJI = '🌑';
 
 // 아이콘 그림을 아직 못 불러왔을 때 대신 쓸 이모지
 const ICON_FALLBACK = {
-  treasure: '💎', box: '🎁', web: '🕸️', portal: '🌀', ice: '🧊', speedUp: '⚡', flashlight: '🔦',
+  school: '🏫', backpack: '🎒', box: '🎁', web: '🕸️', ice: '🧊', speedUp: '⚡', flashlight: '🔦',
   slowDown: '🐌', freeze: '❄️', reverse: '😵', dark: '🌑', dizzy: '💫', trophy: '🏆', sparkles: '✨', home: '🏡',
 };
 

@@ -1,14 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { MOVE } from '../src/config.js';
-import { distanceAt, distancesFrom } from '../src/game/maze.js';
-import { createMatch, pauseMatch, resumeMatch, updateMatch } from '../src/game/match.js';
+import { DIFFICULTIES, MAZE, MOVE } from '../src/config.js';
+import { distanceAt, distancesFrom, generateMaze } from '../src/game/maze.js';
+import { TRAP, pickEnds, placeSpecials } from '../src/game/placement.js';
+import { assembleMatch, createMatch, pauseMatch, resumeMatch, updateMatch } from '../src/game/match.js';
 import { createPlayer, stepPlayer } from '../src/game/player.js';
+import { createRng } from '../src/core/rng.js';
 import {
   DT,
-  OPPOSITE,
   buildMaze,
-  corridorMatch,
-  downhill,
   emptyTraps,
   eventsOf,
   hold,
@@ -88,45 +87,53 @@ describe('한 판 진행', () => {
     const match = createMatch({ difficulty: 'easy', seed: 42 });
     run(match, 60, [hold('right', 'down'), hold('left', 'up')]);
     expect(match.phase).toBe('countdown');
-    expect(match.players[0]).toMatchObject({ x: 0, y: 0, stats: { moves: 0 } });
+    expect(match.players[0]).toMatchObject({ ...match.starts[0], stats: { moves: 0 } });
     skipCountdown(match);
     expect(match.phase).toBe('playing');
     expect(match.events.filter((e) => e.type === 'countdown').map((e) => e.count)).toEqual([3, 2, 1]);
     expect(eventsOf(match, 'go')).toHaveLength(1);
   });
 
-  it('보석을 만지고 집으로 먼저 돌아온 사람이 이긴다 (함정·상자가 있어도 결국 도착)', () => {
+  it('학교에 들렀다가 내 집에 먼저 도착한 사람이 이긴다 (함정·상자가 있어도 결국 도착)', () => {
     const match = createMatch({ difficulty: 'normal', seed: 7 });
     skipCountdown(match);
-    const shortest = distanceAt(match.maze, 0, 0);
+    // 최단 거리 = 출발점 → 학교 + 학교 → 집
+    const [start, home] = [match.starts[1], match.homes[1]];
+    const shortest = distanceAt(match.maze, start.x, start.y) + distanceAt(match.maze, home.x, home.y);
     run(match, 40000, () => (match.phase === 'playing' ? [idle(), hold(towardGoal(match, 1))] : [idle(), idle()]));
     expect(match.phase).toBe('result');
     expect(match.result.winner).toBe(1);
-    expect(match.result.players[1]).toMatchObject({ shortest: shortest * 2, hasGem: true });
-    expect(eventsOf(match, 'gem').map((e) => e.player)).toEqual([1]);
+    expect(match.result.players[1]).toMatchObject({ shortest, visitedSchool: true });
+    expect(eventsOf(match, 'school').map((e) => e.player)).toEqual([1]);
     expect(eventsOf(match, 'finish')).toEqual([{ type: 'finish', winner: 1 }]);
   });
 
-  it('보석을 만지지 않고는 집에 돌아와도 이기지 못하고, 보석은 그 자리에 남는다', () => {
-    const match = corridorMatch();
-    match.maze.treasure = { x: 3, y: 0 };
-    match.maze.distToTreasure = distancesFrom(match.maze, match.maze.treasure);
-    run(match, 15, [hold('right'), idle()]); // (0,0) → (2,0)까지만 감
-    expect(match.players[0]).toMatchObject({ x: 2, hasGem: false });
-    run(match, 60, [hold('left'), idle()]); // 집으로 돌아와도 그대로 진행 중
-    expect(match.players[0]).toMatchObject({ x: 0, finished: false });
+  it('학교에 들르지 않고는 집에 가도 이기지 못하고, 학교는 그 자리에 남는다', () => {
+    // 7×7: 왼쪽 줄 (0,0)~(0,6), 학교는 (0,3)에서 오른쪽으로 갈라진 (1,3). 1P 집은 기본 자리 (0,6)
+    const n = 7;
+    const openings = [[[0, 3], [1, 3]]];
+    for (let y = 0; y < n - 1; y++) openings.push([[0, y], [0, y + 1]]);
+    const maze = buildMaze(n, n, openings);
+    maze.treasure = { x: 1, y: 3 };
+    maze.distToTreasure = distancesFrom(maze, maze.treasure);
+    const match = assembleMatch({ maze, boxes: [], traps: emptyTraps(n * n), rng: createRng(1) });
+    match.phase = 'playing';
+
+    run(match, 80, [hold('down'), idle()]); // 학교 갈림길을 지나 집 (0,6)까지, 등교를 안 했으니 그대로 진행
+    expect(match.players[0]).toMatchObject({ x: 0, y: 6, visitedSchool: false, finished: false });
     expect(match.phase).toBe('playing');
 
-    run(match, 80, [hold('right'), idle()]); // 보석 (3,0)을 지나 복도 끝 (6,0)까지
-    expect(match.players[0]).toMatchObject({ x: 6, hasGem: true });
-    expect(eventsOf(match, 'gem')).toHaveLength(1);
-    run(match, 80, [hold('left'), idle()]); // 보석 칸을 다시 지나도 사건은 한 번뿐, 집에 오면 승리
-    expect(eventsOf(match, 'gem')).toHaveLength(1);
+    run(match, 25, [hold('up'), idle()]); // (0,3)까지
+    run(match, 20, [hold('right'), idle()]); // 학교 (1,3)
+    expect(match.players[0].visitedSchool).toBe(true);
+    expect(eventsOf(match, 'school')).toHaveLength(1);
+    run(match, 15, [hold('left'), idle()]);
+    run(match, 50, [hold('down'), idle()]); // 하교해서 집 (0,6) → 승리
     expect(match.phase).toBe('result');
     expect(match.result.winner).toBe(0);
   });
 
-  it('보석을 든 채 집 근처에 오면 두근두근(near) 사건이 한 번 나온다', () => {
+  it('학교에 들른 뒤 집 근처에 오면 두근두근(near) 사건이 한 번 나온다', () => {
     const match = createMatch({ difficulty: 'easy', seed: 3 });
     skipCountdown(match);
     run(match, 40000, () => {
@@ -135,25 +142,19 @@ describe('한 판 진행', () => {
     });
     const near = eventsOf(match, 'near');
     expect(near).toEqual([{ type: 'near', player: 0 }]);
-    expect(match.events.indexOf(near[0])).toBeGreaterThan(match.events.indexOf(eventsOf(match, 'gem')[0]));
+    expect(match.events.indexOf(near[0])).toBeGreaterThan(match.events.indexOf(eventsOf(match, 'school')[0]));
   });
 
-  it.each([1, 2, 3, 4, 5])('대칭 미로라서 똑같이(대칭으로) 움직이면 같은 순간 도착해 무승부 (seed %i)', (seed) => {
-    const match = createMatch({ difficulty: 'normal', seed });
-    const { maze } = match;
-    const [lastX, lastY] = [maze.width - 1, maze.height - 1];
-    skipCountdown(match);
-    run(match, 40000, () => {
-      if (match.phase !== 'playing') return [idle(), idle()];
-      const [p1, p2] = match.players;
-      // 2P는 '1P가 2P 자리를 180° 돌린 곳에 있다면 갈 방향'의 반대로 움직임 = 완전히 대칭
-      const goal1 = p2.hasGem ? match.homeDist[0] : maze.distToTreasure;
-      const mirrored = downhill(maze, goal1, lastX - p2.x, lastY - p2.y);
-      return [hold(towardGoal(match, 0)), hold(mirrored && OPPOSITE[mirrored])];
-    });
+  it.each([1, 2, 3, 4, 5])('거리가 같아서, 함정 없이 둘 다 가장 빠른 길로 가면 같은 순간 도착해 무승부 (seed %i)', (seed) => {
+    const diff = DIFFICULTIES.normal;
+    const { maze } = generateMaze({ ...MAZE, width: diff.width, height: diff.height, windiness: diff.windiness, braidRatio: diff.braidRatio }, createRng(seed));
+    const ends = pickEnds(maze, {}, createRng(seed));
+    const match = assembleMatch({ maze, boxes: [], traps: emptyTraps(maze.width * maze.height), rng: createRng(1), ...ends });
+    match.phase = 'playing';
+    run(match, 40000, () => (match.phase === 'playing' ? [hold(towardGoal(match, 0)), hold(towardGoal(match, 1))] : [idle(), idle()]));
     expect(match.phase).toBe('result');
     expect(match.result.winner).toBeNull();
-    expect(match.players.every((p) => p.hasGem)).toBe(true);
+    expect(match.players.every((p) => p.visitedSchool)).toBe(true);
   });
 
   it('일시정지 중에는 시간이 흐르지 않고, 다시 하면 원래 상태로 돌아간다', () => {
@@ -162,9 +163,10 @@ describe('한 판 진행', () => {
     run(match, 30);
     const time = match.time;
     pauseMatch(match);
-    run(match, 120, [hold('right'), hold('left')]);
+    const before = { x: match.players[0].x, y: match.players[0].y };
+    run(match, 120, [hold('right', 'down', 'left', 'up'), hold('left')]);
     expect(match.time).toBe(time);
-    expect(match.players[0]).toMatchObject({ x: 0, y: 0 });
+    expect(match.players[0]).toMatchObject(before);
     resumeMatch(match);
     expect(match.phase).toBe('playing');
   });
@@ -184,3 +186,43 @@ describe('한 판 진행', () => {
   });
 
 });
+
+describe('출발점과 집 (판마다 무작위, 거리만 같게)', () => {
+  it.each(['easy', 'normal', 'hard'])('%s: 시드 60개 모두 두 사람의 거리가 같고, 상자·함정을 피하고, 서로 떨어져 있다', (difficulty) => {
+    const diff = DIFFICULTIES[difficulty];
+    const problems = [];
+    for (let seed = 1; seed <= 60; seed++) {
+      const rng = createRng(seed);
+      const { maze } = generateMaze({ ...MAZE, width: diff.width, height: diff.height, windiness: diff.windiness, braidRatio: diff.braidRatio }, rng);
+      const specials = placeSpecials(maze, diff, rng);
+      const { starts, homes } = pickEnds(maze, specials, createRng(seed * 7));
+      const d = (c) => distanceAt(maze, c.x, c.y);
+      const key = (c) => `${c.x},${c.y}`;
+      const special = new Set(specials.boxes.map(key));
+      specials.traps.kind.forEach((k, i) => { if (k !== TRAP.NONE) special.add(`${i % maze.width},${Math.floor(i / maze.width)}`); });
+      const manhattan = (a, b) => Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+      if (starts === maze.starts) problems.push(`seed ${seed}: 자리를 못 찾음`);
+      if (d(starts[0]) !== d(starts[1])) problems.push(`seed ${seed}: 출발점 → 학교 거리 다름`);
+      if (d(homes[0]) !== d(homes[1])) problems.push(`seed ${seed}: 학교 → 집 거리 다름`);
+      for (const c of [...starts, ...homes]) if (special.has(key(c))) problems.push(`seed ${seed}: 상자·함정 위`);
+      if (manhattan(starts[0], starts[1]) < 2 || manhattan(homes[0], homes[1]) < 2) problems.push(`seed ${seed}: 너무 붙어 있음`);
+      for (let k = 0; k < 2; k++) {
+        const fromStart = distancesFrom(maze, starts[k]);
+        if (fromStart[homes[k].y * maze.width + homes[k].x] < d(maze.starts[0]) * 0.5) problems.push(`seed ${seed}: 집이 출발점에 너무 가까움`);
+      }
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('같은 미로라도 판(itemSeed)마다 출발점과 집이 바뀌고, 같은 itemSeed면 같다', () => {
+    const at = (itemSeed) => {
+      const m = createMatch({ difficulty: 'easy', seed: 11, itemSeed });
+      return JSON.stringify([m.starts, m.homes]);
+    };
+    expect(at(5)).toBe(at(5));
+    expect(new Set([1, 2, 3, 4, 5, 6].map(at)).size).toBeGreaterThan(3);
+    const m = createMatch({ difficulty: 'easy', seed: 11, itemSeed: 5 });
+    expect(m.players.map((p) => ({ x: p.x, y: p.y }))).toEqual(m.starts);
+  });
+});
+

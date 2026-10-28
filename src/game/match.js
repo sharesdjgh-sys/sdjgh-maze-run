@@ -1,7 +1,7 @@
 // 한 판 진행: 카운트다운 → 진행 → 결과 (기획서 기능 2~6)
 // 아이템 줍기·사용·발사, 함정, 효과, 상자 재생성, 승리·무승부 판정을 처리합니다.
-// 승리 규칙 (v11): 가운데 보석을 만진 뒤 자기 출발점(집)으로 먼저 돌아온 사람이 이깁니다.
-// 지나온 길은 서서히 어두워지므로, 돌아오는 길은 머릿속에 기억해 두어야 합니다.
+// 승리 규칙 (v13, 등하교): 출발점에서 가운데 학교에 들렀다가(등교) 내 집에 먼저 도착한(하교) 사람이 이깁니다.
+// 출발점과 집은 판마다 무작위로 바뀌고(pickEnds), 두 사람의 '출발점 → 학교', '학교 → 집' 거리만 똑같습니다.
 // 화면·소리는 match.events에 쌓인 사건을 main.js가 꺼내 가서 처리합니다. (이 파일은 그리지 않음)
 
 import { DIFFICULTIES, ITEMS, ITEM_RULES, MATCH, MAZE, MOVE, TRAPS } from '../config.js';
@@ -9,8 +9,8 @@ import { createRng } from '../core/rng.js';
 import { applyEffect, tickEffects } from './effects.js';
 import { addToBag, rollItem, takeFromBag } from './items.js';
 import { cellIndex, distanceAt, distancesFrom, generateMaze } from './maze.js';
-import { TRAP, placeSpecials } from './placement.js';
-import { EMPTY_COMMAND, createPlayer, stepPlayer, teleportPlayer } from './player.js';
+import { TRAP, pickEnds, placeSpecials } from './placement.js';
+import { EMPTY_COMMAND, createPlayer, stepPlayer } from './player.js';
 import { markSeen, visionFor, visionRadius } from './vision.js';
 
 const EPSILON = 1e-9;
@@ -18,7 +18,7 @@ const EPSILON = 1e-9;
 /**
  * 새 판을 만듭니다. 미로를 만들지 못하면 MazeGenerationError를 던집니다.
  * seed: 미로·상자·함정 배치를 정하는 번호 (같은 seed = 같은 미로)
- * itemSeed: 상자에서 나오는 아이템을 정하는 번호. 같은 미로라도 판마다 아이템이 다르게 나오도록 따로 둡니다.
+ * itemSeed: 상자에서 나오는 아이템과 출발점·집 자리를 정하는 번호. 같은 미로라도 판마다 다르게 나오도록 따로 둡니다.
  * mazeNumber: 미로 목록(src/data/mazePool.js)에서 몇 번째 미로인지 (화면 표시용)
  */
 export function createMatch({
@@ -37,6 +37,7 @@ export function createMatch({
     rng,
   );
   const { boxes, traps } = placeSpecials(maze, diff, rng);
+  const { starts, homes } = pickEnds(maze, { boxes, traps }, createRng(itemSeed ^ 0x68bc21eb));
   return assembleMatch({
     difficulty,
     seed,
@@ -47,23 +48,30 @@ export function createMatch({
     boxes,
     traps,
     rng: createRng(itemSeed ^ 0x5bd1e995),
+    starts,
+    homes,
     characters,
     vision: visionFor(diff),
   });
 }
 
-/** 미로·상자·함정이 준비된 상태에서 판을 조립합니다. (테스트에서 직접 만든 미로로 판을 만들 때도 사용) */
+/**
+ * 미로·상자·함정이 준비된 상태에서 판을 조립합니다. (테스트에서 직접 만든 미로로 판을 만들 때도 사용)
+ * starts·homes를 주지 않으면 미로의 기본 모서리를 씁니다.
+ */
 export function assembleMatch({
   maze,
   boxes,
   traps,
   rng,
+  starts = maze.starts,
+  homes = maze.homes,
   characters = ['cat', 'dog'],
   fog = true,
   vision = visionFor(null),
   ...info
 }) {
-  const players = maze.starts.map((start, i) => createPlayer(i, start, characters[i], maze.width * maze.height));
+  const players = starts.map((start, i) => createPlayer(i, start, characters[i], maze.width * maze.height));
   for (const p of players) markSeen(p.seenAt, maze, p.x, p.y, visionRadius(p.effects, vision), 0);
 
   const match = {
@@ -80,9 +88,11 @@ export function assembleMatch({
     countdownShown: null,
     time: 0, // GO 이후 흐른 시간 (일시정지 시간 제외)
     players,
-    homeDist: maze.starts.map((start) => distancesFrom(maze, start)), // 칸마다 각자 집(출발점)까지의 거리
+    starts, // 각자의 출발점 (판마다 무작위)
+    homes, // 각자의 집 (판마다 무작위)
+    homeDist: homes.map((home) => distancesFrom(maze, home)), // 칸마다 각자 집까지의 거리
     projectiles: [], // 날아가는 중인 아이템 { from, to, item, slot, t, duration }
-    near: [false, false], // 보석을 들고 집까지 nearDistance 이내로 들어온 적이 있는지
+    near: [false, false], // 학교에 들른 뒤 집까지 nearDistance 이내로 들어온 적이 있는지
     events: [],
     result: null,
   };
@@ -140,7 +150,7 @@ export function updateMatch(match, dt, commands = []) {
   updateProjectiles(match, dt);
   updateBoxes(match, dt);
   players.forEach((player, i) => {
-    if (!player.hasGem) return;
+    if (!player.visitedSchool) return;
     const remaining = journeyLeft(match, i);
     if (!match.near[i] && remaining >= 0 && remaining <= MATCH.nearDistance) {
       match.near[i] = true;
@@ -151,18 +161,18 @@ export function updateMatch(match, dt, commands = []) {
   if (finished.length > 0) finishMatch(match, finished.length === 1 ? finished[0] : null);
 }
 
-/** 새 칸에 도착했을 때: 보석, 집, 아이템 상자, 함정 */
+/** 새 칸에 도착했을 때: 학교, 집, 아이템 상자, 함정 */
 function handleArrival(match, player) {
   const { maze, traps } = match;
-  if (!player.hasGem && player.x === maze.treasure.x && player.y === maze.treasure.y) {
-    // 보석은 그 자리에 남아 있어서 상대도 만질 수 있습니다.
-    player.hasGem = true;
-    player.gemAt = match.time;
-    emit(match, 'gem', { player: player.index, x: player.x, y: player.y });
+  if (!player.visitedSchool && player.x === maze.treasure.x && player.y === maze.treasure.y) {
+    // 등교! 학교는 두 사람이 같이 쓰는 곳이라 그대로 남아 있습니다.
+    player.visitedSchool = true;
+    player.schoolAt = match.time;
+    emit(match, 'school', { player: player.index, x: player.x, y: player.y });
     return;
   }
-  const home = maze.starts[player.index];
-  if (player.hasGem && player.x === home.x && player.y === home.y) {
+  const home = match.homes[player.index];
+  if (player.visitedSchool && player.x === home.x && player.y === home.y) {
     player.finished = true;
     return;
   }
@@ -177,14 +187,6 @@ function handleArrival(match, player) {
       player.stats.trapsHit += 1;
       emit(match, 'trap', { player: player.index, trap: 'web' });
       break;
-    case TRAP.PORTAL: {
-      const to = traps.portalTo[here];
-      const from = { x: player.x, y: player.y };
-      teleportPlayer(player, to % maze.width, Math.floor(to / maze.width));
-      player.stats.trapsHit += 1;
-      emit(match, 'trap', { player: player.index, trap: 'portal', from, to: { x: player.x, y: player.y } });
-      break;
-    }
     case TRAP.ICE: {
       const cameFrom = cellIndex(maze.width, player.prevX, player.prevY);
       if (traps.kind[cameFrom] !== TRAP.ICE) {
@@ -281,20 +283,22 @@ export function resumeMatch(match) {
   match.pausedFrom = null;
 }
 
-/** 승리까지 남은 최단 거리: 보석 전이면 '보석까지 + 보석에서 집까지', 보석을 만졌으면 '집까지' */
+/** 승리까지 남은 최단 거리: 등교 전이면 '학교까지 + 학교에서 집까지', 등교했으면 '집까지' */
 export function journeyLeft(match, playerIndex) {
   const { maze } = match;
   const p = match.players[playerIndex];
   const here = cellIndex(maze.width, p.x, p.y);
-  if (p.hasGem) return match.homeDist[playerIndex][here];
-  const home = maze.starts[playerIndex];
+  if (p.visitedSchool) return match.homeDist[playerIndex][here];
+  const home = match.homes[playerIndex];
   return maze.distToTreasure[here] + distanceAt(maze, home.x, home.y);
 }
 
-/** 출발 → 보석 → 집 왕복 최단 거리 */
-export function roundTrip(match, playerIndex) {
-  const home = match.maze.starts[playerIndex];
-  return distanceAt(match.maze, home.x, home.y) * 2;
+/** 출발 → 학교 → 집 최단 거리 (두 사람이 같음) */
+export function fullTrip(match, playerIndex) {
+  const { maze } = match;
+  const start = match.starts[playerIndex];
+  const home = match.homes[playerIndex];
+  return distanceAt(maze, start.x, start.y) + distanceAt(maze, home.x, home.y);
 }
 
 function finishMatch(match, winner) {
@@ -304,11 +308,11 @@ function finishMatch(match, winner) {
     winner, // 무승부면 null
     time: match.time,
     players: match.players.map((player) => {
-      const shortest = roundTrip(match, player.index);
+      const shortest = fullTrip(match, player.index);
       const progress = shortest - journeyLeft(match, player.index);
       return {
         ...player.stats,
-        hasGem: player.hasGem,
+        visitedSchool: player.visitedSchool,
         shortest,
         wandered: Math.max(0, player.stats.moves - progress), // 헤맨 칸 = 이동 칸 − 실제로 가까워진 칸
       };

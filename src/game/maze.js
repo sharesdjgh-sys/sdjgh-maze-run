@@ -36,7 +36,12 @@ export function generateMaze(
   throw new MazeGenerationError(`미로를 ${maxAttempts}번 만들었지만 검사를 통과하지 못했어요.`);
 }
 
-/** 벽 정보로 미로 객체를 만듭니다. (출발점, 보물, 보물까지의 거리 지도 포함) */
+/**
+ * 벽 정보로 미로 객체를 만듭니다. (기본 출발점·집, 학교, 학교까지의 거리 지도 포함)
+ * treasure = 가운데 학교 칸입니다. (이름은 처음 '보물'이던 때를 따름)
+ * 기본 출발점은 왼쪽 위(1P)·오른쪽 아래(2P), 기본 집은 왼쪽 아래(1P)·오른쪽 위(2P)입니다.
+ * 실제 판에서는 placement.js의 pickEnds가 출발점과 집을 무작위로 다시 정합니다. (v13)
+ */
 export function createMazeFromWalls(width, height, walls) {
   const treasure = { x: (width - 1) / 2, y: (height - 1) / 2 };
   return {
@@ -47,6 +52,10 @@ export function createMazeFromWalls(width, height, walls) {
     starts: [
       { x: 0, y: 0 },
       { x: width - 1, y: height - 1 },
+    ],
+    homes: [
+      { x: 0, y: height - 1 },
+      { x: width - 1, y: 0 },
     ],
     distToTreasure: bfs(width, height, walls, treasure),
   };

@@ -3,10 +3,10 @@
 // 저작권 표시: licenses/fluentui-emoji.txt
 
 export const ICONS = {
-  treasure: 'Gem stone/3D/gem_stone_3d.png',
+  school: 'School/3D/school_3d.png',
+  backpack: 'Backpack/3D/backpack_3d.png',
   box: 'Wrapped gift/3D/wrapped_gift_3d.png',
   web: 'Spider web/3D/spider_web_3d.png',
-  portal: 'Cyclone/3D/cyclone_3d.png',
   ice: 'Ice/3D/ice_3d.png',
   speedUp: 'High voltage/3D/high_voltage_3d.png',
   flashlight: 'Flashlight/3D/flashlight_3d.png',

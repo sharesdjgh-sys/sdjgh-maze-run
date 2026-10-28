@@ -2,24 +2,24 @@
 
 // 미로는 화면 하나에 크게 그리므로 16:9에 가까운 직사각형입니다. 가로·세로는 홀수여야 정가운데 칸이 생깁니다.
 // 난이도가 오를수록 미로가 커지고, 시야가 좁아지고, 지나온 길이 빨리 사라지고, 함정이 많아집니다.
-// v11: 보석을 찍고 집까지 돌아오는 왕복 규칙이 되어, 칸 수를 줄여 칸(과 캐릭터)을 크게 그립니다. (한 판 길이는 비슷하게)
-// traps의 숫자는 '대칭 짝' 개수입니다. (거미줄 1 = 2칸, 소용돌이 1 = 서로 이어진 2쌍 4칸, 얼음 1 = 얼음 길 2개)
+// v11: 학교(가운데)에 들렀다가 집까지 가는 규칙이 되어, 칸 수를 줄여 칸(과 캐릭터)을 크게 그립니다. (한 판 길이는 비슷하게)
+// traps의 숫자는 '대칭 짝' 개수입니다. (거미줄 1 = 2칸, 얼음 1 = 얼음 길 2개)
 // vision: 시야 반경(칸)과 지나온 길이 완전히 사라지는 시간(초). 적지 않은 값은 아래 VISION을 따릅니다.
 export const DIFFICULTIES = {
   easy: {
     label: '쉬움', width: 27, height: 15, windiness: 0.5, braidRatio: 0.05,
     vision: { radius: 2.0, trailFade: 4 },
-    boxPairs: 4, traps: { web: 3, portal: 1, ice: 2 },
+    boxPairs: 4, traps: { web: 3, ice: 2 },
   },
   normal: {
     label: '보통', width: 31, height: 17, windiness: 0.5, braidRatio: 0.05,
     vision: { radius: 1.8, trailFade: 3 },
-    boxPairs: 5, traps: { web: 4, portal: 2, ice: 3 },
+    boxPairs: 5, traps: { web: 4, ice: 3 },
   },
   hard: {
     label: '어려움', width: 39, height: 21, windiness: 0.45, braidRatio: 0.05,
     vision: { radius: 1.6, trailFade: 2 },
-    boxPairs: 6, traps: { web: 6, portal: 3, ice: 4 },
+    boxPairs: 6, traps: { web: 6, ice: 4 },
   },
 };
 export const DIFFICULTY_ORDER = ['easy', 'normal', 'hard'];
@@ -91,26 +91,29 @@ export const ITEM_RULES = {
   freezeImmunity: 2, // 얼음이 풀린 뒤 얼음이 통하지 않는 시간 (초)
   projectileTime: 0.4, // 아이템이 상대에게 날아가는 시간 (초)
   bagFullNotice: 1.5, // "가방이 가득 찼어요!" 반복 간격 (초)
-  catchUp: { enabled: true, minGap: 4, attackBoost: 1.5 }, // 승리까지 남은 거리(보석 → 집)가 4칸 이상 뒤처지면 공격 아이템 확률 1.5배
+  catchUp: { enabled: true, minGap: 4, attackBoost: 1.5 }, // 승리까지 남은 거리(학교 → 집)가 4칸 이상 뒤처지면 공격 아이템 확률 1.5배
 };
 
-// 함정 3종. 안개 속에 숨어 있다가 가까이 가면 보입니다.
+// 함정 2종. 안개 속에 숨어 있다가 가까이 가면 보입니다. (v12: 소용돌이 순간이동은 없앰)
 export const TRAPS = {
   web: { emoji: '🕸️', name: '거미줄', stuckTime: 1.2, shout: '끈적!', desc: '밟으면 1.2초 동안 묶여요' },
-  portal: { emoji: '🌀', name: '소용돌이', shout: '슈웅~', desc: '막다른 길 끝에 숨어 있어요. 들어가면 짝꿍 소용돌이로 순간이동! 지름길일까, 함정일까?' },
   ice: { emoji: '🧊', name: '얼음 바닥', slideSpeed: 1.8, length: [3, 4], shout: '미끄덩!', desc: '빠르게 미끄러져서 멈추거나 뒤로 돌 수 없어요. 갈림길에서 옆으로 꺾는 것만 가능!' },
 };
 
 export const PLACEMENT = {
-  minDistFromStart: 3, // 상자·함정은 출발점에서 이 칸 수 이상 떨어진 곳에
-  minDistFromTreasure: 2, // 보물에서 이 칸 수 이상 떨어진 곳에
+  minDistFromStart: 3, // 상자·함정은 네 모서리(기본 출발점·집)에서 이 칸 수 이상 떨어진 곳에
+  minDistFromTreasure: 2, // 학교(가운데)에서 이 칸 수 이상 떨어진 곳에
   minSpacing: 3, // 상자·함정끼리 최소 간격 (가로+세로 칸 수)
+  // v13: 출발점과 집은 판마다 무작위. 두 사람의 거리(출발점 → 학교, 학교 → 집)만 똑같이 맞춥니다.
+  endDistance: [0.8, 1.3], // 학교까지의 거리 = 모서리에서 학교까지 거리의 0.8~1.3배
+  endsApart: 0.25, // 두 출발점·두 집·남의 출발점과 내 집 사이 최소 간격 = (가로+세로) × 이 값 (가로+세로 칸 수)
+  homeFromStart: 0.8, // 내 집은 내 출발점에서 길로 '모서리 → 학교 거리 × 이 값' 이상 떨어진 곳에
 };
 
 export const MATCH = {
   countdown: 3, // 3-2-1 카운트다운 (초)
   goDisplayTime: 0.7, // "GO!" 표시 시간 (초)
-  nearDistance: 5, // 보석을 들고 집까지 이 칸 수 이내로 오면 두근두근 연출
+  nearDistance: 5, // 학교에 들른 뒤 집까지 이 칸 수 이내로 오면 두근두근 연출
 };
 
 export const VFX = {

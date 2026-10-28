@@ -1,18 +1,18 @@
 # 귀염뽀짝 미로 레이스 🐱💎🐶
 
-한 컴퓨터에서 두 친구가 키보드를 나눠 쓰며, 화면 가득한 안개 낀 랜덤 미로(16:9)의 양 끝에서 출발해 **가운데 보석을 만지고 자기 집(출발점)으로 먼저 돌아오는** 2인 대결 웹게임입니다. 지나온 길은 서서히 어두워지니 돌아오는 길을 잘 기억해야 해요.
+한 컴퓨터에서 두 친구가 키보드를 나눠 쓰며, 화면 가득한 안개 낀 미로(16:9)에서 **가운데 학교에 들렀다가(등교) 내 집에 먼저 도착하는(하교)** 2인 대결 웹게임입니다. 출발 자리와 집은 판마다 바뀌지만 두 사람의 거리는 언제나 같아요. 지나온 길은 서서히 어두워지니 길을 잘 기억해야 해요.
 
 - 기획서: [`ref/미로찾기 게임_기획서.md`](ref/미로찾기%20게임_기획서.md)
 
 ## 조작법
 
-| | 1P (왼쪽 위에서 출발) | 2P (오른쪽 아래에서 출발) |
+| | 1P | 2P |
 |---|---|---|
 | 이동 | `W` `A` `S` `D` | 방향키 |
 | 아이템 1번 / 2번 | `Q` / `E` | 숫자패드 `1` / `2` (노트북은 `.` / `/`) |
 
 - `Esc` 일시정지 · `M` 소리 끄기/켜기 · 타이틀에서 `H` 조작법, `F` 전체화면
-- 두 사람이 화면 하나를 같이 봅니다. 출발한 곳이 각자의 집(🏡)이고, 보석을 만지면 집이 반짝이며 불러요.
+- 두 사람이 화면 하나를 같이 봅니다. 카운트다운 때 내 출발 자리가 내 색으로 반짝이고, 집(🏡)에는 '1P 집'·'2P 집' 이름표가 붙어요. 학교에 들르면 집이 반짝이며 불러요.
 
 ## 실행하기 (내 컴퓨터)
 
@@ -82,7 +82,7 @@ npm run build:offline
 
 - 글꼴: [주아(Jua)](https://fonts.google.com/specimen/Jua), SIL Open Font License 1.1 (`@fontsource/jua`)
 - 캐릭터 그림: `ref/character-originals`의 원본 16종 → `npm run characters`로 게임용 WebP로 변환
-- 보석·상자·아이템·함정·집 아이콘: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) 3D, MIT 라이선스 (`licenses/fluentui-emoji.txt`, `npm run icons`로 다시 받기)
+- 학교·책가방·집·상자·아이템·함정 아이콘: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) 3D, MIT 라이선스 (`licenses/fluentui-emoji.txt`, `npm run icons`로 다시 받기)
 - 정원 풍경·흙길·생울타리 그림, 캐릭터 애니메이션 시트: 이미지 생성 도구로 제작 (`ref/garden-assets-notes.md`, `ref/character-animation-notes.md`)
 - 효과음: Web Audio로 코드에서 직접 만듦 (음원 파일 없음)
 - 개발: Claude Code

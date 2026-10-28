@@ -451,7 +451,7 @@ button {
   vertical-align: -0.3em;
 }
 
-/* 승리 조건 두 단계: 보석 → 집 */
+/* 승리 조건 두 단계: 학교(등교) → 집(하교) */
 .howto-steps {
   display: flex;
   justify-content: center;

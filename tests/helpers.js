@@ -24,7 +24,7 @@ export function buildMaze(width, height, openings) {
 }
 
 export function emptyTraps(cellCount) {
-  return { kind: new Uint8Array(cellCount), portalTo: new Int32Array(cellCount).fill(-1) };
+  return { kind: new Uint8Array(cellCount) };
 }
 
 /** 7×7 미로의 맨 윗줄 복도 (0,0)~(6,0). 2P는 (6,6)에 갇혀 있어서 움직이지 않습니다. */
@@ -36,13 +36,6 @@ export function corridorMatch({ boxes = [], traps = {} } = {}) {
   const trapData = emptyTraps(n * n);
   for (const [x, y] of traps.web ?? []) trapData.kind[cellIndex(n, x, y)] = TRAP.WEB;
   for (const [x, y] of traps.ice ?? []) trapData.kind[cellIndex(n, x, y)] = TRAP.ICE;
-  for (const [[ax, ay], [bx, by]] of traps.portal ?? []) {
-    const a = cellIndex(n, ax, ay);
-    const b = cellIndex(n, bx, by);
-    trapData.kind[a] = trapData.kind[b] = TRAP.PORTAL;
-    trapData.portalTo[a] = b;
-    trapData.portalTo[b] = a;
-  }
   const match = assembleMatch({
     maze,
     boxes: boxes.map(([x, y]) => ({ x, y, active: true, respawnIn: 0 })),
@@ -75,10 +68,10 @@ export function downhill(maze, dist, x, y) {
   )?.name;
 }
 
-/** i번 플레이어가 지금 가야 할 방향: 보석 전이면 보석 쪽, 보석을 만졌으면 집 쪽 */
+/** i번 플레이어가 지금 가야 할 방향: 등교 전이면 학교 쪽, 학교에 들렀으면 집 쪽 */
 export function towardGoal(match, i) {
   const p = match.players[i];
-  return downhill(match.maze, p.hasGem ? match.homeDist[i] : match.maze.distToTreasure, p.x, p.y);
+  return downhill(match.maze, p.visitedSchool ? match.homeDist[i] : match.maze.distToTreasure, p.x, p.y);
 }
 
 export const OPPOSITE = { up: 'down', down: 'up', left: 'right', right: 'left' };

@@ -24,10 +24,10 @@ export function createPlayer(index, start, character, cellCount = 0) {
     facing: 'down',
     moveTimer: 0, // 다음 칸 도착까지 남은 시간 (0 이하이면 멈춰 있음)
     moveDuration: 1, // 지금 이동 한 칸에 걸리는 시간
-    settled: true, // 도착한 칸의 처리(아이템·함정·보석·집)를 마쳤는지
-    hasGem: false, // 가운데 보석을 만졌는지 (만진 뒤 집으로 돌아오면 승리)
-    gemAt: null, // 보석을 만진 시각
-    finished: false, // 보석을 들고 집에 돌아왔는지
+    settled: true, // 도착한 칸의 처리(아이템·함정·학교·집)를 마쳤는지
+    visitedSchool: false, // 가운데 학교에 들렀는지 (등교). 그 뒤 집에 가면(하교) 승리
+    schoolAt: null, // 학교에 도착한 시각
+    finished: false, // 학교에 들른 뒤 집에 도착했는지
     buffer: null, // 선입력 { dir, time }
     bump: null, // 벽에 부딪힌 연출 { dir, timeLeft }
     slideDir: null, // 얼음 위에서 미끄러지는 방향
@@ -44,7 +44,7 @@ export function createPlayer(index, start, character, cellCount = 0) {
  * 플레이어를 한 업데이트만큼 진행합니다.
  * world: { maze, traps, move(MOVE 설정), onArrive(player) — 새 칸에 도착했을 때 호출 }
  * command: { held: 누르고 있는 방향(최근에 누른 것부터), pressed: 이번에 새로 누른 방향 }
- * 반환: 'moving' | 'moved' | 'idle' | 'held'(얼음·거미줄로 못 움직임) | 'finished'(보석을 들고 집 도착)
+ * 반환: 'moving' | 'moved' | 'idle' | 'held'(얼음·거미줄로 못 움직임) | 'finished'(학교에 들른 뒤 집 도착)
  */
 export function stepPlayer(player, world, command, dt, time) {
   const { maze, move } = world;
@@ -117,14 +117,6 @@ export function stepPlayer(player, world, command, dt, time) {
     player.bump = { dir: command.pressed[command.pressed.length - 1], timeLeft: move.bumpTime };
   }
   return 'idle';
-}
-
-/** 순간이동: 칸 사이를 이어 그리지 않고 바로 옮깁니다. */
-export function teleportPlayer(player, x, y) {
-  player.x = player.prevX = x;
-  player.y = player.prevY = y;
-  player.moveTimer = 0;
-  player.slideDir = null;
 }
 
 /** 화면에 그릴 위치 (칸 사이를 부드럽게 이어 줍니다). extraTime은 마지막 업데이트 뒤로 흐른 시간 */

@@ -2,7 +2,7 @@
 // 두 사람이 한 화면을 같이 보고, 16:9 직사각형 미로를 화면 가득 크게 그립니다.
 // 미로는 '정원 생울타리 미로'로 그립니다: 흙길 바닥 + 그림자와 옆면이 있는 입체 생울타리 벽. (v10)
 // 벽·바닥은 미리 그려 둔 그림을 찍고, 캐릭터·아이템·이펙트는 매 프레임 그립니다.
-// 보물·상자·아이템·함정 그림은 3D 아이콘(Microsoft Fluent Emoji, MIT)입니다.
+// 학교·집·상자·아이템·함정 그림은 3D 아이콘(Microsoft Fluent Emoji, MIT)입니다.
 
 import { ITEMS, ITEM_RULES, LOOP, MATCH, MOVE, PLAYERS, VFX, VISION } from '../config.js';
 import { characterAnimation } from './character-animation.js';
@@ -41,7 +41,7 @@ const COLORS = {
   ink: '#4a3b5c',
   white: '#ffffff',
 };
-const BUBBLE_TONES = { warn: '#f0a020', near: '#ffc43d', web: '#9a8fb0', portal: '#9b8cff', ice: '#6fc3f0' };
+const BUBBLE_TONES = { warn: '#f0a020', near: '#ffc43d', web: '#9a8fb0', ice: '#6fc3f0' };
 const CONFETTI_COLORS = ['#ff6b81', '#3fa7f5', '#ffc43d', '#7ed957', '#b48cff', '#ffffff'];
 const UI_FONT = '"Jua", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
 const MIN_PLAYER_RADIUS = 11; // px. 어려움 난이도를 작은 화면에서 해도 캐릭터가 보이도록
@@ -174,7 +174,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     if (maze && traps) {
       for (let i = 0; i < traps.kind.length; i++) {
         const kind = traps.kind[i];
-        if (kind === TRAP.WEB || kind === TRAP.PORTAL) {
+        if (kind === TRAP.WEB) {
           trapCells.push({ x: i % maze.width, y: Math.floor(i / maze.width), kind });
         }
       }
@@ -220,14 +220,15 @@ export function createRenderer(canvas, { debug = false } = {}) {
     const m = layout.maze;
     const { cell } = m;
 
-    drawTraps(cell, now);
+    drawTraps(cell);
     drawBoxes(match, cell, now);
     if (debug) drawDebugPaths(match, cell);
     drawFog(match, extraTime);
     drawDarkClouds(match, cell, extraTime);
     drawFlashlights(match, cell, extraTime);
-    drawTreasure(toPx(match.maze.treasure.x, match.maze.treasure.y), cell, now);
+    drawSchool(toPx(match.maze.treasure.x, match.maze.treasure.y), cell, now);
     drawHomes(match, cell, now);
+    drawStarts(match, cell, now);
     for (const player of match.players) drawPlayer(player, cell, extraTime, now, match.time + extraTime);
     for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
     if (vfx) {
@@ -306,20 +307,12 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.globalAlpha = 1;
   }
 
-  function drawTraps(cell, now) {
+  // 거미줄 (얼음 바닥은 미로 그림에 미리 그려 둠)
+  function drawTraps(cell) {
     const web = getIconSprite('web', cell * 0.82, dpr);
-    const portal = getIconSprite('portal', cell * 0.8, dpr);
     for (const t of trapCells) {
       const p = toPx(t.x, t.y);
-      if (t.kind === TRAP.WEB) {
-        drawSprite(web, p.x, p.y, 1, 0.9);
-      } else {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(now * 2.5);
-        drawSprite(portal, 0, 0);
-        ctx.restore();
-      }
+      drawSprite(web, p.x, p.y, 1, 0.9);
     }
   }
 
@@ -436,8 +429,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
     }
   }
 
-  // 가운데 보석. 두 사람 모두 만질 수 있도록 만져도 그 자리에 남습니다. (두근두근 연출은 집에서: drawHomes)
-  function drawTreasure(p, cell, now) {
+  // 가운데 학교. 두 사람 모두 들러야 하는 곳이라 들러도 그 자리에 남습니다. (두근두근 연출은 집에서: drawHomes)
+  function drawSchool(p, cell, now) {
     const pulse = 1 + Math.sin(now * 4) * 0.06;
     const glowR = cell * 0.95 * pulse;
     const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
@@ -447,11 +440,11 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.beginPath();
     ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
     ctx.fill();
-    // 보석이 받침 위에서 둥실둥실 떠 있고, 별빛이 반짝임
+    // 학교가 운동장 위에서 살짝 들썩이고, 별빛이 반짝임
     ctx.fillStyle = 'rgba(120, 80, 20, 0.25)';
-    ellipse(p.x, p.y + cell * 0.3, cell * 0.28, cell * 0.08);
-    const bob = Math.sin(now * 2.2) * cell * 0.05;
-    drawSprite(getIconSprite('treasure', cell * 0.86, dpr), p.x, p.y - cell * 0.06 + bob, pulse);
+    ellipse(p.x, p.y + cell * 0.32, cell * 0.34, cell * 0.09);
+    const bob = Math.sin(now * 2.2) * cell * 0.03;
+    drawSprite(getIconSprite('school', cell * 1.05, dpr), p.x, p.y - cell * 0.08 + bob, pulse);
     for (let k = 0; k < 2; k++) {
       const a = now * 1.6 + k * Math.PI;
       const twinkle = 0.5 + 0.5 * Math.sin(now * 5 + k * 2);
@@ -459,13 +452,14 @@ export function createRenderer(canvas, { debug = false } = {}) {
     }
   }
 
-  // 집(출발점) 표시: 안개 위에도 보이게 그립니다. 보석을 만진 뒤에는 크게 반짝이며 '여기로 돌아와!'
+  // 집 표시: 집은 판마다 다른 곳에 있습니다. 안개 위에도 보이게 그리고 '1P 집'처럼 이름표를 붙입니다.
+  // 학교에 들른 뒤에는 크게 반짝이며 '여기로 와!'
   function drawHomes(match, cell, now) {
-    match.maze.starts.forEach((home, i) => {
+    match.homes.forEach((home, i) => {
       const player = match.players[i];
       const config = PLAYERS[i];
       const p = toPx(home.x, home.y);
-      const calling = player.hasGem && !player.finished;
+      const calling = player.visitedSchool && !player.finished;
       const pulse = calling ? 1 + Math.sin(now * (match.near[i] ? 9 : 4)) * 0.12 : 1;
       if (calling) {
         const glowR = cell * 1.25 * pulse;
@@ -488,6 +482,37 @@ export function createRenderer(canvas, { debug = false } = {}) {
       ctx.stroke();
       drawSprite(getIconSprite('home', cell * 0.6 * pulse, dpr), p.x, p.y - cell * 0.02, 1, ctx.globalAlpha);
       ctx.globalAlpha = 1;
+      // 이름표: 위쪽 모서리 집은 아래에, 아래쪽 모서리 집은 위에 (화면 밖으로 잘리지 않게)
+      const below = home.y < match.maze.height / 2;
+      const labelBottom = below ? p.y + cell * 0.95 : p.y - cell * 0.42;
+      drawBadge(`${config.label} 집`, p.x, labelBottom, config.color, cell);
+    });
+  }
+
+  // 출발점: 출발할 때 내 캐릭터가 어디 있는지 찾기 쉽게, 카운트다운 동안 발밑에 내 색 빛이 퍼집니다.
+  // 출발한 뒤에는 그 자리에 작은 점선 발판만 남습니다.
+  function drawStarts(match, cell, now) {
+    const counting = match.phase === 'countdown' || match.pausedFrom === 'countdown';
+    match.starts.forEach((start, i) => {
+      const config = PLAYERS[i];
+      const p = toPx(start.x, start.y);
+      if (counting) {
+        const glowR = cell * (1.3 + Math.sin(now * 6) * 0.15);
+        const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR);
+        glow.addColorStop(0, `${config.color}cc`);
+        glow.addColorStop(1, `${config.color}00`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.strokeStyle = config.color;
+      ctx.lineWidth = Math.max(1.5, cell * 0.04);
+      ctx.setLineDash([cell * 0.08, cell * 0.06]);
+      ctx.beginPath();
+      ctx.ellipse(p.x, p.y + cell * 0.12, cell * 0.36, cell * 0.22, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
     });
   }
 
@@ -584,8 +609,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
     if (fx.freeze > 0) drawIceBlock(x, centerY + f.size * 0.04, f.size * 0.4, fx.freeze);
     if (player.stuck > 0) drawSprite(getIconSprite('web', f.size * 0.85, dpr), x, centerY + f.size * 0.05, 1, 0.9);
 
-    // 보석을 만졌으면 머리 옆에 보석이 반짝이며 따라다님 (이제 집으로!)
-    if (player.hasGem) {
+    // 학교에 들렀으면 머리 옆에 책가방이 따라다님 (하교 중!)
+    if (player.visitedSchool) {
       const gx = x + f.size * 0.3;
       const gy = headY + f.size * 0.12 + Math.sin(now * 3 + player.index) * r * 0.08;
       const glow = ctx.createRadialGradient(gx, gy, 0, gx, gy, r * 0.75);
@@ -595,7 +620,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       ctx.beginPath();
       ctx.arc(gx, gy, r * 0.75, 0, Math.PI * 2);
       ctx.fill();
-      drawSprite(getIconSprite('treasure', r * 0.95, dpr), gx, gy);
+      drawSprite(getIconSprite('backpack', r * 1.05, dpr), gx, gy);
     }
 
     let badgeLift = 0;
@@ -763,7 +788,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.restore();
   }
 
-  // 카운트다운 동안 이번 판 정보를 보여 줍니다. (예: 1P 1 : 0 2P · 2판째 · 미로 17번)
+  // 카운트다운 동안 이번 판 정보와 할 일을 보여 줍니다. (예: 1P 1 : 0 2P · 2판째 · 미로 17번 · 학교 들렀다가 집으로!)
   function drawRoundInfo(m, match) {
     const parts = [];
     if (series && series.bestOf > 1) {
@@ -775,7 +800,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       );
     }
     if (match.mazeNumber) parts.push({ text: `${parts.length ? '  ·  ' : ''}미로 ${match.mazeNumber}번`, color: COLORS.ink });
-    if (parts.length === 0) return;
+    parts.push({ text: `${parts.length ? '  ·  ' : ''}학교 들렀다가 집으로!`, color: COLORS.ink });
     const fontSize = Math.min(44, Math.max(18, m.height * 0.045));
     ctx.save();
     ctx.font = `${fontSize}px ${UI_FONT}`;
@@ -805,7 +830,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.setLineDash([cell * 0.2, cell * 0.2]);
     ctx.globalAlpha = 0.6;
     for (const player of match.players) {
-      const path = shortestPath(match.maze, player, player.hasGem ? match.homeDist[player.index] : undefined);
+      const path = shortestPath(match.maze, player, player.visitedSchool ? match.homeDist[player.index] : undefined);
       ctx.strokeStyle = PLAYERS[player.index].color;
       ctx.beginPath();
       path.forEach((c, k) => {
@@ -914,7 +939,7 @@ function hash(n) {
  * - 벽: 생울타리. 바닥 그림자 → 아래로 보이는 옆면 → 윗면 → 빛 받는 윗부분 → 잎사귀 무늬 순서로 겹쳐서 입체감
  */
 function buildMazeImage(maze, traps, cell, dpr, garden) {
-  const { width, height, walls, starts, treasure } = maze;
+  const { width, height, walls, treasure } = maze;
   const thick = Math.max(4, cell * 0.26); // 생울타리 두께
   const depth = thick * 0.42; // 아래로 보이는 옆면 높이
   const pad = Math.ceil(thick / 2 + depth + thick * 0.6 + 2);
@@ -968,24 +993,7 @@ function buildMazeImage(maze, traps, cell, dpr, garden) {
     }
   }
 
-  // 출발점: 1P/2P 색 발판
-  starts.forEach((s, i) => {
-    const cx = (s.x + 0.5) * cell;
-    const cy = (s.y + 0.5) * cell;
-    g.fillStyle = PLAYERS[i].soft;
-    g.globalAlpha = 0.85;
-    g.beginPath();
-    g.ellipse(cx, cy + cell * 0.1, cell * 0.38, cell * 0.24, 0, 0, Math.PI * 2);
-    g.fill();
-    g.globalAlpha = 1;
-    g.strokeStyle = PLAYERS[i].color;
-    g.lineWidth = Math.max(1.5, cell * 0.04);
-    g.setLineDash([cell * 0.08, cell * 0.06]);
-    g.stroke();
-    g.setLineDash([]);
-  });
-
-  // 보물 자리: 금빛 받침
+  // 학교 자리: 금빛 운동장 (출발점과 집은 판마다 바뀌어서 미로 그림에 넣지 않고 따로 그림: drawHomes, drawStarts)
   {
     const cx = (treasure.x + 0.5) * cell;
     const cy = (treasure.y + 0.5) * cell;

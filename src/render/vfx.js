@@ -58,17 +58,13 @@ export function handleVfxEvent(vfx, event, match) {
       break;
     case 'trap':
       bubble(vfx, event.player, TRAPS[event.trap].shout, event.trap, event.trap);
-      if (event.trap === 'portal') {
-        burst(vfx, event.from.x, event.from.y, { colors: SWIRL, count: 14, speed: 3 });
-        burst(vfx, event.to.x, event.to.y, { colors: SWIRL, count: 14, speed: 3 });
-      }
       if (event.trap === 'ice') burst(vfx, at(event.player).x, at(event.player).y, { colors: SNOW, count: 8, speed: 2 });
       break;
     case 'boxRespawn':
       burst(vfx, event.x, event.y, { colors: SPARKLE, count: 6, speed: 1.5 });
       break;
-    case 'gem':
-      bubble(vfx, event.player, '보석 찜! 이제 집으로!', 'near', 'treasure');
+    case 'school':
+      bubble(vfx, event.player, '등교 완료! 이제 하교!', 'near', 'school');
       burst(vfx, event.x, event.y, { colors: SPARKLE, count: 22, speed: 4 });
       break;
     case 'near':

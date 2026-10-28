@@ -68,7 +68,7 @@ export function createAudio({ muted = false } = {}) {
     go: () => notes([784, 1047], { gap: 0.06, time: 0.3, type: 'square', gain: 0.12 }),
     bump: () => tone({ freq: 150, to: 90, time: 0.08, type: 'triangle', gain: 0.2 }),
     pickup: () => notes([660, 990], { gap: 0.07, time: 0.12, type: 'triangle', gain: 0.22 }),
-    gem: () => notes([784, 988, 1175, 1568], { gap: 0.07, time: 0.2, type: 'triangle', gain: 0.2 }),
+    school: () => notes([659, 523, 587, 392], { gap: 0.16, time: 0.3, type: 'triangle', gain: 0.2 }), // 딩동댕동 학교 종
     bagFull: () => tone({ freq: 190, time: 0.2, type: 'sawtooth', gain: 0.1 }),
     shoot: () => noise({ time: 0.3, freq: 500, to: 3200, gain: 0.14 }),
     speedUp: () => tone({ freq: 380, to: 1300, time: 0.3, type: 'sawtooth', gain: 0.1 }),
@@ -80,10 +80,6 @@ export function createAudio({ muted = false } = {}) {
     dark: () => tone({ freq: 170, to: 55, time: 0.65, type: 'sawtooth', gain: 0.16 }),
     immune: () => tone({ freq: 280, to: 640, time: 0.16, type: 'square', gain: 0.1 }),
     web: () => noise({ time: 0.28, freq: 380, type: 'lowpass', gain: 0.3 }),
-    portal: () => {
-      tone({ freq: 300, to: 1500, time: 0.32, gain: 0.18 });
-      tone({ freq: 1500, to: 300, time: 0.32, gain: 0.14, delay: 0.28 });
-    },
     ice: () => noise({ time: 0.4, freq: 2600, to: 700, gain: 0.12 }),
     respawn: () => tone({ freq: 880, time: 0.06, gain: 0.05 }),
     heartbeat: () => {

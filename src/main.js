@@ -362,7 +362,7 @@ function soundFor(event) {
     case 'countdown':
     case 'go':
     case 'pickup':
-    case 'gem':
+    case 'school':
     case 'bagFull':
     case 'immune':
       return event.type;
@@ -396,7 +396,7 @@ function processEvents(dt) {
     if (player.bump && player.bump !== app.bumps[i]) audio.play('bump');
     app.bumps[i] = player.bump;
   });
-  // 누군가 보석을 들고 집 근처에 오면 두근두근
+  // 누군가 학교에 들렀다가 집 근처에 오면 두근두근
   if (match.phase === 'playing' && match.near.some(Boolean)) {
     app.heartbeatIn -= dt;
     if (app.heartbeatIn <= 0) {
