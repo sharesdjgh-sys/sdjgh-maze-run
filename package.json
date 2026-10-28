@@ -1,0 +1,26 @@
+{
+  "name": "lifeprof-maze-run",
+  "private": true,
+  "version": "1.0.0",
+  "description": "귀염뽀짝 미로 레이스 — 2인 로컬 대결 미로 웹게임",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:offline": "vite build --mode offline",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "characters": "node scripts/build-characters.mjs"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.5",
+    "vite": "^8.3.5",
+    "vite-plugin-pwa": "^2.0.0",
+    "vite-plugin-singlefile": "^2.3.4",
+    "vitest": "^4.1.11"
+  },
+  "dependencies": {
+    "@fontsource/jua": "^5.3.0"
+  }
+}

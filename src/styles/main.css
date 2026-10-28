@@ -1,0 +1,628 @@
+/* 1P/2P 색은 main.js가 config.js 값으로 덮어씁니다. */
+:root {
+  --p1: #ff6b81;
+  --p1-soft: #ffd6dd;
+  --p2: #3fa7f5;
+  --p2-soft: #cde8ff;
+  --ink: #4a3b5c;
+  --ink-soft: #7d6d92;
+  --wall: #6b5b95;
+  --lilac: #f3edfc;
+  font-family: 'Jua', 'Malgun Gothic', 'Apple SD Gothic Neo', sans-serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #fff4f7;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  display: block;
+}
+
+.p1 {
+  --player: var(--p1);
+  --player-soft: var(--p1-soft);
+}
+
+.p2 {
+  --player: var(--p2);
+  --player-soft: var(--p2-soft);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.7em;
+  padding: 0.05em 0.4em;
+  border: 2px solid var(--ink-soft);
+  border-bottom-width: 4px;
+  border-radius: 0.45em;
+  background: #fff;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.85em;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.05em 0.55em;
+  border-radius: 999px;
+  background: var(--player, var(--wall));
+  color: #fff;
+}
+
+button {
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+#sound-toggle {
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 0 rgba(107, 91, 149, 0.25);
+  font-size: 20px;
+}
+
+/* ── 메뉴 창 ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  place-items: center;
+  padding: 16px;
+  background: rgba(74, 59, 92, 0.32);
+}
+
+#overlay.show {
+  display: grid;
+  animation: fade-in 0.25s ease both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+#overlay.static,
+#overlay.static .card {
+  animation: none;
+}
+
+.card {
+  max-width: min(94vw, 780px);
+  max-height: 94vh;
+  overflow: auto;
+  padding: clamp(18px, 2.6vw, 38px) clamp(22px, 3.6vw, 52px);
+  border-radius: 28px;
+  background: #fff;
+  box-shadow:
+    0 10px 0 rgba(107, 91, 149, 0.25),
+    0 24px 60px rgba(74, 59, 92, 0.25);
+  text-align: center;
+  animation: pop-in 0.35s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  animation-delay: var(--enter-delay, 0ms);
+}
+
+.card h2 {
+  margin: 0.1em 0 0.4em;
+  font-size: clamp(26px, 3.6vw, 44px);
+  font-weight: normal;
+}
+
+.card h3 {
+  margin: 0.8em 0 0.4em;
+  font-size: clamp(17px, 1.8vw, 23px);
+  font-weight: normal;
+}
+
+.card h3 small {
+  color: var(--ink-soft);
+  font-size: 0.75em;
+}
+
+.card p {
+  font-size: clamp(15px, 1.7vw, 21px);
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.menu.row {
+  flex-direction: row;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.6em;
+}
+
+.menu button,
+.primary,
+.toggle,
+.ready-btn {
+  padding: 0.5em 1.3em;
+  border-radius: 999px;
+  background: var(--lilac);
+  box-shadow: 0 5px 0 rgba(107, 91, 149, 0.25);
+  font-size: clamp(17px, 1.9vw, 24px);
+  transition: transform 0.1s;
+}
+
+.menu button:hover,
+.primary:hover,
+.toggle:hover,
+.ready-btn:hover {
+  transform: translateY(-2px);
+}
+
+.menu button:active,
+.primary:active,
+.toggle:active,
+.ready-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 rgba(107, 91, 149, 0.25);
+}
+
+.menu .primary,
+.primary {
+  background: var(--p1);
+  color: #fff;
+}
+
+.note {
+  margin: 1em 0 0;
+  color: var(--ink-soft);
+  font-size: clamp(13px, 1.3vw, 16px) !important;
+}
+
+/* 타이틀 */
+.title-chars {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.3em;
+  margin: 0;
+  font-size: clamp(40px, 5.5vw, 68px) !important;
+}
+
+.title-chars > * {
+  display: inline-block;
+  animation: bob 1.6s ease-in-out infinite;
+}
+
+.title-chars > :nth-child(2) {
+  margin-bottom: 0.2em;
+  animation-delay: 0.25s;
+}
+
+.title-chars > :nth-child(3) {
+  animation-delay: 0.5s;
+}
+
+.title-avatar {
+  width: 2.1em;
+  height: 2.1em;
+  object-fit: contain;
+}
+
+.logo {
+  margin: 0.1em 0 0.15em;
+  color: var(--wall);
+  font-size: clamp(40px, 6.5vw, 80px);
+  font-weight: normal;
+  line-height: 1.05;
+}
+
+.logo span {
+  color: var(--p1);
+}
+
+.subtitle {
+  margin: 0 0 1em;
+  color: var(--ink-soft);
+}
+
+/* 난이도 버튼 */
+.difficulty {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 5.6em;
+  padding: 0.45em 0.8em 0.35em;
+  border: 3px solid transparent;
+  border-radius: 16px;
+  background: var(--lilac);
+  font-size: clamp(16px, 1.7vw, 21px);
+}
+
+.choice small {
+  color: var(--ink-soft);
+  font-size: 0.75em;
+}
+
+.choice kbd {
+  position: absolute;
+  top: -0.7em;
+  left: -0.5em;
+  font-size: 0.65em;
+}
+
+.choice.selected {
+  border-color: var(--wall);
+  background: #e6dbff;
+}
+
+/* 준비 화면 */
+.select-card {
+  max-width: min(96vw, 1180px);
+}
+
+.select-layout {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 0.8fr) 1fr;
+  gap: clamp(10px, 2vw, 24px);
+  align-items: start;
+}
+
+.select-panel {
+  padding: 12px 14px 16px;
+  border: 4px solid var(--player-soft);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--player-soft) 35%, white);
+  transition: border-color 0.2s;
+}
+
+.select-panel.ready {
+  border-color: var(--player);
+}
+
+.select-panel h3 {
+  margin: 0 0 0.5em;
+}
+
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.char {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.3em 0 0.2em;
+  border: 3px solid transparent;
+  border-radius: 14px;
+  background: #fff;
+  font-size: clamp(13px, 1.3vw, 16px);
+}
+
+.char-img {
+  width: clamp(40px, 4.4vw, 64px);
+  height: clamp(40px, 4.4vw, 64px);
+  object-fit: contain;
+}
+
+.char.selected {
+  border-color: var(--player);
+  box-shadow: 0 4px 0 var(--player-soft);
+  transform: translateY(-2px);
+}
+
+.char.taken {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.select-keys {
+  margin: 0.7em 0;
+  font-size: clamp(12px, 1.2vw, 15px) !important;
+}
+
+.ready-btn {
+  width: 100%;
+  background: #fff;
+}
+
+.select-panel.ready .ready-btn {
+  background: var(--player);
+  color: #fff;
+}
+
+.select-options h3:first-child {
+  margin-top: 0;
+}
+
+.toggle {
+  width: 100%;
+  font-size: clamp(15px, 1.6vw, 20px);
+}
+
+/* 조작법 */
+.howto-card {
+  width: min(96vw, 1120px);
+  max-width: none;
+  text-align: left;
+}
+
+.howto-card h2,
+.howto-card .menu {
+  text-align: center;
+}
+
+.howto-goal {
+  margin: 0 0 0.6em;
+  text-align: center;
+}
+
+.howto-players {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.howto-player {
+  padding: 8px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--player-soft) 45%, white);
+}
+
+.howto-player p {
+  margin: 0.35em 0;
+}
+
+.howto-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.howto-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 10px;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 14px;
+  background: var(--lilac);
+}
+
+.howto-list .big {
+  grid-row: span 2;
+  font-size: 32px;
+}
+
+.howto-list small {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+/* 결과 */
+.result-hero {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.2em;
+  font-size: clamp(60px, 9vw, 110px);
+  line-height: 1.1;
+  animation: bob 1.2s ease-in-out infinite;
+}
+
+.hero-avatar {
+  width: 1.35em;
+  height: 1.35em;
+  object-fit: contain;
+}
+
+.result-time {
+  margin: 0.2em 0;
+}
+
+.result-score {
+  margin: 0.3em 0;
+  font-size: clamp(22px, 2.6vw, 32px) !important;
+}
+
+.result-score small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.55em;
+}
+
+.stats {
+  margin: 0.5em auto 0;
+  border-spacing: 18px 4px;
+  font-size: clamp(15px, 1.7vw, 21px);
+}
+
+.stats th {
+  font-weight: normal;
+}
+
+.stats tbody th {
+  color: var(--ink-soft);
+  text-align: right;
+}
+
+/* 디버그 (?debug=1) */
+#debug {
+  position: fixed;
+  left: 8px;
+  bottom: 8px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font: 12px/1.4 Consolas, ui-monospace, monospace;
+  pointer-events: none;
+}
+
+#debug[hidden] {
+  display: none;
+}
+
+/* 노트북처럼 화면 높이가 낮을 때: 메뉴 창을 촘촘하게 */
+@media (max-height: 820px) {
+  .card {
+    padding: 14px 26px;
+    border-radius: 22px;
+  }
+
+  .card h2 {
+    margin-bottom: 0.25em;
+    font-size: 28px;
+  }
+
+  .card h3 {
+    margin: 0.5em 0 0.3em;
+    font-size: 17px;
+  }
+
+  .card p {
+    margin: 0.35em 0;
+    font-size: 15px;
+  }
+
+  .menu {
+    gap: 8px;
+  }
+
+  .menu button,
+  .primary,
+  .toggle,
+  .ready-btn {
+    padding: 0.35em 1.1em;
+    font-size: 17px;
+  }
+
+  .title-chars {
+    font-size: 40px !important;
+  }
+
+  .logo {
+    font-size: 50px;
+  }
+
+  .result-hero {
+    font-size: 54px;
+  }
+
+  .result-score {
+    font-size: 22px !important;
+  }
+
+  .stats {
+    border-spacing: 14px 1px;
+    font-size: 15px;
+  }
+
+  .char-img {
+    width: 34px;
+    height: 34px;
+  }
+
+  .char small {
+    font-size: 11px;
+  }
+
+  .char-grid {
+    gap: 5px;
+  }
+
+  .howto-list .big {
+    font-size: 26px;
+  }
+
+  .howto-list small {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 900px) {
+  .select-layout {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .select-options {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
