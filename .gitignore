@@ -4,3 +4,4 @@ dist-offline/
 .vercel/
 *.log
 .DS_Store
+.playwright-mcp/

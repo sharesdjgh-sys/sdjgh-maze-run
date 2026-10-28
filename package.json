@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "characters": "node scripts/build-characters.mjs"
+    "characters": "node scripts/build-characters.mjs",
+    "maze-pool": "node scripts/build-maze-pool.mjs",
+    "icons": "node scripts/build-icons.mjs"
   },
   "devDependencies": {
     "sharp": "^0.35.5",

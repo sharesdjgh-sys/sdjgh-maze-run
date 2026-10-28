@@ -1,0 +1,299 @@
+/* 정원 타이틀: 풍경을 가리지 않고 제목과 메뉴를 장면 안에 배치합니다. */
+#overlay:has(.title-screen) {
+  padding: 0;
+  background: transparent;
+}
+body:has(.title-screen) #sound-toggle { display: none; }
+
+.title-screen {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  height: 100dvh;
+  min-height: 420px;
+  overflow: hidden;
+  color: #314f3b;
+  text-align: center;
+  word-break: keep-all;
+}
+.title-screen::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 43%, #fff3d92b 0%, transparent 52%),
+    linear-gradient(0deg, #1836299c, transparent 16%, transparent 88%, #203c3726);
+}
+
+.title-tools {
+  position: absolute;
+  z-index: 3;
+  top: 24px;
+  right: 28px;
+  display: flex;
+  gap: 10px;
+}
+.title-tools button {
+  padding: 9px 15px;
+  border: 1px solid #f3e1ad96;
+  border-radius: 8px;
+  background: #294b39c9;
+  color: #fff1cf;
+  box-shadow: inset 0 1px 0 #fff5cc24, 0 3px 7px #213d3229;
+  font-size: 15px;
+}
+.title-screen kbd {
+  min-width: 1.5em;
+  margin-left: 10px;
+  padding: 2px 6px;
+  border: 1px solid currentColor;
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: #152c2624;
+  color: inherit;
+  font-size: 0.66em;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+.title-tools kbd { opacity: 0.7; }
+
+.title-brand {
+  position: absolute;
+  z-index: 2;
+  top: clamp(75px, 11vh, 126px);
+  left: 50%;
+  width: min(850px, 92%);
+  transform: translateX(-50%);
+}
+.title-eyebrow {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 20px;
+  font-size: clamp(13px, 1.2vw, 17px);
+  color: #526343;
+  text-shadow: 0 1px 4px #fff5dc;
+  letter-spacing: 0.12em;
+}
+.title-eyebrow span {
+  width: 46px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8b955d);
+}
+.title-eyebrow span:last-child { transform: rotate(180deg); }
+.title-wordmark {
+  margin: 0;
+  color: #ffedbc;
+  font-size: clamp(37px, 4.4vw, 64px);
+  font-weight: normal;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+  -webkit-text-stroke: 5px #365641;
+  paint-order: stroke fill;
+  text-shadow: 0 5px 0 #213f31, 0 9px 15px #364e3d38;
+  text-wrap: balance;
+}
+.title-wordmark span {
+  display: block;
+  margin-top: 2px;
+  color: #fff5d8;
+  font-size: clamp(68px, 8vw, 116px);
+  -webkit-text-stroke-width: 8px;
+  text-shadow: 0 7px 0 #294b36, 0 12px 16px #273b3b3b;
+}
+.title-description {
+  margin: 25px 0 0;
+  color: #3b5944;
+  font-size: clamp(16px, 1.55vw, 22px);
+  line-height: 1.5;
+  text-shadow: 0 1px 7px #fff7e5, 0 0 18px #fff9e2;
+}
+
+.title-companion {
+  position: absolute;
+  z-index: 1;
+  bottom: clamp(110px, 15vh, 165px);
+  margin: 0;
+  width: clamp(200px, 23vw, 330px);
+}
+.title-companion-left { right: calc(50% + 165px); transform: rotate(-5deg); }
+.title-companion-right { left: calc(50% + 165px); transform: rotate(5deg); }
+.title-companion-art { position: relative; }
+.title-companion-art::before {
+  content: '';
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: 4%;
+  height: 9%;
+  border-radius: 50%;
+  background: #2a493a55;
+  filter: blur(9px);
+}
+.title-character {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 9px #33463030);
+}
+.title-companion figcaption {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 7px 16px 7px 8px;
+  border: 1px solid #ebd99b;
+  border-radius: 7px;
+  background: #fff1cfe6;
+  color: #4c6048;
+  box-shadow: 0 3px 0 #6c794c5e;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  transform: rotate(5deg);
+}
+.title-companion-right figcaption { transform: rotate(-5deg); }
+.title-companion figcaption b {
+  padding: 3px 6px;
+  border-radius: 4px;
+  background: #526c49;
+  color: #fff3ce;
+  font-weight: normal;
+  letter-spacing: 0;
+}
+.title-actions {
+  position: absolute;
+  z-index: 3;
+  bottom: clamp(120px, 17vh, 182px);
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 310px;
+  transform: translateX(-50%);
+}
+.title-treasure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  height: 66px;
+  margin-bottom: 4px;
+}
+.title-treasure span {
+  width: 55px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #b59855c9);
+}
+.title-treasure span:last-child { transform: rotate(180deg); }
+.title-treasure-image {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 16px #fff4cc);
+}
+.title-start {
+  position: relative;
+  width: 100%;
+  min-height: 72px;
+  border: 2px solid #e2c47d;
+  border-radius: 13px;
+  background: linear-gradient(#5f8558 0%, #3e6948 48%, #31563e 100%);
+  box-shadow: inset 0 0 0 3px #244a3a, inset 0 0 0 4px #d4bd7599,
+    inset 0 5px 9px #f5f0ad25, 0 6px 0 #233e2f, 0 8px 0 #b6a46a, 0 16px 22px #2b4d3d40;
+  color: #fff0c1;
+  font-size: 29px;
+  text-shadow: 0 2px 0 #24432e;
+}
+.title-start::before, .title-start::after {
+  content: '◆';
+  position: absolute;
+  top: 50%;
+  color: #d7bd7b;
+  font-size: 9px;
+  transform: translateY(-50%);
+}
+.title-start::before { left: 16px; }
+.title-start::after { right: 16px; }
+.title-start kbd { color: #e8d49c; font-size: 13px; margin-left: 16px; }
+.title-howto {
+  min-width: 174px;
+  min-height: 44px;
+  padding: 8px 22px;
+  border: 1px solid #ad945c;
+  border-radius: 9px;
+  background: linear-gradient(#fff1cc, #e5d29e);
+  color: #4b6345;
+  box-shadow: inset 0 0 0 2px #fff3cc8c, 0 3px 0 #7b8054, 0 7px 10px #2b4d3d22;
+  font-size: 18px;
+}
+.title-screen button { transition: filter 160ms, translate 160ms; }
+.title-screen button:hover { filter: brightness(1.1); translate: 0 -2px; }
+.title-screen button:active { translate: 0 3px; filter: brightness(0.96); }
+.title-screen button:focus-visible { outline: 3px solid #fff0b2; outline-offset: 6px; }
+
+.title-footer {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  width: min(700px, 92%);
+  transform: translateX(-50%);
+  color: #fff2cf;
+  text-shadow: 0 2px 4px #1b362c;
+}
+.title-footer p { margin: 0; font-size: 15px; line-height: 1.6; }
+.title-footer .inline-avatar { width: 25px; height: 25px; object-fit: contain; vertical-align: middle; }
+
+@media (max-height: 720px) and (min-width: 701px) {
+  .title-brand { top: 48px; }
+  .title-eyebrow { margin-bottom: 12px; }
+  .title-wordmark { font-size: 42px; }
+  .title-wordmark span { font-size: 82px; }
+  .title-description { margin-top: 16px; font-size: 17px; }
+  .title-actions { bottom: 80px; gap: 13px; width: 275px; }
+  .title-treasure { height: 43px; margin-bottom: 0; }
+  .title-treasure-image { width: 44px; height: 44px; }
+  .title-start { min-height: 62px; font-size: 25px; }
+  .title-companion { width: 240px; bottom: 75px; }
+  .title-companion-left { right: calc(50% + 155px); }
+  .title-companion-right { left: calc(50% + 155px); }
+}
+@media (max-width: 700px) {
+  .title-tools { top: 16px; right: 16px; gap: 7px; }
+  .title-tools button { padding: 7px 10px; font-size: 12px; }
+  .title-tools kbd { margin-left: 5px; }
+  .title-brand { top: 14vh; width: 96%; }
+  .title-eyebrow { font-size: 12px; gap: 9px; letter-spacing: 0.03em; margin-bottom: 15px; }
+  .title-eyebrow span { width: 22px; }
+  .title-wordmark { font-size: 38px; -webkit-text-stroke-width: 4px; }
+  .title-wordmark span { font-size: clamp(54px, 12vw, 80px); -webkit-text-stroke-width: 6px; }
+  .title-description { margin-top: 19px; font-size: 15px; }
+  .title-companion { width: clamp(135px, 32vw, 210px); bottom: 31vh; }
+  .title-companion-left { right: 50%; margin-right: 4vw; }
+  .title-companion-right { left: 50%; margin-left: 4vw; }
+  .title-companion figcaption { font-size: 10px; padding: 4px 9px 4px 5px; gap: 6px; }
+  .title-actions { bottom: 11vh; gap: 12px; width: min(280px, 78vw); }
+  .title-treasure { display: none; }
+  .title-start { min-height: 62px; font-size: 25px; }
+  .title-howto { min-height: 39px; font-size: 16px; }
+  .title-footer { bottom: 18px; }
+  .title-footer p { font-size: 12px; }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+  .title-brand { top: 20px; }
+  .title-eyebrow { display: none; }
+  .title-wordmark { font-size: 31px; }
+  .title-wordmark span { font-size: 62px; }
+  .title-description { margin-top: 10px; font-size: 15px; }
+  .title-actions { bottom: 53px; gap: 10px; }
+  .title-treasure { display: none; }
+  .title-start { min-height: 53px; font-size: 23px; }
+  .title-howto { min-height: 35px; font-size: 15px; padding: 5px 18px; }
+  .title-companion { width: 190px; bottom: 55px; }
+  .title-footer { bottom: 12px; }
+  .title-tools { top: 14px; right: 14px; }
+}

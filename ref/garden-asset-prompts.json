@@ -1,0 +1,17 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "file": "backdrop.webp",
+      "prompt": "Use case: stylized-concept. Asset type: widescreen background illustration for a cute two-player animal maze game. A premium cozy storybook 3D clay diorama of an enchanted garden labyrinth at warm sunrise. Wide landscape 3:2 composition, lush sculpted rounded emerald hedges and tiny cream flowers framing the left and right edges, curving sandy ochre paths, little mushrooms, weathered stone garden arches in the distant corners, layers of soft sage forest and mint sky, distant sunbeams. The central 40 percent is a quiet pale misty clearing left empty for a menu overlay. No characters, no text, no letters, no UI, no logos. Rich tactile materials, soft ambient occlusion, polished family-friendly game art, inviting painterly details with restrained peach and gold highlights. Not a screenshot or mockup."
+    },
+    {
+      "file": "floor.webp",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square ground texture for a top-down cozy animal garden maze game. Orthographic directly overhead view, fills the entire square edge to edge. Warm pale sandy ochre garden footpath, finely hand-painted packed earth, subtle tiny pebbles and fine organic grain, occasional faint warm stone flecks. Mostly quiet light beige readable ground, gentle broad color variation. Premium storybook 3D clay game aesthetic. Uniform ambient lighting, no directional shadow, no border, no grass, no large rocks, no objects, no text. Tileable on all four edges. This is a material texture not a scene."
+    },
+    {
+      "file": "hedge.webp",
+      "prompt": "Use case: stylized-concept. Asset type: seamless square foliage material for the top surface of narrow garden labyrinth hedges in a top-down cozy animal game. Direct orthographic overhead macro view of dense sculpted boxwood foliage filling entire square edge to edge. Many small overlapping rounded leaves, rich sage and emerald greens, fresh lime leaf tips, delicate clusters, tactile clay storybook game art. Tiny restrained cream flower buds very sparsely scattered, soft ambient occlusion between leaves. Flat uniform lighting, no horizon, no perspective, no pots, no trunks, no dirt, no borders, no text, no isolated bush silhouette. Tileable in all directions; this will be masked to winding hedge walls."
+    }
+  ]
+}

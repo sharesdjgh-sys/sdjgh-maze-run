@@ -13,8 +13,20 @@ import { markSeen, visionFor, visionRadius } from './vision.js';
 
 const EPSILON = 1e-9;
 
-/** 새 판을 만듭니다. 미로를 만들지 못하면 MazeGenerationError를 던집니다. */
-export function createMatch({ difficulty = 'easy', seed = 1, characters = ['cat', 'dog'], fog = true } = {}) {
+/**
+ * 새 판을 만듭니다. 미로를 만들지 못하면 MazeGenerationError를 던집니다.
+ * seed: 미로·상자·함정 배치를 정하는 번호 (같은 seed = 같은 미로)
+ * itemSeed: 상자에서 나오는 아이템을 정하는 번호. 같은 미로라도 판마다 아이템이 다르게 나오도록 따로 둡니다.
+ * mazeNumber: 미로 목록(src/data/mazePool.js)에서 몇 번째 미로인지 (화면 표시용)
+ */
+export function createMatch({
+  difficulty = 'easy',
+  seed = 1,
+  itemSeed = seed,
+  mazeNumber = null,
+  characters = ['cat', 'dog'],
+  fog = true,
+} = {}) {
   const diff = DIFFICULTIES[difficulty];
   if (!diff) throw new RangeError(`알 수 없는 난이도예요: ${difficulty}`);
   const rng = createRng(seed);
@@ -23,7 +35,19 @@ export function createMatch({ difficulty = 'easy', seed = 1, characters = ['cat'
     rng,
   );
   const { boxes, traps } = placeSpecials(maze, diff, rng);
-  return assembleMatch({ difficulty, seed, fog, attempts, maze, boxes, traps, rng, characters, vision: visionFor(diff) });
+  return assembleMatch({
+    difficulty,
+    seed,
+    mazeNumber,
+    fog,
+    attempts,
+    maze,
+    boxes,
+    traps,
+    rng: createRng(itemSeed ^ 0x5bd1e995),
+    characters,
+    vision: visionFor(diff),
+  });
 }
 
 /** 미로·상자·함정이 준비된 상태에서 판을 조립합니다. (테스트에서 직접 만든 미로로 판을 만들 때도 사용) */

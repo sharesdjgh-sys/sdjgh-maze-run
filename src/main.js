@@ -3,6 +3,7 @@
 
 import '@fontsource/jua';
 import './styles/main.css';
+import './styles/title.css';
 import {
   DEFAULT_SETTINGS,
   DIFFICULTIES,
@@ -18,11 +19,13 @@ import { createAudio } from './core/audio.js';
 import { itemSlotOf, screenDirOf, toCommand } from './core/controls.js';
 import { createInput } from './core/input.js';
 import { startLoop } from './core/loop.js';
+import { createMazeDeck } from './core/mazeDeck.js';
 import { randomSeed } from './core/rng.js';
 import { load, save } from './core/storage.js';
 import { distanceAt } from './game/maze.js';
 import { createMatch, pauseMatch, resumeMatch, updateMatch } from './game/match.js';
 import { createSeries, recordResult, seriesWinner, startNextRound } from './game/series.js';
+import { MAZE_POOL } from './data/mazePool.js';
 import { CHARACTERS, preloadCharacters } from './render/characters.js';
 import { createRenderer } from './render/renderer.js';
 import { createVfx, handleVfxEvent, updateVfx } from './render/vfx.js';
@@ -68,6 +71,8 @@ const overlay = createOverlay(document.getElementById('overlay'), (action) => {
 });
 const input = createInput({ onBlur: () => runAction('pause') });
 let vfx = createVfx();
+const mazeDeck = createMazeDeck(MAZE_POOL);
+const backdrop = createMatch({ difficulty: 'easy', seed: MAZE_POOL.easy[0].seed });
 
 const soundButton = document.getElementById('sound-toggle');
 soundButton.addEventListener('click', () => {
@@ -127,7 +132,7 @@ function setScene(scene) {
 
 function clearGame() {
   app.match = null;
-  renderer.setMaze(null);
+  renderer.setMaze(backdrop.maze, backdrop.traps); // 메뉴 뒤에는 장식용 미로를 깔아 둠
 }
 
 function showTitle() {
@@ -160,9 +165,13 @@ function startSeries() {
 
 function startMatch() {
   try {
+    // 미로는 골라 둔 목록에서 섞어서 꺼냅니다. (?seed=로 정하면 그 미로)
+    const pick = FIXED_SEED !== null ? { seed: FIXED_SEED, number: null } : mazeDeck.next(settings.difficulty);
     app.match = createMatch({
       difficulty: settings.difficulty,
-      seed: FIXED_SEED ?? randomSeed(),
+      seed: pick.seed,
+      mazeNumber: pick.number,
+      itemSeed: randomSeed(),
       characters: settings.characters,
       fog: settings.fog,
     });
@@ -173,7 +182,7 @@ function startMatch() {
     setScene('error');
     return;
   }
-  if (DEBUG) console.info(`[미로] seed=${app.match.seed} 생성 시도=${app.match.attempts}회`);
+  if (DEBUG) console.info(`[미로] ${app.match.mazeNumber ?? '-'}번 seed=${app.match.seed} 생성 시도=${app.match.attempts}회`);
   vfx = createVfx();
   app.heartbeatIn = 0;
   renderer.setMaze(app.match.maze, app.match.traps);
@@ -436,7 +445,7 @@ function updateDebugBox(nowMs) {
   fpsSince = nowMs;
   const m = app.match;
   debugBox.textContent = m
-    ? `FPS ${fps} · seed ${m.seed} · ${m.maze.width}×${m.maze.height} · 최단 ${distanceAt(m.maze, 0, 0)}칸 · 생성 ${m.attempts}회 · ${m.phase}`
+    ? `FPS ${fps} · 미로 ${m.mazeNumber ?? '-'}번 · seed ${m.seed} · ${m.maze.width}×${m.maze.height} · 최단 ${distanceAt(m.maze, 0, 0)}칸 · 생성 ${m.attempts}회 · ${m.phase}`
     : `FPS ${fps} · ${app.scene}`;
 }
 

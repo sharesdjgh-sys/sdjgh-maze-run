@@ -2,7 +2,7 @@
 
 import { DIFFICULTIES, PLAYERS } from '../config.js';
 import { seriesWinner } from '../game/series.js';
-import { characterImg, getCharacter } from '../render/characters.js';
+import { characterImg, getCharacter, iconImg } from '../render/characters.js';
 import { formatTime } from './format.js';
 
 export function resultScreen({ match, series, idleLeft }) {
@@ -17,7 +17,7 @@ export function resultScreen({ match, series, idleLeft }) {
   let headline;
   let heroHtml;
   if (final && series.bestOf > 1) {
-    heroHtml = `<span>🏆</span>${hero(characters[champion].id)}`;
+    heroHtml = `${iconImg('trophy', 'hero-avatar')}${hero(characters[champion].id)}`;
     headline = `${badge(champion)} ${characters[champion].name} 최종 승리!`;
   } else if (result.winner === null) {
     heroHtml = characters.map((c) => hero(c.id)).join('');
@@ -47,7 +47,7 @@ export function resultScreen({ match, series, idleLeft }) {
     <div class="card result-card">
       <div class="result-hero">${heroHtml}</div>
       <h2>${headline}</h2>
-      <p class="result-time">⏱ ${formatTime(result.time)} · ${diff.label} ${diff.width}×${diff.height}${match.fog ? ' · 안개' : ''}</p>
+      <p class="result-time">⏱ ${formatTime(result.time)} · ${diff.label}${match.mazeNumber ? ` 미로 ${match.mazeNumber}번` : ` ${diff.width}×${diff.height}`}${match.fog ? ' · 안개' : ''}</p>
       ${score}
       <table class="stats">
         <thead><tr><th></th>${[0, 1].map((i) => `<th>${badge(i)} ${characterImg(characters[i].id, 'inline-avatar')}</th>`).join('')}</tr></thead>

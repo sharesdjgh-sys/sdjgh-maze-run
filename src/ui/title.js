@@ -1,34 +1,48 @@
-// 타이틀 화면
-
-import { CHARACTERS, TREASURE_EMOJI, characterImg } from '../render/characters.js';
+// 정원 풍경 위에 놓이는 타이틀 화면
+import { CHARACTERS, characterImg, iconImg } from '../render/characters.js';
 
 /** record: 오늘의 전적 { matches, wins: { 캐릭터id: 승수 } } */
 export function titleScreen({ settings, muted, record }) {
   const [c1, c2] = settings.characters;
   return `
-    <div class="card title-card">
-      <p class="title-chars">${characterImg(c1, 'title-avatar')}<span>${TREASURE_EMOJI}</span>${characterImg(c2, 'title-avatar')}</p>
-      <h1 class="logo">귀염뽀짝<br /><span>미로 레이스</span></h1>
-      <p class="subtitle">안개 낀 미로에서 가운데 보물을 먼저 차지하면 승리!</p>
-      <div class="menu">
-        <button class="primary" data-action="setup">시작하기 <kbd>Enter</kbd></button>
-        <button data-action="howto">조작법 · 아이템 · 함정 <kbd>H</kbd></button>
-        <div class="menu row">
-          <button data-action="fullscreen">전체화면 <kbd>F</kbd></button>
-          <button data-action="mute">${muted ? '🔇 소리 꺼짐' : '🔊 소리 켜짐'} <kbd>M</kbd></button>
-        </div>
+    <main class="title-screen" aria-labelledby="garden-title">
+      <nav class="title-tools" aria-label="화면과 소리 설정">
+        <button data-action="fullscreen">전체화면 <kbd>F</kbd></button>
+        <button data-action="mute" aria-pressed="${!muted}">소리 ${muted ? '꺼짐' : '켜짐'} <kbd>M</kbd></button>
+      </nav>
+
+      <header class="title-brand">
+        <p class="title-eyebrow"><span></span>둘이서 떠나는 정원 속 보물찾기<span></span></p>
+        <h1 id="garden-title" class="title-wordmark">귀염뽀짝<span>미로 레이스</span></h1>
+        <p class="title-description">신비로운 미로 끝, 보물의 주인공은 누구?</p>
+      </header>
+
+      <figure class="title-companion title-companion-left">
+        <div class="title-companion-art">${characterImg(c1, 'title-character')}</div>
+        <figcaption><b>1P</b><span>W A S D</span></figcaption>
+      </figure>
+      <figure class="title-companion title-companion-right">
+        <div class="title-companion-art">${characterImg(c2, 'title-character')}</div>
+        <figcaption><b>2P</b><span>방향키</span></figcaption>
+      </figure>
+
+      <div class="title-actions">
+        <div class="title-treasure" aria-hidden="true"><span></span>${iconImg('treasure', 'title-treasure-image')}<span></span></div>
+        <button class="title-start" data-action="setup"><span>시작하기</span><kbd>Enter</kbd></button>
+        <button class="title-howto" data-action="howto">놀이 방법 <kbd>H</kbd></button>
       </div>
-      ${recordLine(record)}
-    </div>`;
+
+      <footer class="title-footer">${recordLine(record)}</footer>
+    </main>`;
 }
 
 function recordLine(record) {
   const known = Object.entries(record?.wins ?? {}).filter(([id]) => CHARACTERS.some((c) => c.id === id));
-  if (!record || record.matches === 0) return '<p class="note">한 컴퓨터에서 두 명이 키보드를 나눠 쓰는 대결 게임이에요</p>';
+  if (!record || record.matches === 0) return '<p>키보드 하나, 친구 둘. 함께 보물을 찾아 떠나요!</p>';
   const top = known
     .sort((a, b) => b[1] - a[1])
     .slice(0, 4)
     .map(([id, wins]) => `${characterImg(id, 'inline-avatar')} ${wins}승`)
     .join(' · ');
-  return `<p class="note">오늘의 전적 (${record.matches}판)${top ? ` · ${top}` : ''}</p>`;
+  return `<p>오늘의 전적 (${record.matches}판)${top ? ` · ${top}` : ''}</p>`;
 }

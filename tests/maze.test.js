@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DIFFICULTIES, MAZE } from '../src/config.js';
 import { createRng } from '../src/core/rng.js';
+import { greedyWalk } from '../src/game/analysis.js';
 import { DIR_LIST } from '../src/game/dir.js';
 import {
   MazeGenerationError,
@@ -99,30 +100,6 @@ describe.each(Object.entries(DIFFICULTIES))('%s 미로', (_, diff) => {
     expect(maze.treasure).toEqual({ x: (diff.width - 1) / 2, y: (diff.height - 1) / 2 });
   });
 });
-
-// 안개 속에서 '보물 쪽으로만' 가려는 사람 흉내: 갈림길마다 보물에 가까워지는 쪽부터 가 보고, 막히면 되돌아옴.
-// 걸은 칸 수(되돌아온 칸 포함)를 돌려줍니다.
-function greedyWalk(maze) {
-  const { width, treasure } = maze;
-  const seen = new Uint8Array(width * maze.height);
-  let steps = 0;
-  const far = (x, y) => Math.abs(x - treasure.x) + Math.abs(y - treasure.y);
-  function go(x, y) {
-    seen[y * width + x] = 1;
-    if (x === treasure.x && y === treasure.y) return true;
-    const dirs = DIR_LIST.filter((d) => canMove(maze, x, y, d.name) && !seen[(y + d.dy) * width + x + d.dx]).sort(
-      (a, b) => far(x + a.dx, y + a.dy) - far(x + b.dx, y + b.dy),
-    );
-    for (const d of dirs) {
-      steps++;
-      if (go(x + d.dx, y + d.dy)) return true;
-      steps++;
-    }
-    return false;
-  }
-  go(0, 0);
-  return steps;
-}
 
 describe('미로 난이도 (조작이 빠른 사람이 아니라 길을 잘 찾는 사람이 이기도록)', () => {
   it.each(Object.entries(DIFFICULTIES))('%s: 보물 쪽으로만 가면 평균적으로 최단 경로의 3배 넘게 헤맨다', (_, diff) => {

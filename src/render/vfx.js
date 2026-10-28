@@ -30,15 +30,15 @@ export function handleVfxEvent(vfx, event, match) {
   const at = (i) => match.players[i];
   switch (event.type) {
     case 'pickup':
-      bubble(vfx, event.player, `${ITEMS[event.item].emoji} 획득!`);
+      bubble(vfx, event.player, '획득!', 'normal', event.item);
       burst(vfx, event.x, event.y, { colors: SPARKLE, count: 12, speed: 3 });
       break;
     case 'bagFull':
-      bubble(vfx, event.player, '가방이 가득 찼어요!', 'warn');
+      bubble(vfx, event.player, '가방이 가득 찼어요!', 'warn', 'box');
       break;
     case 'effect': {
       const target = at(event.player);
-      bubble(vfx, event.player, ITEMS[event.item].shout, event.item);
+      bubble(vfx, event.player, ITEMS[event.item].shout, event.item, event.item);
       if (event.item === 'freeze') burst(vfx, target.x, target.y, { colors: SNOW, count: 16, speed: 2.5 });
       if (event.item === 'dark') burst(vfx, target.x, target.y, { colors: SMOKE, count: 18, speed: 2, size: 0.22 });
       if (event.item === 'speedUp') burst(vfx, target.x, target.y, { colors: SPARKLE, count: 10, speed: 3 });
@@ -48,7 +48,7 @@ export function handleVfxEvent(vfx, event, match) {
       break;
     }
     case 'immune':
-      bubble(vfx, event.player, '안 통해!');
+      bubble(vfx, event.player, '안 통해!', 'normal', event.item);
       break;
     case 'effectEnd':
       if (event.effect === 'freeze') {
@@ -57,7 +57,7 @@ export function handleVfxEvent(vfx, event, match) {
       }
       break;
     case 'trap':
-      bubble(vfx, event.player, TRAPS[event.trap].shout, event.trap);
+      bubble(vfx, event.player, TRAPS[event.trap].shout, event.trap, event.trap);
       if (event.trap === 'portal') {
         burst(vfx, event.from.x, event.from.y, { colors: SWIRL, count: 14, speed: 3 });
         burst(vfx, event.to.x, event.to.y, { colors: SWIRL, count: 14, speed: 3 });
@@ -68,15 +68,16 @@ export function handleVfxEvent(vfx, event, match) {
       burst(vfx, event.x, event.y, { colors: SPARKLE, count: 6, speed: 1.5 });
       break;
     case 'near':
-      bubble(vfx, event.player, '보물이 코앞이야!', 'near');
+      bubble(vfx, event.player, '보물이 코앞이야!', 'near', 'treasure');
       break;
   }
 }
 
-function bubble(vfx, player, text, tone = 'normal') {
+/** icon: 말풍선 앞에 붙일 3D 아이콘 이름 (src/data/icons.js) */
+function bubble(vfx, player, text, tone = 'normal', icon = null) {
   // 같은 사람 머리 위의 이전 말풍선은 지우고 새로 띄웁니다.
   vfx.bubbles = vfx.bubbles.filter((b) => b.player !== player);
-  vfx.bubbles.push({ player, text, tone, life: VFX.bubbleTime, maxLife: VFX.bubbleTime });
+  vfx.bubbles.push({ player, text, tone, icon, life: VFX.bubbleTime, maxLife: VFX.bubbleTime });
 }
 
 function burst(vfx, x, y, { colors, count = 10, speed = 2, gravity = 0, size = 0.12, shape = 'dot' }) {

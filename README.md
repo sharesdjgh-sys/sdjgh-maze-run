@@ -31,6 +31,15 @@ npm run dev      # http://localhost:5173 을 브라우저로 열기
 2. `src/data/characters.js`에서 캐릭터 이름과 파일 이름을 맞춥니다.
 3. `npm run characters`를 실행하면 `src/assets/characters/`에 게임용 그림(256px WebP)이 만들어집니다.
 
+## 미로 목록 다시 만들기
+
+미로는 난이도마다 미리 골라 둔 50개(`src/data/mazePool.js`)를 섞어서 차례대로 씁니다. 50판을 다 할 때까지 같은 미로가 다시 나오지 않습니다.
+미로 생성 방식이나 난이도 수치를 바꿨다면 아래 명령으로 목록을 다시 만드세요. (약 40초)
+
+```bash
+npm run maze-pool
+```
+
 ## 테스트
 
 ```bash

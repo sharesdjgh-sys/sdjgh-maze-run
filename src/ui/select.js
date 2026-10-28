@@ -34,7 +34,7 @@ export function selectScreen({ settings, cursors, ready }) {
   const bothReady = ready[0] && ready[1];
   return `
     <div class="card select-card">
-      <h2>${bothReady ? '둘 다 준비 완료! 곧 시작해요 🎉' : '캐릭터와 규칙을 골라요'}</h2>
+      <h2>${bothReady ? '둘 다 준비 완료! 곧 시작해요' : '캐릭터와 규칙을 골라요'}</h2>
       <div class="select-layout">
         ${panels[0]}
         <section class="select-options">
@@ -43,7 +43,7 @@ export function selectScreen({ settings, cursors, ready }) {
           <h3>판 수</h3>
           <button class="toggle" data-action="bestOf"><kbd>4</kbd> ${settings.bestOf === 1 ? '단판승' : '3판 2선승'}</button>
           <h3>시야</h3>
-          <button class="toggle" data-action="fog"><kbd>5</kbd> ${settings.fog ? '🌫️ 안개 (내 주변만 보임)' : '👀 미로 전체 보기'}</button>
+          <button class="toggle" data-action="fog"><kbd>5</kbd> ${settings.fog ? '안개 켬 (주변만 보임)' : '안개 끔 (미로 전체 보기)'}</button>
         </section>
         ${panels[1]}
       </div>

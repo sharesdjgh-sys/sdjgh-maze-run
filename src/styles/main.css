@@ -626,3 +626,22 @@ button {
     transition: none !important;
   }
 }
+
+/* 생성한 정원 일러스트와 어울리는 따뜻한 메뉴 */
+#overlay { background: rgba(29, 55, 40, 0.18); }
+.card {
+  background: rgba(255, 253, 244, 0.97);
+  border: 2px solid #f5e9cc;
+  box-shadow: 0 7px 0 rgba(71, 91, 57, 0.24), 0 25px 75px rgba(26, 48, 35, 0.30);
+}
+.title-card { border-radius: 36px; }
+.title-card .logo { color: #416c52; text-shadow: 0 3px 0 #e4ebd3; }
+.title-card .logo span { color: #d77955; text-shadow: 0 3px 0 #f8e2c7; }
+.title-card .subtitle, .title-card .note { color: #6d7964; }
+.title-card .menu button { background: #e9eedc; box-shadow: 0 5px 0 #ced7bd; color: #405b47; }
+.title-card .menu .primary { background: #4e805a; box-shadow: 0 5px 0 #335d40; color: #fffdf1; }
+.title-card kbd { border-color: #809276; }
+button:focus-visible { outline: 3px solid #e8b859; outline-offset: 5px; }
+@media (prefers-reduced-motion: reduce) {
+  .title-chars > *, .card, #overlay.show { animation: none; }
+}

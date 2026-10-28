@@ -1,35 +1,42 @@
 // 게임 화면 그리기 (기획서 4.2, 6.1, 8.6)
 // 두 사람이 한 화면을 같이 보고, 16:9 직사각형 미로를 화면 가득 크게 그립니다.
+// 미로는 '정원 생울타리 미로'로 그립니다: 흙길 바닥 + 그림자와 옆면이 있는 입체 생울타리 벽. (v10)
 // 벽·바닥은 미리 그려 둔 그림을 찍고, 캐릭터·아이템·이펙트는 매 프레임 그립니다.
+// 보물·상자·아이템·함정 그림은 3D 아이콘(Microsoft Fluent Emoji, MIT)입니다.
 
-import { ITEMS, ITEM_RULES, LOOP, MATCH, MOVE, PLAYERS, TRAPS, VFX, VISION } from '../config.js';
+import { ITEMS, ITEM_RULES, LOOP, MATCH, MOVE, PLAYERS, VFX, VISION } from '../config.js';
+import { loadGardenAssets, texturePattern } from './garden.js';
 import { DIRS } from '../game/dir.js';
 import { shortestPath } from '../game/maze.js';
 import { TRAP } from '../game/placement.js';
 import { playerRenderPosition } from '../game/player.js';
 import { trailBrightness, visionRadius } from '../game/vision.js';
-import {
-  BOX_EMOJI,
-  CLOUD_EMOJI,
-  STAR_EMOJI,
-  TREASURE_EMOJI,
-  clearSpriteCache,
-  getCharacterSprite,
-  getEmojiSprite,
-} from './characters.js';
+import { clearSpriteCache, getCharacterSprite, getIconSprite } from './characters.js';
 
 const COLORS = {
-  sideTints: ['#ffe3ea', '#dcefff'],
-  frameShadow: 'rgba(107, 91, 149, 0.18)',
-  floor: '#fffaf0',
-  floorAlt: '#fff4e2',
-  wall: '#6b5b95',
-  treasureCell: '#ffeaa6',
-  ice: '#cfeeff',
+  sideTints: ['#f7dfe4', '#d9e9f5'],
+  frameShadow: 'rgba(40, 70, 40, 0.28)',
+  // 흙길 바닥
+  floor: '#f1e2c2',
+  floorShade: 'rgba(160, 120, 70, 0.10)',
+  floorLight: 'rgba(255, 252, 240, 0.35)',
+  pebble: 'rgba(150, 115, 80, 0.30)',
+  grass: 'rgba(96, 156, 74, 0.40)',
+  // 생울타리 벽
+  hedgeTop: '#6fbf63',
+  hedgeLight: 'rgba(196, 238, 160, 0.75)',
+  hedgeSide: '#3e8448',
+  hedgeShadow: 'rgba(40, 60, 30, 0.38)',
+  leafDark: 'rgba(36, 104, 50, 0.55)',
+  leafLight: 'rgba(214, 250, 176, 0.55)',
+  // 그 밖
+  treasurePad: ['#fff1b8', '#f2c14e'],
+  ice: ['#e4f7ff', '#b8e6fb'],
   iceShine: 'rgba(255, 255, 255, 0.9)',
-  fogRgb: [43, 33, 64],
-  glow: '255, 196, 61',
-  shadow: 'rgba(74, 59, 92, 0.2)',
+  fogRgb: [24, 30, 50],
+  glow: '255, 204, 80',
+  shadow: 'rgba(40, 40, 30, 0.28)',
+  wall: '#3e5b46',
   ink: '#4a3b5c',
   white: '#ffffff',
 };
@@ -37,7 +44,7 @@ const BUBBLE_TONES = { warn: '#f0a020', near: '#ffc43d', web: '#9a8fb0', portal:
 const CONFETTI_COLORS = ['#ff6b81', '#3fa7f5', '#ffc43d', '#7ed957', '#b48cff', '#ffffff'];
 const UI_FONT = '"Jua", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
 const MIN_PLAYER_RADIUS = 11; // px. 어려움 난이도를 작은 화면에서 해도 캐릭터가 보이도록
-const CHARACTER_SCALE = 2.45; // 캐릭터 그림 크기 = 원판 반지름 × 이 값 (원판보다 조금 크게)
+const CHARACTER_SCALE = 2.75; // 캐릭터 그림 크기 = 기준 반지름 × 이 값 (발밑 고리 위에 서 있는 크기)
 
 /**
  * 창 크기와 미로 크기(칸 수)로 화면 배치를 계산합니다. (v8)
@@ -78,6 +85,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
   let series = null; // 3판 2선승 점수 (카운트다운 때 보여 줌)
   const slotPops = [[null, null], [null, null]]; // 아이템 칸에 새 아이템이 들어온 시각 (튀어나오는 연출)
 
+  const garden = loadGardenAssets(() => { if (layout) relayout(); });
+
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2);
     const { innerWidth: w, innerHeight: h } = window;
@@ -91,7 +100,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
 
   function relayout() {
     layout = computeLayout(window.innerWidth, window.innerHeight, maze?.width ?? 33, maze?.height ?? 19);
-    mazeImage = maze ? buildMazeImage(maze, traps, layout.cell, dpr) : null;
+    mazeImage = maze ? buildMazeImage(maze, traps, layout.cell, dpr, garden) : null;
   }
 
   function setMaze(nextMaze, nextTraps = null) {
@@ -117,13 +126,37 @@ export function createRenderer(canvas, { debug = false } = {}) {
     bg.addColorStop(1, COLORS.sideTints[1]);
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, layout.width, layout.height);
+    if (garden.backdrop) {
+      const image = garden.backdrop;
+      const scale = Math.max(layout.width / image.width, layout.height / image.height);
+      const w = image.width * scale, h = image.height * scale;
+      ctx.drawImage(image, (layout.width - w) / 2, (layout.height - h) / 2, w, h);
+      if (match) {
+        ctx.fillStyle = 'rgba(33, 56, 43, 0.24)';
+        ctx.fillRect(0, 0, layout.width, layout.height);
+      }
+    }
     if (match && mazeImage) {
       const extraTime = match.phase === 'playing' ? alpha * LOOP.step : 0;
       drawScene(match, extraTime, now, vfx);
       drawProjectiles(match, extraTime);
+    } else if (maze && mazeImage && !garden.backdrop) {
+      drawBackdrop(now);
     }
     updateConfetti(frameDt);
     drawConfetti();
+  }
+
+  // 메뉴 화면 뒤에 깔리는 장식용 미로 (main.js가 setMaze로 넘겨 줌)
+  function drawBackdrop(now) {
+    const m = layout.maze;
+    ctx.fillStyle = COLORS.frameShadow;
+    ctx.beginPath();
+    ctx.roundRect(m.x - 4, m.y + 3, m.width + 8, m.height + 8, m.cell * 0.4);
+    ctx.fill();
+    ctx.drawImage(mazeImage.canvas, m.x - mazeImage.pad, m.y - mazeImage.pad, mazeImage.cssWidth, mazeImage.cssHeight);
+    drawTraps(m.cell, now);
+    drawTreasure(toPx(maze.treasure.x, maze.treasure.y), m.cell, now, { phase: 'menu', near: [false, false] });
   }
 
   function toPx(x, y) {
@@ -165,7 +198,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     const gap = size * 0.16;
     let y = p.y + r + size * 0.62;
     // 화면 아래 끝이라 칸이 잘리면 캐릭터 머리 위(1P/2P 배지 위)로 올립니다.
-    if (y + size / 2 > layout.height - 2) y = p.y - r * 1.3 - size * 1.4;
+    if (y + size / 2 > layout.height - 2) y = p.y - r * 2.25 - size * 0.9;
     return [-1, 1].map((side) => ({ x: p.x + (side * (size + gap)) / 2, y, size }));
   }
 
@@ -194,7 +227,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.globalAlpha = 1;
-      if (item) drawSprite(getEmojiSprite(ITEMS[item].emoji, size * 0.7, dpr), 0, 0);
+      if (item) drawSprite(getIconSprite(item, size * 0.8, dpr), 0, 0);
 
       // 사용 키 (1P: Q·E, 2P: 1·2)
       const label = s === 0 ? config.keyLabels.item1 : config.keyLabels.item2;
@@ -227,8 +260,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
   }
 
   function drawTraps(cell, now) {
-    const web = getEmojiSprite(TRAPS.web.emoji, cell * 0.78, dpr);
-    const portal = getEmojiSprite(TRAPS.portal.emoji, cell * 0.8, dpr);
+    const web = getIconSprite('web', cell * 0.82, dpr);
+    const portal = getIconSprite('portal', cell * 0.8, dpr);
     for (const t of trapCells) {
       const p = toPx(t.x, t.y);
       if (t.kind === TRAP.WEB) {
@@ -244,10 +277,12 @@ export function createRenderer(canvas, { debug = false } = {}) {
   }
 
   function drawBoxes(match, cell, now) {
-    const sprite = getEmojiSprite(BOX_EMOJI, cell * 0.72, dpr);
+    const sprite = getIconSprite('box', cell * 0.74, dpr);
     for (const box of match.boxes) {
       const p = toPx(box.x, box.y);
       if (box.active) {
+        ctx.fillStyle = COLORS.shadow;
+        ellipse(p.x, p.y + cell * 0.3, cell * 0.24, cell * 0.07);
         drawSprite(sprite, p.x, p.y + Math.sin(now * 3 + box.x + box.y) * cell * 0.05);
       } else {
         // 다시 생기기까지 남은 시간
@@ -365,7 +400,29 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.beginPath();
     ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2);
     ctx.fill();
-    drawSprite(getEmojiSprite(TREASURE_EMOJI, cell * 0.7, dpr), p.x, p.y, pulse);
+    // 보석이 받침 위에서 둥실둥실 떠 있고, 별빛이 반짝임
+    ctx.fillStyle = 'rgba(120, 80, 20, 0.25)';
+    ellipse(p.x, p.y + cell * 0.3, cell * 0.28, cell * 0.08);
+    const bob = Math.sin(now * 2.2) * cell * 0.05;
+    drawSprite(getIconSprite('treasure', cell * 0.86, dpr), p.x, p.y - cell * 0.06 + bob, pulse);
+    for (let k = 0; k < 2; k++) {
+      const a = now * 1.6 + k * Math.PI;
+      const twinkle = 0.5 + 0.5 * Math.sin(now * 5 + k * 2);
+      drawTwinkle(p.x + Math.cos(a) * cell * 0.42, p.y - cell * 0.12 + Math.sin(a) * cell * 0.22, cell * 0.12 * twinkle);
+    }
+  }
+
+  // 네 갈래 별빛
+  function drawTwinkle(x, y, s) {
+    if (s <= 0.5) return;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.beginPath();
+    ctx.moveTo(x, y - s);
+    ctx.quadraticCurveTo(x, y, x + s, y);
+    ctx.quadraticCurveTo(x, y, x, y + s);
+    ctx.quadraticCurveTo(x, y, x - s, y);
+    ctx.quadraticCurveTo(x, y, x, y - s);
+    ctx.fill();
   }
 
   function drawPlayer(player, cell, extraTime, now) {
@@ -393,12 +450,13 @@ export function createRenderer(canvas, { debug = false } = {}) {
     const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
     const top = y - hop;
 
+    const ringY = y + r * 0.55;
     if (fx.slowDown > 0) {
       ctx.fillStyle = 'rgba(150, 220, 110, 0.6)';
-      ellipse(x, y + r * 0.72, r * 1.1, r * 0.38);
+      ellipse(x, ringY, r * 1.2, r * 0.45);
     }
     ctx.fillStyle = COLORS.shadow;
-    ellipse(x, y + r * 0.78, r * 0.7, r * 0.2);
+    ellipse(x, ringY + r * 0.06, r * 0.8, r * 0.26);
 
     if (fx.speedUp > 0 && player.moveTimer > 0) {
       const d = DIRS[player.facing];
@@ -415,38 +473,39 @@ export function createRenderer(canvas, { debug = false } = {}) {
       }
     }
 
-    // 1P/2P 색 원판 위에 캐릭터 그림을 원판보다 조금 크게 그립니다. 얼음 보호 중에는 반짝반짝
+    // 발밑에 1P/2P 색 고리를 깔고 캐릭터가 그 위에 서 있게 그립니다. 얼음 보호 중에는 반짝반짝
     const blink = fx.freezeImmune > 0 ? 0.7 + 0.3 * Math.sin(now * 25) : 1;
-    ctx.globalAlpha = blink;
-    ctx.beginPath();
-    ctx.arc(x, top, r, 0, Math.PI * 2);
+    ctx.globalAlpha = 0.55 * blink;
     ctx.fillStyle = config.soft;
-    ctx.fill();
-    ctx.lineWidth = Math.max(2, cell * 0.08);
+    ellipse(x, ringY, r * 0.95, r * 0.36);
+    ctx.globalAlpha = blink;
+    ctx.lineWidth = Math.max(2, cell * 0.07);
     ctx.strokeStyle = config.color;
+    ctx.beginPath();
+    ctx.ellipse(x, ringY, r * 0.95, r * 0.36, 0, 0, Math.PI * 2);
     ctx.stroke();
     const sprite = getCharacterSprite(player.character, r * CHARACTER_SCALE, dpr);
-    if (sprite) drawSprite(sprite, x, top - r * 0.12, 1, blink);
+    if (sprite) drawSprite(sprite, x, top - r * 0.35, 1, blink);
     ctx.globalAlpha = 1;
 
-    if (fx.slowDown > 0) drawSprite(getEmojiSprite(ITEMS.slowDown.emoji, r * 0.8, dpr), x + r * 0.8, y + r * 0.45);
-    if (fx.freeze > 0) drawIceBlock(x, top, r, fx.freeze);
-    if (player.stuck > 0) drawSprite(getEmojiSprite(TRAPS.web.emoji, r * 2, dpr), x, top, 1, 0.85);
+    if (fx.slowDown > 0) drawSprite(getIconSprite('slowDown', r * 0.95, dpr), x + r * 0.95, ringY - r * 0.1);
+    if (fx.freeze > 0) drawIceBlock(x, top - r * 0.3, r * 1.1, fx.freeze);
+    if (player.stuck > 0) drawSprite(getIconSprite('web', r * 2.3, dpr), x, top - r * 0.25, 1, 0.9);
 
     let badgeLift = 0;
     if (fx.reverse > 0) {
-      const star = getEmojiSprite(STAR_EMOJI, r * 0.6, dpr);
-      for (let k = 0; k < 3; k++) {
-        const a = now * 5 + (k * Math.PI * 2) / 3;
-        drawSprite(star, x + Math.cos(a) * r * 0.95, top - r * 1.05 + Math.sin(a) * r * 0.25);
-      }
-      badgeLift = r * 0.55;
+      ctx.save();
+      ctx.translate(x, top - r * 1.75);
+      ctx.rotate(now * 4);
+      drawSprite(getIconSprite('dizzy', r * 1.05, dpr), 0, 0);
+      ctx.restore();
+      badgeLift = r * 0.75;
     }
     if (fx.dark > 0) {
-      drawSprite(getEmojiSprite(CLOUD_EMOJI, r * 1.1, dpr), x + Math.sin(now * 2) * r * 0.2, top - r * 1.3);
-      badgeLift = r * 0.95;
+      drawSprite(getIconSprite('dark', r * 1.05, dpr), x + Math.sin(now * 2) * r * 0.2, top - r * 1.75);
+      badgeLift = r * 0.85;
     }
-    drawBadge(config.label, x, top - r * 1.3 - badgeLift, config.color, cell);
+    drawBadge(config.label, x, top - r * 1.72 - badgeLift, config.color, cell);
   }
 
   function drawIceBlock(x, y, r, remaining) {
@@ -528,24 +587,33 @@ export function createRenderer(canvas, { debug = false } = {}) {
       const fontSize = Math.min(26, Math.max(13, cell * 0.42)) * scale;
       const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
       ctx.font = `${fontSize}px ${UI_FONT}`;
-      const w = ctx.measureText(b.text).width + fontSize * 1.1;
-      const h = fontSize * 1.6;
+      const iconSize = b.icon ? fontSize * 1.35 : 0;
+      const textW = ctx.measureText(b.text).width;
+      const w = textW + fontSize * 1.1 + (b.icon ? iconSize + fontSize * 0.2 : 0);
+      const h = fontSize * 1.7;
       const cx = p.x;
-      let cy = p.y - r * 1.35 - h * 0.5 - fontSize * 1.4 - t * cell * 0.25;
+      let cy = p.y - r * 1.8 - h * 0.5 - fontSize * 1.4 - t * cell * 0.25;
       // 미로 맨 윗줄 근처라 화면 위로 잘리면 캐릭터 아래(아이템 칸 아래)에 띄웁니다.
       if (cy - h / 2 < 2) cy = p.y + r + Math.max(cell * 0.56, 22) * 1.35 + h * 0.6 + t * cell * 0.25;
       ctx.globalAlpha = b.life < 0.25 ? b.life / 0.25 : 1;
+      ctx.save();
+      ctx.shadowColor = 'rgba(40, 30, 60, 0.25)';
+      ctx.shadowBlur = fontSize * 0.5;
+      ctx.shadowOffsetY = fontSize * 0.15;
       ctx.fillStyle = COLORS.white;
-      ctx.strokeStyle = BUBBLE_TONES[b.tone] ?? PLAYERS[b.player].color;
-      ctx.lineWidth = Math.max(2, fontSize * 0.13);
       ctx.beginPath();
       ctx.roundRect(cx - w / 2, cy - h / 2, w, h, h / 2);
       ctx.fill();
+      ctx.restore();
+      ctx.strokeStyle = BUBBLE_TONES[b.tone] ?? PLAYERS[b.player].color;
+      ctx.lineWidth = Math.max(2, fontSize * 0.13);
       ctx.stroke();
+      const textX = cx + (b.icon ? (iconSize + fontSize * 0.2) / 2 : 0);
+      if (b.icon) drawSprite(getIconSprite(b.icon, iconSize, dpr), textX - textW / 2 - fontSize * 0.2 - iconSize / 2, cy, 1, ctx.globalAlpha);
       ctx.fillStyle = COLORS.ink;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(b.text, cx, cy + fontSize * 0.06);
+      ctx.fillText(b.text, textX, cy + fontSize * 0.06);
       ctx.globalAlpha = 1;
     }
   }
@@ -563,7 +631,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       scale = 1 + 0.4 * (1 - sinceTick) ** 3;
       ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
       ctx.fillRect(m.x, m.y, m.width, m.height);
-      drawSeriesScore(m);
+      drawRoundInfo(m, match);
     } else if (match.phase === 'playing' && match.time < MATCH.goDisplayTime) {
       const t = match.time / MATCH.goDisplayTime;
       text = 'GO!';
@@ -589,16 +657,20 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.restore();
   }
 
-  // 3판 2선승이면 카운트다운 동안 점수를 보여 줍니다. (예: 1P 1 : 0 2P · 2판째)
-  function drawSeriesScore(m) {
-    if (!series || series.bestOf <= 1) return;
+  // 카운트다운 동안 이번 판 정보를 보여 줍니다. (예: 1P 1 : 0 2P · 2판째 · 미로 17번)
+  function drawRoundInfo(m, match) {
+    const parts = [];
+    if (series && series.bestOf > 1) {
+      parts.push(
+        { text: PLAYERS[0].label, color: PLAYERS[0].color },
+        { text: `  ${series.wins[0]} : ${series.wins[1]}  `, color: COLORS.ink },
+        { text: PLAYERS[1].label, color: PLAYERS[1].color },
+        { text: `  ·  ${series.round}판째`, color: COLORS.ink },
+      );
+    }
+    if (match.mazeNumber) parts.push({ text: `${parts.length ? '  ·  ' : ''}미로 ${match.mazeNumber}번`, color: COLORS.ink });
+    if (parts.length === 0) return;
     const fontSize = Math.min(44, Math.max(18, m.height * 0.045));
-    const parts = [
-      { text: PLAYERS[0].label, color: PLAYERS[0].color },
-      { text: `  ${series.wins[0]} : ${series.wins[1]}  `, color: COLORS.ink },
-      { text: PLAYERS[1].label, color: PLAYERS[1].color },
-      { text: `  ·  ${series.round}판째`, color: COLORS.ink },
-    ];
     ctx.save();
     ctx.font = `${fontSize}px ${UI_FONT}`;
     ctx.textBaseline = 'middle';
@@ -649,7 +721,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       const start = slotPositions(from, layout.cell, extraTime)[shot.slot];
       const end = toPxOf(target, extraTime);
       const ctrl = { x: (start.x + end.x) / 2, y: Math.min(start.y, end.y) - layout.height * 0.15 };
-      const sprite = getEmojiSprite(ITEMS[shot.item].emoji, size, dpr);
+      const sprite = getIconSprite(shot.item, size, dpr);
       const t = Math.min(1, (shot.t + extraTime) / shot.duration);
       for (let k = 3; k >= 0; k--) {
         const tt = Math.max(0, t - k * 0.07);
@@ -721,11 +793,25 @@ export function createRenderer(canvas, { debug = false } = {}) {
   return { setMaze, setSeries, render, celebrate };
 }
 
-/** 벽·바닥·얼음 바닥을 한 번 그려 둡니다. */
-function buildMazeImage(maze, traps, cell, dpr) {
+/** 칸 번호 등으로 정해지는 0~1 사이 값 (매번 같은 무늬가 나오도록) */
+function hash(n) {
+  let h = Math.imul((n | 0) ^ 0x9e3779b9, 0x85ebca6b);
+  h ^= h >>> 13;
+  h = Math.imul(h, 0xc2b2ae35);
+  h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+
+/**
+ * 벽·바닥·얼음 바닥을 한 번 그려 둡니다. (v10: 정원 생울타리 미로)
+ * - 바닥: 따뜻한 흙길. 칸마다 밝기가 조금씩 다르고 자갈·풀이 드문드문
+ * - 벽: 생울타리. 바닥 그림자 → 아래로 보이는 옆면 → 윗면 → 빛 받는 윗부분 → 잎사귀 무늬 순서로 겹쳐서 입체감
+ */
+function buildMazeImage(maze, traps, cell, dpr, garden) {
   const { width, height, walls, starts, treasure } = maze;
-  const wallWidth = Math.max(2, Math.round(cell * 0.14));
-  const pad = Math.ceil(wallWidth / 2) + 1;
+  const thick = Math.max(4, cell * 0.26); // 생울타리 두께
+  const depth = thick * 0.42; // 아래로 보이는 옆면 높이
+  const pad = Math.ceil(thick / 2 + depth + thick * 0.6 + 2);
   const cssWidth = width * cell + pad * 2;
   const cssHeight = height * cell + pad * 2;
   const canvas = document.createElement('canvas');
@@ -734,61 +820,159 @@ function buildMazeImage(maze, traps, cell, dpr) {
   const g = canvas.getContext('2d');
   g.scale(dpr, dpr);
   g.translate(pad, pad);
+  const W = width * cell;
+  const H = height * cell;
 
-  g.fillStyle = COLORS.floor;
+  // ── 바닥: 흙길 ──
+  g.fillStyle = texturePattern(g, garden.floor, cell * 5) ?? COLORS.floor;
   g.beginPath();
-  g.roundRect(0, 0, width * cell, height * cell, cell * 0.3);
+  g.roundRect(0, 0, W, H, cell * 0.3);
   g.fill();
-  g.fillStyle = COLORS.floorAlt;
   for (let y = 0; y < height; y++) {
-    for (let x = y % 2; x < width; x += 2) g.fillRect(x * cell, y * cell, cell, cell);
+    for (let x = 0; x < width; x++) {
+      const i = y * width + x;
+      const v = hash(i);
+      g.fillStyle = v < 0.5 ? COLORS.floorShade : COLORS.floorLight;
+      g.globalAlpha = Math.abs(v - 0.5) * 1.6;
+      g.fillRect(x * cell, y * cell, cell, cell);
+      g.globalAlpha = 1;
+      // 자갈
+      if (hash(i * 7 + 1) < 0.35) {
+        g.fillStyle = COLORS.pebble;
+        const px = (x + 0.2 + hash(i * 7 + 2) * 0.6) * cell;
+        const py = (y + 0.2 + hash(i * 7 + 3) * 0.6) * cell;
+        g.beginPath();
+        g.ellipse(px, py, cell * 0.05, cell * 0.035, hash(i * 7 + 4) * Math.PI, 0, Math.PI * 2);
+        g.fill();
+      }
+      // 풀 한 포기
+      if (hash(i * 7 + 5) < 0.18) {
+        g.strokeStyle = COLORS.grass;
+        g.lineWidth = Math.max(1, cell * 0.025);
+        g.lineCap = 'round';
+        const gx = (x + 0.15 + hash(i * 7 + 6) * 0.7) * cell;
+        const gy = (y + 0.75) * cell;
+        g.beginPath();
+        for (const lean of [-0.6, 0, 0.6]) {
+          g.moveTo(gx, gy);
+          g.quadraticCurveTo(gx + lean * cell * 0.04, gy - cell * 0.07, gx + lean * cell * 0.08, gy - cell * 0.13);
+        }
+        g.stroke();
+      }
+    }
   }
-  starts.forEach((s, i) => {
-    g.fillStyle = PLAYERS[i].soft;
-    g.fillRect(s.x * cell, s.y * cell, cell, cell);
-  });
-  g.fillStyle = COLORS.treasureCell;
-  g.fillRect(treasure.x * cell, treasure.y * cell, cell, cell);
 
+  // 출발점: 1P/2P 색 발판
+  starts.forEach((s, i) => {
+    const cx = (s.x + 0.5) * cell;
+    const cy = (s.y + 0.5) * cell;
+    g.fillStyle = PLAYERS[i].soft;
+    g.globalAlpha = 0.85;
+    g.beginPath();
+    g.ellipse(cx, cy + cell * 0.1, cell * 0.38, cell * 0.24, 0, 0, Math.PI * 2);
+    g.fill();
+    g.globalAlpha = 1;
+    g.strokeStyle = PLAYERS[i].color;
+    g.lineWidth = Math.max(1.5, cell * 0.04);
+    g.setLineDash([cell * 0.08, cell * 0.06]);
+    g.stroke();
+    g.setLineDash([]);
+  });
+
+  // 보물 자리: 금빛 받침
+  {
+    const cx = (treasure.x + 0.5) * cell;
+    const cy = (treasure.y + 0.5) * cell;
+    const pad = g.createRadialGradient(cx, cy, 0, cx, cy, cell * 0.45);
+    pad.addColorStop(0, COLORS.treasurePad[0]);
+    pad.addColorStop(1, COLORS.treasurePad[1]);
+    g.fillStyle = pad;
+    g.beginPath();
+    g.ellipse(cx, cy + cell * 0.12, cell * 0.42, cell * 0.28, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = 'rgba(190, 130, 30, 0.6)';
+    g.lineWidth = Math.max(1.5, cell * 0.04);
+    g.stroke();
+  }
+
+  // 얼음 바닥
   if (traps) {
-    g.strokeStyle = COLORS.iceShine;
-    g.lineWidth = Math.max(1.5, cell * 0.06);
-    g.lineCap = 'round';
     for (let i = 0; i < width * height; i++) {
       if (traps.kind[i] !== TRAP.ICE) continue;
       const x = (i % width) * cell;
       const y = Math.floor(i / width) * cell;
-      g.fillStyle = COLORS.ice;
-      g.fillRect(x, y, cell, cell);
+      const ice = g.createLinearGradient(x, y, x + cell, y + cell);
+      ice.addColorStop(0, COLORS.ice[0]);
+      ice.addColorStop(1, COLORS.ice[1]);
+      g.fillStyle = ice;
       g.beginPath();
-      g.moveTo(x + cell * 0.2, y + cell * 0.55);
-      g.lineTo(x + cell * 0.55, y + cell * 0.2);
-      g.moveTo(x + cell * 0.45, y + cell * 0.8);
-      g.lineTo(x + cell * 0.8, y + cell * 0.45);
+      g.roundRect(x + cell * 0.04, y + cell * 0.04, cell * 0.92, cell * 0.92, cell * 0.12);
+      g.fill();
+      g.strokeStyle = COLORS.iceShine;
+      g.lineWidth = Math.max(1.5, cell * 0.05);
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(x + cell * 0.22, y + cell * 0.5);
+      g.lineTo(x + cell * 0.5, y + cell * 0.22);
+      g.moveTo(x + cell * 0.5, y + cell * 0.78);
+      g.lineTo(x + cell * 0.78, y + cell * 0.5);
       g.stroke();
     }
   }
 
-  g.strokeStyle = COLORS.wall;
-  g.lineWidth = wallWidth;
-  g.lineCap = 'round';
-  g.beginPath();
+  // ── 벽: 생울타리 ──
+  const segments = [];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       const bits = walls[y * width + x];
       const px = x * cell;
       const py = y * cell;
-      if (bits & 1) line(g, px, py, px + cell, py);
-      if (bits & 8) line(g, px, py, px, py + cell);
-      if (x === width - 1 && bits & 2) line(g, px + cell, py, px + cell, py + cell);
-      if (y === height - 1 && bits & 4) line(g, px, py + cell, px + cell, py + cell);
+      if (bits & 1) segments.push([px, py, px + cell, py]);
+      if (bits & 8) segments.push([px, py, px, py + cell]);
+      if (x === width - 1 && bits & 2) segments.push([px + cell, py, px + cell, py + cell]);
+      if (y === height - 1 && bits & 4) segments.push([px, py + cell, px + cell, py + cell]);
     }
   }
-  g.stroke();
-  return { canvas, cssWidth, cssHeight, pad };
-}
+  const hedge = new Path2D();
+  for (const [x1, y1, x2, y2] of segments) {
+    hedge.moveTo(x1, y1);
+    hedge.lineTo(x2, y2);
+  }
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  const strokeHedge = (color, lineWidth, dx, dy, blur = 0) => {
+    g.save();
+    if (blur) g.filter = `blur(${blur}px)`;
+    g.translate(dx, dy);
+    g.strokeStyle = color;
+    g.lineWidth = lineWidth;
+    g.stroke(hedge);
+    g.restore();
+  };
+  strokeHedge(COLORS.hedgeShadow, thick * 1.05, thick * 0.12, depth + thick * 0.28, thick * 0.35); // 바닥 그림자
+  strokeHedge(COLORS.hedgeSide, thick, 0, depth); // 옆면
+  strokeHedge(texturePattern(g, garden.hedge, cell * 1.7) ?? COLORS.hedgeTop, thick, 0, 0); // 윗면
+  if (!garden.hedge) strokeHedge(COLORS.hedgeLight, thick * 0.42, -thick * 0.06, -thick * 0.14); // 빛 받는 윗부분
 
-function line(g, x1, y1, x2, y2) {
-  g.moveTo(x1, y1);
-  g.lineTo(x2, y2);
+  // 잎사귀 무늬
+  if (!garden.hedge) {
+  let k = 0;
+  for (const [x1, y1, x2, y2] of segments) {
+    const len = Math.hypot(x2 - x1, y2 - y1);
+    const leaves = Math.max(2, Math.round(len / (thick * 0.55)));
+    for (let j = 0; j < leaves; j++, k++) {
+      const t = (j + hash(k * 3 + 11)) / leaves;
+      const off = (hash(k * 3 + 12) - 0.5) * thick * 0.6;
+      const nx = (y2 - y1) / len;
+      const ny = -(x2 - x1) / len;
+      const lx = x1 + (x2 - x1) * t + nx * off;
+      const ly = y1 + (y2 - y1) * t + ny * off;
+      g.fillStyle = hash(k * 3 + 13) < 0.55 ? COLORS.leafDark : COLORS.leafLight;
+      g.beginPath();
+      g.ellipse(lx, ly, thick * 0.13, thick * 0.09, hash(k) * Math.PI, 0, Math.PI * 2);
+      g.fill();
+    }
+  }
+  }
+  return { canvas, cssWidth, cssHeight, pad };
 }
