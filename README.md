@@ -32,6 +32,12 @@ npm run dev      # http://localhost:5173 을 브라우저로 열기
 3. `npm run characters`를 실행하면 `src/assets/characters/`에 게임용 그림(256px WebP)이 만들어집니다.
 
 
+## 선택과 승리 화면
+
+정원 테마의 공용 캐릭터 명단과 두 사람의 큰 미리보기에서 친구를 고릅니다. 승리 화면은 우승 캐릭터·시상대·축하 연출을 중심으로 구성하며, 시리즈 승수는 별로 표시합니다.
+
+[선택 화면](ref/after-selection-redesign-1440.png) · [승리 화면](ref/after-victory-redesign-1440.png) · [놀이 방법](ref/after-howto-redesign-1440.png) · [디자인·검증 기록](ref/garden-menu-redesign.md)
+
 ## 캐릭터 움직임
 
 16종 모두 대기 4프레임과 걷기 4프레임 시트가 있습니다. 게임에서는 이동에 따라 발걸음이 바뀌고, 가만히 있으면 가끔 눈을 깜빡입니다. 타이틀·선택·결과 화면은 프레임을 바꾸지 않고 그림 하나를 숨쉬듯 부드럽게 움직입니다(`src/styles/character-animation.css`).
@@ -82,7 +88,9 @@ npm run build:offline
 
 - 글꼴: [주아(Jua)](https://fonts.google.com/specimen/Jua), SIL Open Font License 1.1 (`@fontsource/jua`)
 - 캐릭터 그림: `ref/character-originals`의 원본 16종 → `npm run characters`로 게임용 WebP로 변환
-- 학교·책가방·집·상자·아이템·함정 아이콘: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) 3D, MIT 라이선스 (`licenses/fluentui-emoji.txt`, `npm run icons`로 다시 받기)
+- 책가방·집·상자·아이템·함정 아이콘: [Microsoft Fluent Emoji](https://github.com/microsoft/fluentui-emoji) 3D, MIT 라이선스 (`licenses/fluentui-emoji.txt`, `npm run icons`로 다시 받기)
 - 정원 풍경·흙길·생울타리 그림, 캐릭터 애니메이션 시트: 이미지 생성 도구로 제작 (`ref/garden-assets-notes.md`, `ref/character-animation-notes.md`)
 - 효과음: Web Audio로 코드에서 직접 만듦 (음원 파일 없음)
 - 개발: Claude Code
+
+- 서대전여고 학교 그림: 사용자 제공 사진을 참고해 내장 imagegen으로 제작. [생성 기록](ref/seodaejeon-school-icon-prompt.json), [최종 첫 화면](ref/after-title-school-and-friends.png). 첫 화면용 캠퍼스는 `node scripts/build-garden-assets.mjs`, 게임용 아이콘은 `npm run icons`로 재가공합니다.

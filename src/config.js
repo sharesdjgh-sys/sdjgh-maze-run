@@ -63,8 +63,8 @@ export const ITEMS = {
     shout: '슝슝!', desc: '5초 동안 내 속도 1.5배',
   },
   flashlight: {
-    emoji: '🔦', name: '손전등', target: 'self', duration: 8, weight: 20, fogOnly: true,
-    shout: '반짝!', desc: '8초 동안 내 시야가 넓어지고, 걸려 있던 먹구름도 걷혀요',
+    emoji: '🔦', name: '손전등', target: 'self', duration: 3, weight: 20, fogOnly: true,
+    shout: '반짝!', desc: '3초 동안 내 시야가 넓어지고, 걸려 있던 먹구름도 걷혀요',
   },
   slowDown: {
     emoji: '🐌', name: '달팽이 저주', target: 'enemy', duration: 4, multiplier: 0.6, weight: 15,
@@ -165,7 +165,7 @@ export const PLAYERS = [
 export const MENU_KEYS = {
   global: { KeyM: 'mute' },
   title: { Enter: 'setup', NumpadEnter: 'setup', KeyH: 'howto', KeyF: 'fullscreen' },
-  howto: { Escape: 'title', Enter: 'title', NumpadEnter: 'title', KeyH: 'title' },
+  howto: { Escape: 'title', Enter: 'setup', NumpadEnter: 'setup', KeyH: 'title' },
   setup: {
     Enter: 'start',
     NumpadEnter: 'start',

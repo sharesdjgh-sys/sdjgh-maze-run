@@ -64,6 +64,7 @@ export function createAudio({ muted = false } = {}) {
 
   const SOUNDS = {
     click: () => tone({ freq: 660, time: 0.06, type: 'triangle', gain: 0.15 }),
+    ready: () => notes([523, 659, 784], { gap: 0.065, time: 0.15, type: 'triangle', gain: 0.16 }),
     countdown: () => tone({ freq: 523, time: 0.16, type: 'square', gain: 0.12 }),
     go: () => notes([784, 1047], { gap: 0.06, time: 0.3, type: 'square', gain: 0.12 }),
     bump: () => tone({ freq: 150, to: 90, time: 0.08, type: 'triangle', gain: 0.2 }),
@@ -86,7 +87,13 @@ export function createAudio({ muted = false } = {}) {
       tone({ freq: 72, time: 0.12, gain: 0.5 });
       tone({ freq: 62, time: 0.14, gain: 0.4, delay: 0.18 });
     },
-    win: () => notes([523, 659, 784, 1047], { gap: 0.12, time: 0.28, type: 'triangle', gain: 0.22 }),
+    // 짧은 팡파르와 마지막 화음으로 도착의 순간을 강조합니다.
+    win: () => {
+      const melody = [523, 523, 523, 659, 784, 1047];
+      const delays = [0, 0.14, 0.28, 0.5, 0.68, 0.87];
+      melody.forEach((freq, i) => tone({ freq, delay: delays[i], time: i === 5 ? 0.6 : 0.17, type: 'triangle', gain: 0.21 }));
+      [262, 330, 392].forEach(freq => tone({ freq, delay: 0.87, time: 0.65, type: 'triangle', gain: 0.08 }));
+    },
     draw: () => notes([523, 523], { gap: 0.2, time: 0.25, type: 'triangle', gain: 0.2 }),
   };
 

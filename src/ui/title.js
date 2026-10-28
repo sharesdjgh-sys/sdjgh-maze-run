@@ -1,5 +1,6 @@
+import schoolCampusUrl from '../assets/garden/school-campus.webp';
 // 정원 풍경 위에 놓이는 타이틀 화면
-import { CHARACTERS, characterImg, iconImg, animatedCharacterImg } from '../render/characters.js';
+import { CHARACTERS, characterImg, animatedCharacterImg } from '../render/characters.js';
 
 /** record: 오늘의 전적 { matches, wins: { 캐릭터id: 승수 } } */
 export function titleScreen({ settings, muted, record }) {
@@ -17,6 +18,8 @@ export function titleScreen({ settings, muted, record }) {
         <p class="title-description">학교에 들렀다가 우리 집에 먼저 도착하면 승리!</p>
       </header>
 
+      <div class="title-campus-stage">
+        <img class="title-campus-image" src="${schoolCampusUrl}" alt="서대전여고" draggable="false" />
       <figure class="title-companion title-companion-left">
         <div class="title-companion-art">${animatedCharacterImg(c1, 'title-character')}</div>
         <figcaption><b>1P</b><span>W A S D</span></figcaption>
@@ -26,8 +29,9 @@ export function titleScreen({ settings, muted, record }) {
         <figcaption><b>2P</b><span>방향키</span></figcaption>
       </figure>
 
+      </div>
+
       <div class="title-actions">
-        <div class="title-treasure" aria-hidden="true"><span></span>${iconImg('school', 'title-treasure-image')}<span></span></div>
         <button class="title-start" data-action="setup"><span>시작하기</span><kbd>Enter</kbd></button>
         <button class="title-howto" data-action="howto">놀이 방법 <kbd>H</kbd></button>
       </div>

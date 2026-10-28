@@ -5,6 +5,8 @@ import '@fontsource/jua';
 import './styles/main.css';
 import './styles/title.css';
 import './styles/character-animation.css';
+import './styles/garden-menus.css';
+import './styles/guide.css';
 import {
   DEFAULT_SETTINGS,
   DIFFICULTIES,
@@ -145,7 +147,7 @@ function showTitle() {
 function showSetup() {
   clearGame();
   const cursors = settings.characters.map((id) => CHARACTERS.findIndex((c) => c.id === id));
-  app.select = { cursors, ready: [false, false], readySince: null };
+  app.select = { cursors, ready: [false, false], readySince: null, activePlayer: 0 };
   overlay.show(selectScreen({ settings, ...app.select }));
   setScene('setup');
 }
@@ -195,6 +197,15 @@ function showResult({ animate }) {
   const final = seriesWinner(app.series) !== null;
   const idleLeft = final ? Math.max(0, Math.ceil(RESULT_IDLE_RETURN - (performance.now() - app.lastInput) / 1000)) : null;
   app.shownIdle = idleLeft;
+  // 자동 복귀 문구만 갱신해 캐릭터와 축하 애니메이션이 매초 처음부터 재생되지 않게 합니다.
+  if (!animate && document.querySelector('.garden-result')) {
+    const notice = document.querySelector('[data-result-idle]');
+    if (notice) {
+      notice.textContent = idleLeft + '초 뒤 처음 화면으로 돌아가요';
+      notice.hidden = idleLeft > 10;
+    }
+    return;
+  }
   const html = resultScreen({ match: app.match, series: app.series, idleLeft });
   if (animate) overlay.show(html, { delay: RESULT_INPUT_DELAY });
   else overlay.update(html);
@@ -223,7 +234,7 @@ function updateSoundButton() {
 function runAction(action) {
   const [name, a, b] = action.split(':');
   const inMenu = app.scene !== 'game';
-  if (inMenu && name !== 'mute') audio.play('click');
+  if (inMenu && name !== 'mute') audio.play(name === 'ready' && !app.select?.ready[Number(a)] ? 'ready' : 'click');
   switch (name) {
     case 'mute':
       save('muted', audio.toggleMute());
@@ -234,7 +245,7 @@ function runAction(action) {
       toggleFullscreen();
       break;
     case 'howto':
-      overlay.show(howtoScreen());
+      overlay.show(howtoScreen({ characters: settings.characters }));
       setScene('howto');
       break;
     case 'title':
@@ -258,11 +269,17 @@ function runAction(action) {
       settings.fog = !settings.fog;
       refreshSetup();
       break;
+    case 'select-player':
+      if (app.scene !== 'setup' || ![0, 1].includes(Number(a))) return;
+      app.select.activePlayer = Number(a);
+      refreshSetup();
+      break;
     case 'pick': {
       const [p, k] = [Number(a), Number(b)];
       const { cursors, ready } = app.select ?? {};
       if (app.scene !== 'setup' || ready[p] || cursors[1 - p] === k) return;
       cursors[p] = k;
+      app.select.activePlayer = p;
       refreshSetup();
       break;
     }
@@ -270,6 +287,7 @@ function runAction(action) {
       if (app.scene !== 'setup') return;
       const p = Number(a);
       app.select.ready[p] = !app.select.ready[p];
+      app.select.activePlayer = app.select.ready[p] && !app.select.ready[1 - p] ? 1 - p : p;
       refreshSetup();
       break;
     }
@@ -316,20 +334,28 @@ function handleMenuKeys(presses) {
 function handleSetupKeys(presses) {
   const { cursors, ready } = app.select;
   let changed = false;
+  let becameReady = false;
   PLAYERS.forEach((player, p) => {
     for (const code of presses) {
       const dir = screenDirOf(player.keys, code);
-      if (dir && !ready[p]) changed = moveCursor(p, dir) || changed;
+      if (dir && !ready[p] && moveCursor(p, dir)) {
+        app.select.activePlayer = p;
+        changed = true;
+      }
       const slot = itemSlotOf(player.keys, code);
-      if (slot === 0 && !ready[p]) ready[p] = changed = true;
+      if (slot === 0 && !ready[p]) {
+        ready[p] = changed = becameReady = true;
+        app.select.activePlayer = ready[1 - p] ? p : 1 - p;
+      }
       if (slot === 1 && ready[p]) {
         ready[p] = false;
+        app.select.activePlayer = p;
         changed = true;
       }
     }
   });
   if (changed) {
-    audio.play('click');
+    audio.play(becameReady ? 'ready' : 'click');
     refreshSetup();
   }
   if (ready[0] && ready[1] && performance.now() - app.select.readySince >= READY_START_DELAY * 1000) startSeries();
@@ -458,7 +484,7 @@ startLoop({
     const frameDt = lastFrame === null ? 0 : Math.min(0.1, now - lastFrame);
     lastFrame = now;
     if (app.scene === 'game' || app.scene === 'result') updateVfx(vfx, frameDt);
-    renderer.render(app.match, app.scene === 'game' ? alpha : 0, now, vfx, frameDt);
+    renderer.render(app.scene === 'result' ? null : app.match, app.scene === 'game' ? alpha : 0, now, vfx, frameDt);
     if (DEBUG) updateDebugBox(now * 1000);
   },
 });

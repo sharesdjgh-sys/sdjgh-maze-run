@@ -1,65 +1,47 @@
-// 결과 화면: 승자(또는 무승부), 시간, 3판 2선승 점수, 통계 (기획서 기능 6)
-
-import { DIFFICULTIES, PLAYERS } from '../config.js';
-import { seriesWinner } from '../game/series.js';
-import { characterImg, getCharacter, iconImg, animatedCharacterImg } from '../render/characters.js';
-import { formatTime } from './format.js';
+﻿// 결과 화면은 승리 캐릭터와 축하 연출을 중심으로 보여 줍니다.
+import { PLAYERS } from '../config.js';
+import { seriesWinner, winsNeeded } from '../game/series.js';
+import { getCharacter, iconImg, animatedCharacterImg } from '../render/characters.js';
+import podiumUrl from '../assets/garden/victory-podium.webp';
 
 export function resultScreen({ match, series, idleLeft }) {
-  const { result } = match;
-  const diff = DIFFICULTIES[match.difficulty];
-  const characters = match.players.map((p) => getCharacter(p.character));
   const champion = seriesWinner(series);
   const final = champion !== null;
-  const badge = (i) => `<span class="badge p${i + 1}">${PLAYERS[i].label}</span>`;
-  const hero = (id) => animatedCharacterImg(id, 'hero-avatar');
-
-  let headline;
-  let heroHtml;
-  if (final && series.bestOf > 1) {
-    heroHtml = `${iconImg('trophy', 'hero-avatar')}${hero(characters[champion].id)}`;
-    headline = `${badge(champion)} ${characters[champion].name} 최종 승리!`;
-  } else if (result.winner === null) {
-    heroHtml = characters.map((c) => hero(c.id)).join('');
-    headline = '동시 도착! 무승부';
-  } else {
-    heroHtml = hero(characters[result.winner].id);
-    headline = `${badge(result.winner)} ${characters[result.winner].name} ${series.bestOf > 1 ? '이번 판 승리!' : '승리!'}`;
-  }
-
-  const score =
-    series.bestOf > 1
-      ? `<p class="result-score">${badge(0)} ${series.wins[0]} : ${series.wins[1]} ${badge(1)}
-         <small>${final ? '3판 2선승 끝!' : `${series.round}판째 · 먼저 2승하면 우승`}</small></p>`
-      : '';
-
-  const rows = [
-    ['학교', (s) => (s.visitedSchool ? '등교 완료' : '아직 못 감')],
-    ['이동한 칸', (s) => `${s.moves}칸`],
-    ['헤맨 칸', (s) => `${s.wandered}칸`],
-    ['아이템 사용', (s) => `${s.itemsUsed}개 (명중 ${s.itemsHit})`],
-    ['함정에 걸림', (s) => `${s.trapsHit}번`],
-  ]
-    .map(([label, value]) => `<tr><th>${label}</th>${result.players.map((s) => `<td>${value(s)}</td>`).join('')}</tr>`)
-    .join('');
-
-  const nextLabel = final ? '재도전' : series.bestOf > 1 ? '다음 판' : '다시 한 판';
-  return `
-    <div class="card result-card">
-      <div class="result-hero">${heroHtml}</div>
-      <h2>${headline}</h2>
-      <p class="result-time">⏱ ${formatTime(result.time)} · ${diff.label}${match.mazeNumber ? ` 미로 ${match.mazeNumber}번` : ` ${diff.width}×${diff.height}`}${match.fog ? ' · 안개' : ''}</p>
+  const draw = match.result.winner === null;
+  const winner = champion ?? match.result.winner;
+  const characters = match.players.map(p => getCharacter(p.character));
+  const winnerCharacter = winner === null ? null : characters[winner];
+  const headline = draw ? '나란히 도착!' : final && series.bestOf > 1 ? '최종 우승!' : `${PLAYERS[winner].label} 승리!`;
+  const subtitle = draw ? '이번엔 무승부! 다음엔 누가 먼저일까요?' : `${winnerCharacter.name}, 학교 다녀왔습니다!`;
+  const hero = (id) => `<div class="victory-jump">${animatedCharacterImg(id, 'victory-avatar')}</div>`;
+  const score = series.bestOf > 1 ? `<div class="victory-series" aria-label="시리즈 점수 1P ${series.wins[0]}승, 2P ${series.wins[1]}승">
+    ${PLAYERS.map((p, i) => `<div class="victory-score-side p${i + 1}"><b>${p.label}</b><span class="victory-score-stars" aria-hidden="true">${Array.from({ length: winsNeeded(series) }, (_, j) => `<span class="${series.wins[i] > j ? 'is-won' : ''}">★</span>`).join('')}</span></div>`).join('<span class="victory-score-divider">:</span>')}
+    <span class="victory-series-note">${final ? '먼저 두 번 이겼어요!' : '먼저 두 번 이기면 우승!'}</span>
+  </div>` : '';
+  const label = draw ? '둘 다 멋진 레이스였어요!' : `${PLAYERS[winner].label} · ${winnerCharacter.name}`;
+  return `<main class="garden-result result-card${draw ? ' is-draw' : ` p${winner + 1}`}" data-result-winner="${winner ?? 'draw'}" aria-labelledby="victory-title">
+    <span class="victory-warmth" aria-hidden="true"></span>
+    <header class="victory-header">
+      <p class="garden-eyebrow">${draw ? '마지막까지, 멋진 승부!' : final && series.bestOf > 1 ? '등하굣길 챔피언 탄생!' : '오늘의 레이스 주인공!'}</p>
+      <h1 id="victory-title">${headline}</h1>
+      <p class="victory-subtitle">${subtitle}</p>
+    </header>
+    <div class="celebration-stage">
+      <span class="victory-rays" aria-hidden="true"></span>
+      <span class="victory-spark victory-spark-one" aria-hidden="true">✦</span><span class="victory-spark victory-spark-two" aria-hidden="true">✦</span><span class="victory-spark victory-spark-three" aria-hidden="true">✧</span>
+      <img class="victory-podium" src="${podiumUrl}" alt="" draggable="false" />
+      <div class="victory-figures${draw ? ' victory-duo' : ''}">${draw ? characters.map(c => hero(c.id)).join('') : hero(winnerCharacter.id)}</div>
+      <div class="victory-trophy" aria-hidden="true">${iconImg(draw ? 'sparkles' : 'trophy', 'victory-trophy-icon')}</div>
+      <p class="victory-winner-name">${label}</p>
+    </div>
+    <div class="victory-actions">
       ${score}
-      <table class="stats">
-        <thead><tr><th></th>${[0, 1].map((i) => `<th>${badge(i)} ${characterImg(characters[i].id, 'inline-avatar')}</th>`).join('')}</tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-      <p class="note">이번 판의 최단 거리: 학교 들렀다가 집까지 ${result.players[0].shortest}칸 (두 사람 똑같음)</p>
-      <div class="menu row">
-        <button class="primary" data-action="next">${nextLabel} <kbd>Enter</kbd></button>
-        <button data-action="setup">캐릭터 다시 고르기 <kbd>C</kbd></button>
+      <button class="garden-primary victory-again" data-action="next">${draw ? '다시 대결!' : !final && series.bestOf > 1 ? '다음 판으로!' : '한 판 더!'} <kbd>Enter</kbd></button>
+      <div class="victory-secondary">
+        <button data-action="setup">캐릭터 바꾸기 <kbd>C</kbd></button>
         <button data-action="title">처음으로 <kbd>Esc</kbd></button>
       </div>
-      ${final && idleLeft !== null ? `<p class="note">${idleLeft}초 동안 아무것도 누르지 않으면 처음 화면으로 돌아가요</p>` : ''}
-    </div>`;
+    </div>
+    ${final && idleLeft !== null ? `<p class="victory-idle" data-result-idle ${idleLeft > 10 ? 'hidden' : ''}>${idleLeft}초 뒤 처음 화면으로 돌아가요</p>` : ''}
+  </main>`;
 }

@@ -881,6 +881,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
 
   /** 승리 꽃가루. 이긴 사람 쪽(1P 왼쪽, 2P 오른쪽)에 더 많이 뿌립니다. 무승부면 고르게 */
   function celebrate(winner) {
+    if (motionPreference.matches) return;
     for (let i = 0; i < 220; i++) {
       let x = Math.random() * layout.width;
       if (winner !== null && i % 3 !== 0) x = (winner === 0 ? 0 : layout.width / 2) + Math.random() * (layout.width / 2);

@@ -123,7 +123,7 @@ body:has(.title-screen) #sound-toggle { display: none; }
   z-index: 1;
   bottom: clamp(110px, 15vh, 165px);
   margin: 0;
-  width: clamp(200px, 23vw, 330px);
+  width: clamp(175px, 20vw, 285px);
 }
 .title-companion-left { right: calc(50% + 165px); transform: rotate(-5deg); }
 .title-companion-right { left: calc(50% + 165px); transform: rotate(5deg); }
@@ -173,7 +173,7 @@ body:has(.title-screen) #sound-toggle { display: none; }
 .title-actions {
   position: absolute;
   z-index: 3;
-  bottom: clamp(120px, 17vh, 182px);
+  bottom: clamp(58px, 8vh, 88px);
   left: 50%;
   display: flex;
   flex-direction: column;
@@ -187,7 +187,7 @@ body:has(.title-screen) #sound-toggle { display: none; }
   align-items: center;
   justify-content: center;
   gap: 15px;
-  height: 66px;
+  height: clamp(140px, 23vh, 220px);
   margin-bottom: 4px;
 }
 .title-treasure span {
@@ -197,8 +197,8 @@ body:has(.title-screen) #sound-toggle { display: none; }
 }
 .title-treasure span:last-child { transform: rotate(180deg); }
 .title-treasure-image {
-  width: 60px;
-  height: 60px;
+  width: clamp(140px, 23vh, 220px);
+  height: clamp(140px, 23vh, 220px);
   object-fit: contain;
   filter: drop-shadow(0 0 16px #fff4cc);
 }
@@ -254,17 +254,20 @@ body:has(.title-screen) #sound-toggle { display: none; }
 .title-footer p { margin: 0; font-size: 15px; line-height: 1.6; }
 .title-footer .inline-avatar { width: 25px; height: 25px; object-fit: contain; vertical-align: middle; }
 
+@media (min-height: 721px) and (max-height: 820px) and (min-width: 701px) {
+  .title-brand { top: 60px; }
+}
 @media (max-height: 720px) and (min-width: 701px) {
   .title-brand { top: 48px; }
   .title-eyebrow { margin-bottom: 12px; }
   .title-wordmark { font-size: 42px; }
   .title-wordmark span { font-size: 82px; }
   .title-description { margin-top: 16px; font-size: 17px; }
-  .title-actions { bottom: 80px; gap: 13px; width: 275px; }
-  .title-treasure { height: 43px; margin-bottom: 0; }
-  .title-treasure-image { width: 44px; height: 44px; }
+  .title-actions { bottom: 65px; gap: 13px; width: 275px; }
+  .title-treasure { height: clamp(110px, 21vh, 150px); margin-bottom: 0; }
+  .title-treasure-image { width: clamp(110px, 21vh, 150px); height: clamp(110px, 21vh, 150px); }
   .title-start { min-height: 62px; font-size: 25px; }
-  .title-companion { width: 240px; bottom: 75px; }
+  .title-companion { width: 210px; bottom: 75px; }
   .title-companion-left { right: calc(50% + 155px); }
   .title-companion-right { left: calc(50% + 155px); }
 }
@@ -278,7 +281,7 @@ body:has(.title-screen) #sound-toggle { display: none; }
   .title-wordmark { font-size: 38px; -webkit-text-stroke-width: 4px; }
   .title-wordmark span { font-size: clamp(54px, 12vw, 80px); -webkit-text-stroke-width: 6px; }
   .title-description { margin-top: 19px; font-size: 15px; }
-  .title-companion { width: clamp(135px, 32vw, 210px); bottom: 31vh; }
+  .title-companion { width: clamp(120px, 28vw, 185px); bottom: 31vh; }
   .title-companion-left { right: 50%; margin-right: 4vw; }
   .title-companion-right { left: 50%; margin-left: 4vw; }
   .title-companion figcaption { font-size: 10px; padding: 4px 9px 4px 5px; gap: 6px; }
@@ -299,7 +302,63 @@ body:has(.title-screen) #sound-toggle { display: none; }
   .title-treasure { display: none; }
   .title-start { min-height: 53px; font-size: 23px; }
   .title-howto { min-height: 35px; font-size: 15px; padding: 5px 18px; }
-  .title-companion { width: 190px; bottom: 55px; }
+  .title-companion { width: 170px; bottom: 55px; }
   .title-footer { bottom: 12px; }
   .title-tools { top: 14px; right: 14px; }
+}
+
+/* The campus is the main scene, with the two friends standing beside it. */
+.title-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 14px; padding: 62px 24px 22px; }
+.title-brand { position: relative; top: auto; left: auto; transform: none; justify-self: center; }
+.title-eyebrow { margin-bottom: 12px; }
+.title-wordmark { font-size: clamp(32px, 3.7vw, 48px); }
+.title-wordmark span { font-size: clamp(60px, 6.8vw, 90px); }
+.title-description { margin-top: 17px; font-size: 19px; }
+.title-campus-stage { position: relative; min-height: 0; width: min(1250px, 100%); justify-self: center; }
+.title-campus-image { display: block; position: absolute; inset: 0; margin: auto; width: 62%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 18px #254b3540); }
+.title-companion { width: clamp(160px, 19vw, 265px); bottom: 8px; }
+.title-companion-left { left: 1%; right: auto; }
+.title-companion-right { right: 1%; left: auto; }
+.title-actions { position: relative; bottom: auto; left: auto; transform: none; justify-self: center; gap: 12px; }
+.title-footer { position: relative; bottom: auto; left: auto; transform: none; justify-self: center; }
+@media (max-height: 720px) and (min-width: 701px) {
+  .title-screen { padding-top: 44px; padding-bottom: 14px; gap: 9px; }
+  .title-wordmark { font-size: 33px; }
+  .title-wordmark span { font-size: 64px; }
+  .title-description { margin-top: 10px; font-size: 16px; }
+  .title-companion { width: min(21vw, 175px); bottom: 4px; }
+  .title-start { min-height: 52px; }
+  .title-howto { min-height: 34px; padding: 5px 18px; }
+}
+@media (max-width: 700px) {
+  .title-screen { padding: 68px 12px 18px; gap: 12px; }
+  .title-brand { top: auto; }
+  .title-wordmark { font-size: 32px; }
+  .title-wordmark span { font-size: clamp(48px, 11vw, 70px); }
+  .title-description { font-size: 14px; margin-top: 12px; }
+  .title-campus-image { width: 100%; height: 78%; top: 0; bottom: auto; }
+  .title-companion { width: clamp(105px, 26vw, 160px); bottom: 0; margin: 0; }
+  .title-companion-left { left: 0; right: auto; }
+  .title-companion-right { right: 0; left: auto; }
+  .title-actions { bottom: auto; }
+  .title-footer { bottom: auto; }
+}
+@media (max-height: 500px) and (min-width: 701px) {
+  .title-screen { padding-top: 15px; gap: 5px; }
+  .title-wordmark { font-size: 27px; }
+  .title-wordmark span { font-size: 48px; }
+  .title-description { font-size: 13px; margin-top: 6px; }
+  .title-companion { width: 125px; }
+  .title-companion figcaption { margin-top: 0; padding: 3px 7px; font-size: 10px; }
+  .title-actions { flex-direction: row; width: 410px; gap: 12px; }
+  .title-start { min-height: 45px; font-size: 21px; }
+  .title-howto { flex-shrink: 0; }
+  .title-footer p { font-size: 11px; }
+}
+
+@media (min-width: 701px) {
+  .title-campus-stage { container-type: size; }
+  .title-companion { width: clamp(125px, 19cqw, 240px); bottom: 12px; }
+  .title-companion-left { left: auto; right: calc(50% + min(31cqw, 62.5cqh) + 8px); }
+  .title-companion-right { right: auto; left: calc(50% + min(31cqw, 62.5cqh) + 8px); }
 }

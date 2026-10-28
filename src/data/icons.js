@@ -1,9 +1,10 @@
+// school.webp uses a custom generated icon based on the user-provided school photo.
 // 게임 아이콘 목록. 그림은 Microsoft Fluent Emoji의 3D 스타일(MIT 라이선스)입니다.
 // 게임용 작은 그림(src/assets/icons/<id>.webp)은 `npm run icons`로 다시 받아서 만들 수 있습니다.
 // 저작권 표시: licenses/fluentui-emoji.txt
 
 export const ICONS = {
-  school: 'School/3D/school_3d.png',
+  school: null, // Custom school icon, generated from the user's Seodaejeon school photo.
   backpack: 'Backpack/3D/backpack_3d.png',
   box: 'Wrapped gift/3D/wrapped_gift_3d.png',
   web: 'Spider web/3D/spider_web_3d.png',
@@ -19,3 +20,6 @@ export const ICONS = {
   sparkles: 'Sparkles/3D/sparkles_3d.png',
   home: 'House with garden/3D/house_with_garden_3d.png',
 };
+
+// Local originals take priority when running npm run icons.
+export const CUSTOM_ICON_SOURCES = { school: 'ref/generated-originals/seodaejeon-school.png' };

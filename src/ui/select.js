@@ -1,55 +1,66 @@
-// 준비 화면: 캐릭터 선택(두 사람 동시에, 키보드로), 난이도, 판 수, 안개
-
+﻿// 준비 화면: 하나의 공용 명단에서 두 사람이 각자 친구를 고릅니다.
 import { DIFFICULTIES, DIFFICULTY_ORDER, PLAYERS } from '../config.js';
+import selectionPlinthUrl from '../assets/garden/selection-plinth.webp';
 import { CHARACTERS, characterImg, animatedCharacterImg } from '../render/characters.js';
 
 export const GRID_COLUMNS = 4;
+const kbds = (keys) => keys.map(key => `<kbd>${key}</kbd>`).join('');
 
-export function selectScreen({ settings, cursors, ready }) {
-  const panels = PLAYERS.map((p, i) => {
-    const chars = CHARACTERS.map((c, k) => {
-      const taken = cursors[1 - i] === k;
-      const classes = ['char', cursors[i] === k ? 'selected' : '', taken ? 'taken' : ''].join(' ');
-      return `<button class="${classes}" data-action="pick:${i}:${k}" title="${c.name} (${c.type})" ${taken ? 'disabled' : ''}>
-          ${(cursors[i] === k ? animatedCharacterImg(c.id, 'char-img') : characterImg(c.id, 'char-img'))}<small>${c.name}</small></button>`;
-    }).join('');
-    const keys = i === 0
-      ? '이동 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · 준비 <kbd>Q</kbd> · 취소 <kbd>E</kbd>'
-      : '이동 <kbd>←</kbd><kbd>→</kbd><kbd>↑</kbd><kbd>↓</kbd> · 준비 <kbd>1</kbd> · 취소 <kbd>2</kbd>';
-    return `
-      <section class="select-panel p${i + 1}${ready[i] ? ' ready' : ''}">
-        <h3><span class="badge">${p.label}</span> ${characterImg(CHARACTERS[cursors[i]].id, 'inline-avatar')} ${CHARACTERS[cursors[i]].name}</h3>
-        <div class="char-grid">${chars}</div>
-        <p class="select-keys">${keys}</p>
-        <button class="ready-btn" data-action="ready:${i}">${ready[i] ? '✔ 준비 완료!' : '준비하기'}</button>
-      </section>`;
-  });
-
-  const difficulty = DIFFICULTY_ORDER.map((key, k) => {
-    const d = DIFFICULTIES[key];
-    return `<button class="choice${key === settings.difficulty ? ' selected' : ''}" data-action="difficulty:${key}">
-        <kbd>${k + 1}</kbd><b>${d.label}</b><small>${d.width}×${d.height} · 시야 ${d.vision.radius}칸</small></button>`;
+export function selectScreen({ settings, cursors, ready, activePlayer = 0 }) {
+  const active = activePlayer === 1 ? 1 : 0;
+  const bothReady = ready.every(Boolean);
+  const player = (index) => {
+    const config = PLAYERS[index], c = CHARACTERS[cursors[index]];
+    return `<section class="recruit-player p${index + 1}${ready[index] ? ' is-ready' : ''}" aria-label="${config.label} 캐릭터">
+      <button class="recruit-player-label" data-action="select-player:${index}" aria-pressed="${active === index}"><b>${config.label}</b><span>${ready[index] ? '함께 갈 준비 끝!' : '나의 모험 친구'}</span></button>
+      <button class="recruit-portrait" data-action="select-player:${index}" aria-label="${config.label} 고르기">
+        <span class="recruit-halo" aria-hidden="true"></span>
+        <img class="recruit-plinth" src="${selectionPlinthUrl}" alt="" draggable="false" />
+        ${animatedCharacterImg(c.id, 'recruit-avatar')}
+        ${ready[index] ? '<span class="recruit-ready-seal">준비 완료</span>' : ''}
+      </button>
+      <h2 class="recruit-name">${c.name}</h2>
+      <p class="recruit-move">${kbds(config.keyLabels.move)}<span>고르기</span></p>
+      <button class="recruit-ready" data-action="ready:${index}" aria-pressed="${ready[index]}">${ready[index] ? '준비 취소' : '이 친구로 준비!'} <kbd>${ready[index] ? config.keyLabels.item2 : config.keyLabels.item1}</kbd></button>
+      <p class="recruit-key-note">${index === 0 ? '다시 고르기 E' : '숫자패드 1·2 / 노트북 .·/'}</p>
+    </section>`;
+  };
+  const roster = CHARACTERS.map((c, index) => {
+    const pickedBy = cursors.indexOf(index);
+    const taken = pickedBy === 1 - active;
+    return `<button class="roster-character${pickedBy >= 0 ? ` is-picked p${pickedBy + 1}` : ''}${cursors[active] === index ? ' is-active' : ''}" data-action="pick:${active}:${index}" aria-label="${c.name} 선택" aria-pressed="${cursors[active] === index}" title="${c.name}" ${taken || ready[active] ? 'disabled' : ''}>
+      ${pickedBy >= 0 ? `<span class="roster-player-tag">${PLAYERS[pickedBy].label}</span>` : ''}
+      ${characterImg(c.id, 'roster-avatar')}
+    </button>`;
   }).join('');
-
-  const bothReady = ready[0] && ready[1];
-  return `
-    <div class="card select-card">
-      <h2>${bothReady ? '둘 다 준비 완료! 곧 시작해요' : '캐릭터와 규칙을 골라요'}</h2>
-      <div class="select-layout">
-        ${panels[0]}
-        <section class="select-options">
-          <h3>난이도</h3>
-          <div class="difficulty">${difficulty}</div>
-          <h3>판 수</h3>
-          <button class="toggle" data-action="bestOf"><kbd>4</kbd> ${settings.bestOf === 1 ? '단판승' : '3판 2선승'}</button>
-          <h3>시야</h3>
-          <button class="toggle" data-action="fog"><kbd>5</kbd> ${settings.fog ? '안개 켬 (주변만 보임)' : '안개 끔 (미로 전체 보기)'}</button>
-        </section>
-        ${panels[1]}
+  const difficulties = DIFFICULTY_ORDER.map((id, index) =>
+    `<button class="course-choice${settings.difficulty === id ? ' is-chosen' : ''}" data-action="difficulty:${id}" aria-pressed="${settings.difficulty === id}" aria-keyshortcuts="${index + 1}">${DIFFICULTIES[id].label}</button>`
+  ).join('');
+  return `<main class="garden-select select-card" aria-labelledby="recruit-title">
+    <header class="recruit-header">
+      <button class="garden-back" data-action="title">돌아가기 <kbd>Esc</kbd></button>
+      <p class="garden-eyebrow">오늘의 등하굣길, 누구와 달려 볼까요?</p>
+      <h1 id="recruit-title">함께 달릴 친구를 골라요</h1>
+      <p class="recruit-instruction" aria-live="polite">${bothReady ? '둘 다 준비 완료! 곧 출발해요!' : '마음에 드는 친구를 고르고, 준비 버튼을 눌러요'}</p>
+    </header>
+    <div class="recruitment-layout">
+      ${player(0)}
+      <section class="recruit-board" aria-label="캐릭터 명단">
+        <div class="recruit-mouse-tabs" role="group" aria-label="마우스로 고를 플레이어">
+          ${PLAYERS.map((p, i) => `<button class="p${i + 1}${active === i ? ' is-active' : ''}" data-action="select-player:${i}" aria-pressed="${active === i}">${p.label} 고르기</button>`).join('')}
+        </div>
+        <div class="recruit-roster" role="group" aria-label="16명의 모험 친구">${roster}</div>
+        <p class="roster-hint">${ready[active] ? `${PLAYERS[active].label} 준비 완료! 다시 고르려면 준비를 취소해요` : `클릭하면 ${PLAYERS[active].label}의 친구가 바뀌어요`}</p>
+      </section>
+      ${player(1)}
+    </div>
+    <footer class="recruit-footer">
+      <div class="recruit-rules" aria-label="대결 설정">
+        <div class="course-options"><span>난이도</span><div role="group" aria-label="난이도">${difficulties}</div></div>
+        <button class="garden-setting" data-action="bestOf" aria-keyshortcuts="4">${settings.bestOf === 1 ? '한 판 승부' : '3판 2선승'} <span>변경</span></button>
+        <button class="garden-setting" data-action="fog" aria-pressed="${settings.fog}" aria-keyshortcuts="5">안개 ${settings.fog ? '켬' : '끔'} <span>변경</span></button>
       </div>
-      <div class="menu row">
-        <button data-action="title">뒤로 <kbd>Esc</kbd></button>
-        <button class="primary" data-action="start">바로 시작! <kbd>Enter</kbd></button>
-      </div>
-    </div>`;
+      <button class="garden-primary recruit-start" data-action="start">이대로 출발! <kbd>Enter</kbd></button>
+    </footer>
+  </main>`;
 }

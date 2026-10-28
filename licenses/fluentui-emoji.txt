@@ -1,3 +1,5 @@
+school.webp is a custom AI-generated asset based on the user-provided Seodaejeon school photo and is excluded from the following Fluent Emoji attribution.
+
 게임 아이콘(src/assets/icons)은 Microsoft Fluent Emoji (https://github.com/microsoft/fluentui-emoji)의 3D 그림을 줄여서 썼습니다.
 
     MIT License
