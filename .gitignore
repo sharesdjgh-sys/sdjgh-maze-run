@@ -5,3 +5,12 @@ dist-offline/
 *.log
 .DS_Store
 .playwright-mcp/
+
+# ref/: 화면 캡처, 미리보기, 빌드 보고서, 참고 사진처럼 다시 만들 수 있거나 참고만 하는 파일은 올리지 않습니다.
+# (원본 그림 폴더 ref/*-originals/, 기획서·기록(md·json), 원본 요약(txt)은 올립니다.)
+ref/*.png
+ref/*.jpg
+ref/*.jpeg
+ref/*.webp
+ref/*.html
+ref/character-animation-build.json

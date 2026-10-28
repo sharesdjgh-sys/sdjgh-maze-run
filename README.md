@@ -36,7 +36,7 @@ npm run dev      # http://localhost:5173 을 브라우저로 열기
 
 정원 테마의 공용 캐릭터 명단과 두 사람의 큰 미리보기에서 친구를 고릅니다. 승리 화면은 우승 캐릭터·시상대·축하 연출을 중심으로 구성하며, 시리즈 승수는 별로 표시합니다.
 
-[선택 화면](ref/after-selection-redesign-1440.png) · [승리 화면](ref/after-victory-redesign-1440.png) · [놀이 방법](ref/after-howto-redesign-1440.png) · [디자인·검증 기록](ref/garden-menu-redesign.md)
+[디자인·검증 기록](ref/garden-menu-redesign.md) (기록에 나오는 화면 캡처는 저장소에 올리지 않고 각자 컴퓨터의 `ref/`에만 둡니다)
 
 ## 캐릭터 움직임
 
@@ -45,7 +45,7 @@ npm run dev      # http://localhost:5173 을 브라우저로 열기
 - 원본: `ref/character-animation-originals/`
 - 게임용 시트 다시 만들기: `npm run animations`
 - 움직임 미리보기 다시 만들기: `npm run animations:preview`
-- [대기·걷기 미리보기](ref/character-animation-preview.html) · [움직이는 WebP](ref/character-motion-demo.webp) · [제작·검증 기록](ref/character-animation-notes.md)
+- 미리보기(`ref/character-animation-preview.html`, `ref/character-motion-demo.webp`)는 `npm run animations:preview`로 만들 수 있어요. (저장소에는 올리지 않음) · [제작·검증 기록](ref/character-animation-notes.md)
 
 ## 미로 목록 다시 만들기
 
@@ -93,4 +93,4 @@ npm run build:offline
 - 효과음: Web Audio로 코드에서 직접 만듦 (음원 파일 없음)
 - 개발: Claude Code
 
-- 서대전여고 학교 그림: 사용자 제공 사진을 참고해 내장 imagegen으로 제작. [생성 기록](ref/seodaejeon-school-icon-prompt.json), [최종 첫 화면](ref/after-title-school-and-friends.png). 첫 화면용 캠퍼스는 `node scripts/build-garden-assets.mjs`, 게임용 아이콘은 `npm run icons`로 재가공합니다.
+- 서대전여고 학교 그림: 사용자 제공 사진을 참고해 내장 imagegen으로 제작. [생성 기록](ref/seodaejeon-school-icon-prompt.json). 참고한 학교 사진(`ref/서대전여고.jpg`)은 저장소에 올리지 않습니다. 첫 화면용 캠퍼스는 `node scripts/build-garden-assets.mjs`, 게임용 아이콘은 `npm run icons`로 재가공합니다.
