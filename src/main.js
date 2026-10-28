@@ -4,6 +4,7 @@
 import '@fontsource/jua';
 import './styles/main.css';
 import './styles/title.css';
+import './styles/character-animation.css';
 import {
   DEFAULT_SETTINGS,
   DIFFICULTIES,
@@ -26,7 +27,7 @@ import { distanceAt } from './game/maze.js';
 import { createMatch, pauseMatch, resumeMatch, updateMatch } from './game/match.js';
 import { createSeries, recordResult, seriesWinner, startNextRound } from './game/series.js';
 import { MAZE_POOL } from './data/mazePool.js';
-import { CHARACTERS, preloadCharacters } from './render/characters.js';
+import { CHARACTERS, preloadCharacters, installCharacterAnimationElements } from './render/characters.js';
 import { createRenderer } from './render/renderer.js';
 import { createVfx, handleVfxEvent, updateVfx } from './render/vfx.js';
 import { errorScreen } from './ui/error.js';
@@ -49,6 +50,7 @@ PLAYERS.forEach((p, i) => {
 });
 document.fonts?.load('32px Jua').catch(() => {});
 preloadCharacters();
+installCharacterAnimationElements();
 
 const settings = loadSettings();
 const app = {

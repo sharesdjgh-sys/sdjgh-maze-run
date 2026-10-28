@@ -1,9 +1,10 @@
-// 캐릭터 그림과 이모지 그림 캐시
-// 캐릭터는 src/assets/characters/<id>.webp 그림을 쓰고, 보물·아이템·함정은 이모지를 씁니다.
+// 캐릭터 정지 그림·애니메이션 시트와 3D 아이콘 캐시
+// 애니메이션은 src/assets/animations/<id>.webp의 4열 × 2행 프레임을 사용합니다.
 // 매 프레임 큰 그림을 줄여 그리면 느리고 흐릿하므로, 크기별로 한 번만 곱게 줄여 두고 찍습니다.
 
 import { CHARACTERS } from '../data/characters.js';
 import { ICONS } from '../data/icons.js';
+import { CHARACTER_SHEET } from './character-animation.js';
 
 export { CHARACTERS };
 
@@ -19,6 +20,7 @@ const ICON_FALLBACK = {
 };
 
 const imageUrls = import.meta.glob('../assets/characters/*.webp', { eager: true, query: '?url', import: 'default' });
+const animationUrls = import.meta.glob('../assets/animations/*.webp', { eager: true, query: '?url', import: 'default' });
 const iconUrls = import.meta.glob('../assets/icons/*.webp', { eager: true, query: '?url', import: 'default' });
 
 export function iconUrl(id) {
@@ -44,9 +46,27 @@ export function characterImg(id, className = 'avatar') {
   return `<img class="${className}" src="${characterImageUrl(c.id)}" alt="${c.name}" draggable="false" />`;
 }
 
+/** 메뉴용 애니메이션. 시트를 못 불러온 경우 기존 정지 그림을 그대로 보여 줍니다. */
+export function animatedCharacterImg(id, className = 'avatar', motion = 'idle') {
+  const c = getCharacter(id);
+  const url = animationUrls[`../assets/animations/${c.id}.webp`];
+  if (!url) return characterImg(c.id, className);
+  return `<span class="${className} char-animation" role="img" aria-label="${c.name}" data-motion="${motion}">
+    <img class="character-still" src="${characterImageUrl(c.id)}" alt="" draggable="false" />
+    <img class="character-atlas" src="${url}" alt="" draggable="false" />
+  </span>`;
+}
+
+export function installCharacterAnimationElements(root = document) {
+  root.addEventListener('load', (event) => {
+    if (event.target.matches?.('.character-atlas')) event.target.parentElement.dataset.animationReady = 'true';
+  }, true);
+}
+
 // 캔버스용 그림을 미리 불러 둡니다. 다 불러오기 전에는 getCharacterSprite가 null을 돌려줍니다.
 const images = new Map();
 const iconImages = new Map();
+const animationImages = new Map();
 function loadImage(map, key, src) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -58,11 +78,12 @@ function loadImage(map, key, src) {
 export function preloadCharacters() {
   return Promise.all([
     ...CHARACTERS.map((c) => loadImage(images, c.id, characterImageUrl(c.id))),
+    ...CHARACTERS.filter(c => animationUrls[`../assets/animations/${c.id}.webp`]).map(c => loadImage(animationImages, c.id, animationUrls[`../assets/animations/${c.id}.webp`])),
     ...Object.keys(ICONS).map((id) => loadImage(iconImages, id, iconUrl(id))),
   ]);
 }
 
-function scaledSprite(img, key, cssSize, dpr) {
+function scaledSprite(img, key, cssSize, dpr, region = null) {
   const px = Math.max(8, Math.round(cssSize * dpr));
   const cacheKey = `${key}|${px}`;
   let sprite = spriteCache.get(cacheKey);
@@ -72,7 +93,8 @@ function scaledSprite(img, key, cssSize, dpr) {
     const g = sprite.getContext('2d');
     g.imageSmoothingEnabled = true;
     g.imageSmoothingQuality = 'high';
-    g.drawImage(img, 0, 0, px, px);
+    if (region) g.drawImage(img, ...region, 0, 0, px, px);
+    else g.drawImage(img, 0, 0, px, px);
     spriteCache.set(cacheKey, sprite);
   }
   return sprite;
@@ -88,8 +110,14 @@ export function getIconSprite(id, cssSize, dpr) {
 const EMOJI_FONT = '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';
 const spriteCache = new Map();
 
-/** cssSize 크기의 캐릭터 그림 (화면 배율 dpr 반영). 아직 못 불러왔으면 null */
-export function getCharacterSprite(id, cssSize, dpr) {
+/** frame을 주면 해당 애니메이션 프레임, 준비 전에는 정지 그림을 반환합니다. dpr은 화면 배율입니다. */
+export function getCharacterSprite(id, cssSize, dpr, frame = null) {
+  const sheet = animationImages.get(id);
+  if (frame !== null && sheet?.complete && sheet.naturalWidth) {
+    const index = Math.min(CHARACTER_SHEET.frames - 1, Math.max(0, Math.floor(frame)));
+    const w = sheet.naturalWidth / CHARACTER_SHEET.columns, h = sheet.naturalHeight / CHARACTER_SHEET.rows;
+    return scaledSprite(sheet, 'animation|' + id + '|' + index, cssSize, dpr, [(index % CHARACTER_SHEET.columns) * w, Math.floor(index / CHARACTER_SHEET.columns) * h, w, h]);
+  }
   const img = images.get(id);
   if (!img?.complete || !img.naturalWidth) return null;
   return scaledSprite(img, `char|${id}`, cssSize, dpr);

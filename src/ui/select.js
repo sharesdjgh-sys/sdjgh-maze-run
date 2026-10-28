@@ -1,7 +1,7 @@
 // 준비 화면: 캐릭터 선택(두 사람 동시에, 키보드로), 난이도, 판 수, 안개
 
 import { DIFFICULTIES, DIFFICULTY_ORDER, PLAYERS } from '../config.js';
-import { CHARACTERS, characterImg } from '../render/characters.js';
+import { CHARACTERS, characterImg, animatedCharacterImg } from '../render/characters.js';
 
 export const GRID_COLUMNS = 4;
 
@@ -11,7 +11,7 @@ export function selectScreen({ settings, cursors, ready }) {
       const taken = cursors[1 - i] === k;
       const classes = ['char', cursors[i] === k ? 'selected' : '', taken ? 'taken' : ''].join(' ');
       return `<button class="${classes}" data-action="pick:${i}:${k}" title="${c.name} (${c.type})" ${taken ? 'disabled' : ''}>
-          ${characterImg(c.id, 'char-img')}<small>${c.name}</small></button>`;
+          ${(cursors[i] === k ? animatedCharacterImg(c.id, 'char-img') : characterImg(c.id, 'char-img'))}<small>${c.name}</small></button>`;
     }).join('');
     const keys = i === 0
       ? '이동 <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> · 준비 <kbd>Q</kbd> · 취소 <kbd>E</kbd>'

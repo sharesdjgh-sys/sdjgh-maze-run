@@ -1,0 +1,123 @@
+﻿{
+  "generator": "built-in image_gen",
+  "layout": {
+    "columns": 4,
+    "rows": 2,
+    "idle": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "walk": [
+      4,
+      5,
+      6,
+      7
+    ]
+  },
+  "prompts": [
+    "Use case: identity-preserve. Asset type: production game animation sprite sheet. Input image 1 is the character identity reference, not a layout. Create an animation atlas of THIS EXACT cream kitten, with the same pink hoodie, orange and white fur markings, round headphones, fluffy curled tail, eyes and soft polished 3D storybook rendering. Actual transparent background.\nLAYOUT IS CRITICAL: landscape canvas 2:1 aspect ratio, exact 4 columns by 2 rows of equal square cells. Exactly eight separate FULL BODY instances, one centered within each cell, no overlap, consistent character height 80% of the cell, feet aligned to same baseline at 91% of each cell height. Keep 8% empty padding on all sides, including ears and tail. No grid lines or labels.\nAnimation frames in reading order: TOP ROW 4 idle frames: 1 relaxed neutral eyes open, 2 gently inhale body raised slightly and tail sways, 3 eyes closed in a cute blink with slight head tilt, 4 relaxed eyes open with tail returned. BOTTOM ROW 4 looping walk-in-place frames: 1 left foot forward right foot back arms opposite, 2 feet passing underneath body, 3 right foot forward left foot back arms opposite, 4 feet passing with opposite arm swing. Front-facing slight three-quarter view maintained in every frame, no change of camera. Clear alternating leg poses and hand motion, not eight duplicates. Same anatomy, proportions, clothing and accessories across all eight frames. Hands empty except existing headphone gesture. No ground shadows, no floor, no text, no objects, no new costume, no checkerboard texture. Crisp alpha edges, high quality cohesive game sprites.",
+    "Use case: identity-preserve. Asset type: production game animation sprite sheet. Input image 1 is the character identity reference. Create a polished animation atlas of THIS EXACT CHARACTER with all its existing clothing, fur/feathers/scales colors, accessories and proportions preserved. Copy the rendering style and recognizable face of the reference. Actual transparent background with clean alpha, no background painted in.\nCRITICAL LAYOUT: landscape 2:1 canvas, exactly FOUR COLUMNS by TWO ROWS of equal square cells, exactly eight separate FULL BODY instances. Each instance centered inside its own cell at identical scale; same baseline for feet at 88% of cell height. Character height 76% of the cell. Leave generous empty 10% padding around ears, feet, wings and tails. Never touch neighboring frames.\nTOP ROW four distinct IDLE frames in order: 1 relaxed eyes open, 2 gentle inhale body slightly raised and ears/tail/wing tips subtly lifted, 3 eyes CLOSED in a cute blink and slight head tilt, 4 relaxed eyes open ears/tail settle back.\nBOTTOM ROW four distinct WALK-IN-PLACE frames in order: 1 left foot visibly forward, right foot back with opposite arm motion, 2 feet passing under body, 3 right foot visibly forward, left foot back with opposite arm motion, 4 feet passing with opposite arm motion. Clear alternating leg positions and natural arm/wing movement, not repeated identical poses. Keep existing held accessories in the same hands, do not add props. For birds use feet waddling and subtle wing movement.\nKeep camera and three-quarter front viewing angle fixed, same coherent anatomy and costume in every cell. No ground plane, no cast ground shadow, no text, no frame borders, no labels, no checkerboard background. High quality coherent game character assets, sharp readable silhouette, soft storybook 3D shading. Image 1 is a visual identity reference, not a sheet layout.",
+    "Use case: identity-preserve. Asset type: production game animation sprite sheet. Input image 1 is the character identity reference. Create a polished animation atlas of THIS EXACT CHARACTER with all its existing clothing, fur/feathers/scales colors, accessories and proportions preserved. Copy the rendering style and recognizable face of the reference. Actual transparent background with clean alpha, no background painted in.\nCRITICAL LAYOUT: landscape 2:1 canvas, exactly FOUR COLUMNS by TWO ROWS of equal square cells, exactly eight separate FULL BODY instances. Each instance centered inside its own cell at identical scale; same baseline for feet at 88% of cell height. Character height 76% of the cell. Leave generous empty 10% padding around ears, feet, wings and tails. Never touch neighboring frames.\nTOP ROW four distinct IDLE frames in order: 1 relaxed eyes open, 2 gentle inhale body slightly raised and ears/tail/wing tips subtly lifted, 3 eyes CLOSED in a cute blink and slight head tilt, 4 relaxed eyes open ears/tail settle back.\nBOTTOM ROW four distinct WALK-IN-PLACE frames in order: 1 left foot visibly forward, right foot back with opposite arm motion, 2 feet passing under body, 3 right foot visibly forward, left foot back with opposite arm motion, 4 feet passing with opposite arm motion. Clear alternating leg positions and natural arm/wing movement, not repeated identical poses. Keep existing held accessories in the same hands, do not add props. For birds use feet waddling and subtle wing movement.\nKeep camera and three-quarter front viewing angle fixed, same coherent anatomy and costume in every cell. No ground plane, no cast ground shadow, no text, no frame borders, no labels, no checkerboard background. High quality coherent game character assets, sharp readable silhouette, soft storybook 3D shading. Image 1 is a visual identity reference, not a sheet layout.\nIf the reference has a seated or lifted-leg pose, place this character standing in the idle row and walking in the walk row, while preserving its outfit and held accessories.",
+    "Use case: identity-preserve. Asset type: production game animation sprite sheet. Input image 1 is the character identity reference. Create a polished animation atlas of THIS EXACT CHARACTER with all its existing clothing, fur/feathers/scales colors, accessories and proportions preserved. Copy the rendering style and recognizable face of the reference. Actual transparent background with clean alpha, no background painted in.\nCRITICAL LAYOUT: landscape 2:1 canvas, exactly FOUR COLUMNS by TWO ROWS of equal square cells, exactly eight separate FULL BODY instances. Each instance centered inside its own cell at identical scale; same baseline for feet at 88% of cell height. Character height 76% of the cell. Leave generous empty 10% padding around ears, feet, wings and tails. Never touch neighboring frames.\nTOP ROW four distinct IDLE frames in order: 1 relaxed eyes open, 2 gentle inhale body slightly raised and ears/tail/wing tips subtly lifted, 3 eyes CLOSED in a cute blink and slight head tilt, 4 relaxed eyes open ears/tail settle back.\nBOTTOM ROW four distinct WALK-IN-PLACE frames in order: 1 left foot visibly forward, right foot back with opposite arm motion, 2 feet passing under body, 3 right foot visibly forward, left foot back with opposite arm motion, 4 feet passing with opposite arm motion. Clear alternating leg positions and natural arm/wing movement, not repeated identical poses. Keep existing held accessories in the same hands, do not add props. For birds use feet waddling and subtle wing movement.\nKeep camera and three-quarter front viewing angle fixed, same coherent anatomy and costume in every cell. No ground plane, no cast ground shadow, no text, no frame borders, no labels, no checkerboard background. High quality coherent game character assets, sharp readable silhouette, soft storybook 3D shading. Image 1 is a visual identity reference, not a sheet layout.\nIf the reference is seated, retain the same character and clothing but show a standing idle pose and a walking pose with visible feet in the corresponding rows."
+  ],
+  "assets": [
+    {
+      "id": "cat",
+      "reference": "src/assets/characters/cat.webp",
+      "original": "ref/character-animation-originals/cat.png",
+      "promptIndex": 0
+    },
+    {
+      "id": "dog",
+      "reference": "src/assets/characters/dog.webp",
+      "original": "ref/character-animation-originals/dog.png",
+      "promptIndex": 1
+    },
+    {
+      "id": "fennec",
+      "reference": "src/assets/characters/fennec.webp",
+      "original": "ref/character-animation-originals/fennec.png",
+      "promptIndex": 1
+    },
+    {
+      "id": "parrot",
+      "reference": "src/assets/characters/parrot.webp",
+      "original": "ref/character-animation-originals/parrot.png",
+      "promptIndex": 1
+    },
+    {
+      "id": "rabbit",
+      "reference": "src/assets/characters/rabbit.webp",
+      "original": "ref/character-animation-originals/rabbit.png",
+      "promptIndex": 2
+    },
+    {
+      "id": "penguin",
+      "reference": "src/assets/characters/penguin.webp",
+      "original": "ref/character-animation-originals/penguin.png",
+      "promptIndex": 2
+    },
+    {
+      "id": "quokka",
+      "reference": "src/assets/characters/quokka.webp",
+      "original": "ref/character-animation-originals/quokka.png",
+      "promptIndex": 2
+    },
+    {
+      "id": "husky",
+      "reference": "src/assets/characters/husky.webp",
+      "original": "ref/character-animation-originals/husky.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "raccoon",
+      "reference": "src/assets/characters/raccoon.webp",
+      "original": "ref/character-animation-originals/raccoon.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "beaver",
+      "reference": "src/assets/characters/beaver.webp",
+      "original": "ref/character-animation-originals/beaver.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "otter",
+      "reference": "src/assets/characters/otter.webp",
+      "original": "ref/character-animation-originals/otter.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "bear",
+      "reference": "src/assets/characters/bear.webp",
+      "original": "ref/character-animation-originals/bear.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "fox",
+      "reference": "src/assets/characters/fox.webp",
+      "original": "ref/character-animation-originals/fox.png",
+      "promptIndex": 3
+    },
+    {
+      "id": "owl",
+      "reference": "src/assets/characters/owl.webp",
+      "original": "ref/character-animation-originals/owl.png",
+      "promptIndex": 1
+    },
+    {
+      "id": "chameleon",
+      "reference": "src/assets/characters/chameleon.webp",
+      "original": "ref/character-animation-originals/chameleon.png",
+      "promptIndex": 1
+    },
+    {
+      "id": "deer",
+      "reference": "src/assets/characters/deer.webp",
+      "original": "ref/character-animation-originals/deer.png",
+      "promptIndex": 1
+    }
+  ]
+}

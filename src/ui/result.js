@@ -2,7 +2,7 @@
 
 import { DIFFICULTIES, PLAYERS } from '../config.js';
 import { seriesWinner } from '../game/series.js';
-import { characterImg, getCharacter, iconImg } from '../render/characters.js';
+import { characterImg, getCharacter, iconImg, animatedCharacterImg } from '../render/characters.js';
 import { formatTime } from './format.js';
 
 export function resultScreen({ match, series, idleLeft }) {
@@ -12,7 +12,7 @@ export function resultScreen({ match, series, idleLeft }) {
   const champion = seriesWinner(series);
   const final = champion !== null;
   const badge = (i) => `<span class="badge p${i + 1}">${PLAYERS[i].label}</span>`;
-  const hero = (id) => characterImg(id, 'hero-avatar');
+  const hero = (id) => animatedCharacterImg(id, 'hero-avatar');
 
   let headline;
   let heroHtml;

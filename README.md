@@ -31,6 +31,16 @@ npm run dev      # http://localhost:5173 을 브라우저로 열기
 2. `src/data/characters.js`에서 캐릭터 이름과 파일 이름을 맞춥니다.
 3. `npm run characters`를 실행하면 `src/assets/characters/`에 게임용 그림(256px WebP)이 만들어집니다.
 
+
+## 캐릭터 움직임
+
+16종 모두 대기 4프레임과 걷기 4프레임을 사용합니다. 게임 이동에 따라 발걸음이 바뀌며, 타이틀·선택·결과 화면에서도 대기 움직임이 재생됩니다.
+
+- 원본: `ref/character-animation-originals/`
+- 게임용 시트 다시 만들기: `npm run animations`
+- 움직임 미리보기 다시 만들기: `npm run animations:preview`
+- [대기·걷기 미리보기](ref/character-animation-preview.html) · [움직이는 WebP](ref/character-motion-demo.webp) · [제작·검증 기록](ref/character-animation-notes.md)
+
 ## 미로 목록 다시 만들기
 
 미로는 난이도마다 미리 골라 둔 50개(`src/data/mazePool.js`)를 섞어서 차례대로 씁니다. 50판을 다 할 때까지 같은 미로가 다시 나오지 않습니다.

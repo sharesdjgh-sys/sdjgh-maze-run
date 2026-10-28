@@ -1,5 +1,5 @@
 // 정원 풍경 위에 놓이는 타이틀 화면
-import { CHARACTERS, characterImg, iconImg } from '../render/characters.js';
+import { CHARACTERS, characterImg, iconImg, animatedCharacterImg } from '../render/characters.js';
 
 /** record: 오늘의 전적 { matches, wins: { 캐릭터id: 승수 } } */
 export function titleScreen({ settings, muted, record }) {
@@ -18,11 +18,11 @@ export function titleScreen({ settings, muted, record }) {
       </header>
 
       <figure class="title-companion title-companion-left">
-        <div class="title-companion-art">${characterImg(c1, 'title-character')}</div>
+        <div class="title-companion-art">${animatedCharacterImg(c1, 'title-character')}</div>
         <figcaption><b>1P</b><span>W A S D</span></figcaption>
       </figure>
       <figure class="title-companion title-companion-right">
-        <div class="title-companion-art">${characterImg(c2, 'title-character')}</div>
+        <div class="title-companion-art">${animatedCharacterImg(c2, 'title-character')}</div>
         <figcaption><b>2P</b><span>방향키</span></figcaption>
       </figure>
 

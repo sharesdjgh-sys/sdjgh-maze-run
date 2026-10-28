@@ -1,0 +1,114 @@
+[
+  {
+    "id": "cat",
+    "bytes": 155122,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "fennec",
+    "bytes": 176682,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "parrot",
+    "bytes": 181616,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "dog",
+    "bytes": 160886,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "rabbit",
+    "bytes": 148094,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "penguin",
+    "bytes": 140116,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "quokka",
+    "bytes": 158690,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "husky",
+    "bytes": 160672,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "raccoon",
+    "bytes": 153640,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "beaver",
+    "bytes": 160820,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "otter",
+    "bytes": 159342,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "bear",
+    "bytes": 135378,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "fox",
+    "bytes": 163448,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "owl",
+    "bytes": 177442,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "chameleon",
+    "bytes": 192442,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  },
+  {
+    "id": "deer",
+    "bytes": 166476,
+    "frames": 8,
+    "width": 1024,
+    "height": 512
+  }
+]

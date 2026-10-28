@@ -5,6 +5,7 @@
 // 보물·상자·아이템·함정 그림은 3D 아이콘(Microsoft Fluent Emoji, MIT)입니다.
 
 import { ITEMS, ITEM_RULES, LOOP, MATCH, MOVE, PLAYERS, VFX, VISION } from '../config.js';
+import { characterAnimation } from './character-animation.js';
 import { loadGardenAssets, texturePattern } from './garden.js';
 import { DIRS } from '../game/dir.js';
 import { shortestPath } from '../game/maze.js';
@@ -74,6 +75,7 @@ export function computeLayout(width, height, mazeWidth, mazeHeight) {
 
 export function createRenderer(canvas, { debug = false } = {}) {
   const ctx = canvas.getContext('2d');
+  const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let dpr = 1;
   let layout = null;
   let maze = null;
@@ -181,7 +183,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     drawDarkClouds(match, cell, extraTime);
     drawFlashlights(match, cell, extraTime);
     drawTreasure(toPx(match.maze.treasure.x, match.maze.treasure.y), cell, now, match);
-    for (const player of match.players) drawPlayer(player, cell, extraTime, now);
+    for (const player of match.players) drawPlayer(player, cell, extraTime, now, match.time + extraTime);
     for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
     if (vfx) {
       drawParticles(vfx, cell);
@@ -425,7 +427,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.fill();
   }
 
-  function drawPlayer(player, cell, extraTime, now) {
+  function drawPlayer(player, cell, extraTime, now, animationTime) {
     const config = PLAYERS[player.index];
     const fx = player.effects;
     const pos = playerRenderPosition(player, extraTime);
@@ -446,7 +448,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
       x += Math.sin(now * 38) * amp * cell;
     }
     const stepT = player.moveTimer > 0 ? 1 - Math.max(0, player.moveTimer - extraTime) / player.moveDuration : 0;
-    const hop = Math.sin(stepT * Math.PI) * cell * 0.08;
+    const pose = characterAnimation(player, animationTime, extraTime, { reducedMotion: motionPreference.matches });
+    const hop = pose.walking ? Math.sin(stepT * Math.PI) * cell * 0.06 : 0;
     const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
     const top = y - hop;
 
@@ -484,8 +487,14 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.beginPath();
     ctx.ellipse(x, ringY, r * 0.95, r * 0.36, 0, 0, Math.PI * 2);
     ctx.stroke();
-    const sprite = getCharacterSprite(player.character, r * CHARACTER_SCALE, dpr);
-    if (sprite) drawSprite(sprite, x, top - r * 0.35, 1, blink);
+    const sprite = getCharacterSprite(player.character, r * CHARACTER_SCALE, dpr, pose.frame);
+    if (sprite) {
+      ctx.save();
+      ctx.translate(x, top - r * 0.35);
+      ctx.scale(pose.flip ? -1 : 1, 1);
+      drawSprite(sprite, 0, 0, 1, blink);
+      ctx.restore();
+    }
     ctx.globalAlpha = 1;
 
     if (fx.slowDown > 0) drawSprite(getIconSprite('slowDown', r * 0.95, dpr), x + r * 0.95, ringY - r * 0.1);
