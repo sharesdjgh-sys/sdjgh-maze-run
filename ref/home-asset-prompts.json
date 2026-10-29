@@ -1,0 +1,85 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "cat",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon for a cute animal maze racing game. Subject: a cozy lavender cat cottage for Melo, a solitary free-spirited auditory learner: rounded cat-ear shaped lavender roof, cream walls, round dark doorway, one large pink yarn ball beside door and a tiny musical-note shaped window. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background, no environment, no ground plane, no text, no letters, no character, no border, no watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-917845d5-785f-494d-ad82-bdf5510eb694.png"
+    },
+    {
+      "id": "fennec",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Sori, an organized solitary auditory fennec fox: compact warm sandstone dome home with two tall fennec-ear roof towers, teal arched door, a tiny brass listening horn and orderly circular windows. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-2a6716a4-2467-4a19-a708-be33fbe22c79.png"
+    },
+    {
+      "id": "parrot",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Leaf, a social flexible auditory parrot: tropical turquoise treehouse on a short chunky trunk, a big leafy green roof and coral balcony, a tiny hanging bell for musical gatherings. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-60fca30d-185a-4b49-b249-f2e3df1fb063.png"
+    },
+    {
+      "id": "dog",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Talk, an organized social auditory dog: red-roof cream clubhouse kennel, big dark arched door, a blue bone emblem, a bell above entrance and two symmetrical windows for a friendly discussion club. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-c6d254ec-75b0-4fff-b2f0-5b7193c02b1c.png"
+    },
+    {
+      "id": "rabbit",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Bani, a flexible solitary athletic rabbit: round grassy burrow home with a huge orange carrot-shaped roof and leafy green roof tuft, cream round door, a little stepping stone for hopping. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-f8bfa4b4-df5b-4f20-932e-39be805cef32.png"
+    },
+    {
+      "id": "penguin",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Pace, an organized solitary athletic penguin: icy blue-white igloo home built of neat chunky ice blocks, dark blue arched tunnel entrance, small orange flag and orderly footprints on a compact snow doorstep. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-1307d399-e2f5-4457-b970-f8046dc4d63b.png"
+    },
+    {
+      "id": "quokka",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Skip, a flexible social athletic quokka: sunny peach round cottage with yellow curved roof, green open porch, a big colorful beach ball beside door and friendly curved windows. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-d97bc6c8-fe6b-40b8-b68b-384dc8e6f746.png"
+    },
+    {
+      "id": "husky",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Luka, an organized social athletic husky: deep blue alpine team lodge, snow-capped A-frame roof, warm amber windows, tiny pair of skis leaning against the wall and a red team pennant. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-392d906b-ba6d-4236-a5d9-fedd8eb2bd01.png"
+    },
+    {
+      "id": "raccoon",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Mong, a flexible solitary tactile raccoon: cozy plum-purple patchwork craft cottage with a rounded striped gray roof resembling a raccoon tail, chunky fabric-patch panels and a little clay pot beside the door. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-e1cb4ceb-8d24-4299-a55a-aacd5b3aed17.png"
+    },
+    {
+      "id": "beaver",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Tori, an organized solitary tactile beaver: tidy compact log cabin workshop, neatly stacked thick honey-brown timbers, forest-green roof, big orange wooden door and two spare logs stacked beside it. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-60a38f9c-e9a3-4f0f-b276-a52d4e275c7c.png"
+    },
+    {
+      "id": "otter",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Joy, a flexible social tactile otter: aqua riverside home on a very short round wooden dock base, roof shaped like a large scallop shell, two smooth colorful pebbles beside a wide friendly doorway. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-79ad6624-eebb-4f0b-a754-1d2d1d6610f6.png"
+    },
+    {
+      "id": "bear",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Block, an organized social tactile bear: sturdy colorful building-block cabin, thick honey-yellow toy brick walls, dark forest-green roof with little bear ears, symmetrical windows and a large red block beside door. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-99bf3bef-13eb-4ae7-9930-1c83b207529d.png"
+    },
+    {
+      "id": "fox",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Moa, a flexible solitary visual fox artist: terracotta art studio cottage, two fox-ear roof tips, a sweeping orange tail-shaped roof ornament with cream tip, a large colorful painter palette beside teal door. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-fa92dd70-a0d3-40dc-bdb4-8e5ef6b6d4dc.png"
+    },
+    {
+      "id": "owl",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Lumi, an organized solitary visual owl: short round hollow-tree observatory home, deep indigo conical roof decorated with big golden stars, two round eye-like windows, a chunky brass telescope pointing upward beside the door. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-cf19e290-3799-4a7e-836d-2963e935a950.png"
+    },
+    {
+      "id": "chameleon",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Pico, a flexible social visual chameleon: playful lime-green color studio cottage with a chunky rainbow arched roof, spiral tail roof ornament and three large colored pencils beside a wide purple doorway. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-a3a24774-1814-4e4c-98e7-247252926fa9.png"
+    },
+    {
+      "id": "deer",
+      "prompt": "Use case: stylized-concept. Asset type: single transparent game home icon. Subject: a cute house for Root, an organized social visual deer: tidy sage-green woodland map cottage, large leaf roof, two gentle antler-like branching roof beams, a round compass emblem above the wooden door and symmetrical windows. Style: polished soft clay 3D toy, rounded chunky silhouettes like Fluent 3D emoji, warm gentle studio light, three-quarter front view slightly above, playful pastel colors. Composition: ONE complete freestanding house centered in square, fills 85 percent of canvas, all parts within frame, simple enough to read at 32 pixels. Genuine transparent alpha background. No environment, ground plane, text, letters, character, border or watermark. Small soft contact shadow only.",
+      "sourcePath": "C:\\Users\\LifeProfessor\\.codex\\generated_images\\01a1868e-51a2-75e1-9d13-2bbf822429d8\\exec-a4e289fe-9fa0-4cf4-8705-9682e15fe85c.png"
+    }
+  ]
+}

@@ -22,6 +22,11 @@ const ICON_FALLBACK = {
 const imageUrls = import.meta.glob('../assets/characters/*.webp', { eager: true, query: '?url', import: 'default' });
 const animationUrls = import.meta.glob('../assets/animations/*.webp', { eager: true, query: '?url', import: 'default' });
 const iconUrls = import.meta.glob('../assets/icons/*.webp', { eager: true, query: '?url', import: 'default' });
+const homeUrls = import.meta.glob('../assets/homes/*.webp', { eager: true, query: '?url', import: 'default' });
+
+export function homeImageUrl(id) {
+  return homeUrls[`../assets/homes/${getCharacter(id).id}.webp`];
+}
 
 export function iconUrl(id) {
   return iconUrls[`../assets/icons/${id}.webp`];
@@ -55,6 +60,7 @@ export function animatedCharacterImg(id, className = 'avatar') {
 const images = new Map();
 const iconImages = new Map();
 const animationImages = new Map();
+const homeImages = new Map();
 function loadImage(map, key, src) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -69,6 +75,7 @@ export function preloadCharacters() {
   return Promise.all([
     ...CHARACTERS.map((c) => loadImage(images, c.id, characterImageUrl(c.id))),
     ...Object.keys(ICONS).map((id) => loadImage(iconImages, id, iconUrl(id))),
+    ...CHARACTERS.map((c) => loadImage(homeImages, c.id, homeImageUrl(c.id))),
   ]).then(() =>
     Promise.all(
       CHARACTERS.filter((c) => animationUrls[`../assets/animations/${c.id}.webp`]).map((c) =>
@@ -100,6 +107,13 @@ export function getIconSprite(id, cssSize, dpr) {
   const img = iconImages.get(id);
   if (img?.complete && img.naturalWidth) return scaledSprite(img, `icon|${id}`, cssSize, dpr);
   return getEmojiSprite(ICON_FALLBACK[id] ?? '❔', cssSize * 0.8, dpr);
+}
+
+/** 캐릭터 전용 집. 로딩 중이거나 실패하면 기본 집을 표시합니다. */
+export function getHomeSprite(id, cssSize, dpr) {
+  const img = homeImages.get(getCharacter(id).id);
+  if (img?.complete && img.naturalWidth) return scaledSprite(img, `home|${getCharacter(id).id}`, cssSize, dpr);
+  return getIconSprite('home', cssSize, dpr);
 }
 
 const EMOJI_FONT = '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif';

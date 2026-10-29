@@ -2,7 +2,7 @@
 // 두 사람이 한 화면을 같이 보고, 16:9 직사각형 미로를 화면 가득 크게 그립니다.
 // 미로는 '정원 생울타리 미로'로 그립니다: 흙길 바닥 + 그림자와 옆면이 있는 입체 생울타리 벽. (v10)
 // 벽·바닥은 미리 그려 둔 그림을 찍고, 캐릭터·아이템·이펙트는 매 프레임 그립니다.
-// 학교·집·상자·아이템·함정 그림은 3D 아이콘(Microsoft Fluent Emoji, MIT)입니다.
+// 학교·상자·아이템·함정은 3D 아이콘, 집은 캐릭터별로 생성한 전용 에셋입니다.
 
 import { ITEMS, ITEM_RULES, LOOP, MATCH, MOVE, PLAYERS, VFX, VISION } from '../config.js';
 import { characterAnimation } from './character-animation.js';
@@ -12,7 +12,7 @@ import { shortestPath } from '../game/maze.js';
 import { TRAP } from '../game/placement.js';
 import { playerRenderPosition } from '../game/player.js';
 import { trailBrightness, visionRadius } from '../game/vision.js';
-import { clearSpriteCache, getCharacterSprite, getIconSprite } from './characters.js';
+import { clearSpriteCache, getCharacterSprite, getHomeSprite, getIconSprite } from './characters.js';
 
 const COLORS = {
   sideTints: ['#efe4c4', '#cfe2bd'], // 풍경 그림을 불러오기 전에 보이는 바탕 (풍경과 비슷한 색)
@@ -480,7 +480,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       ctx.arc(p.x, p.y, cell * 0.36 * pulse, 0, Math.PI * 2);
       ctx.fill();
       ctx.stroke();
-      drawSprite(getIconSprite('home', cell * 0.6 * pulse, dpr), p.x, p.y - cell * 0.02, 1, ctx.globalAlpha);
+      drawSprite(getHomeSprite(player.character, cell * 0.72 * pulse, dpr), p.x, p.y - cell * 0.02, 1, ctx.globalAlpha);
       ctx.globalAlpha = 1;
       // 이름표: 위쪽 모서리 집은 아래에, 아래쪽 모서리 집은 위에 (화면 밖으로 잘리지 않게)
       const below = home.y < match.maze.height / 2;
