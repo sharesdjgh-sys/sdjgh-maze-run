@@ -158,11 +158,6 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
 .victory-spark-one { left: 12%; top: 28%; font-size: 44px; }
 .victory-spark-two { right: 19%; top: 60%; font-size: 24px; animation-delay: -1s; }
 .victory-spark-three { left: 23%; top: 4%; font-size: 30px; animation-delay: -1.8s; }
-.victory-winner-name {
-  position: absolute; z-index: 2; left: 50%; bottom: 10px; translate: -50% 0; min-width: 210px; margin: 0;
-  padding: 9px 30px; border: 1px solid #f4d994; border-radius: 6px; color: #fff0c3;
-  background: linear-gradient(#617c48, #3e603c); box-shadow: inset 0 0 0 2px #d0bf7738, 0 4px 0 #2d482f; font-size: 20px;
-}
 .victory-actions { position: relative; z-index: 3; display: flex; flex-direction: column; align-items: center; gap: 16px; }
 .victory-again { width: min(320px, 84vw); min-height: 65px; font-size: 28px; }
 .victory-secondary { display: flex; justify-content: center; gap: 12px; }
@@ -235,7 +230,6 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
   .victory-avatar { width: 245px; height: 245px; }
   .victory-figures { bottom: 83px; }
   .victory-podium { width: 365px; }
-  .victory-winner-name { bottom: 6px; min-width: 185px; padding: 6px 20px; font-size: 17px; }
   .victory-trophy-icon { width: 78px; height: 78px; }
   .victory-trophy { right: 19%; }
   .victory-duo .victory-avatar { width: 190px; height: 190px; }
@@ -285,7 +279,6 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
   .victory-duo { bottom: 95px; }
   .victory-trophy { right: 3%; top: 10%; }
   .victory-trophy-icon { width: 76px; height: 76px; }
-  .victory-winner-name { bottom: 11px; min-width: 180px; padding: 7px 22px; font-size: 17px; }
   .victory-spark-one { left: 4%; font-size: 29px; }
   .victory-spark-three { left: 17%; font-size: 22px; }
   .victory-actions { gap: 14px; }
@@ -329,7 +322,6 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
   .victory-avatar { width: 160px; height: 160px; }
   .victory-figures { bottom: 53px; }
   .victory-podium { width: 275px; }
-  .victory-winner-name { bottom: 2px; font-size: 13px; min-width: 150px; padding: 5px 15px; }
   .victory-trophy-icon { width: 60px; height: 60px; }
   .victory-trophy { right: 13%; top: 8%; }
   .victory-duo .victory-avatar { width: 140px; height: 140px; }
@@ -345,4 +337,22 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
 }
 @media (prefers-reduced-motion: reduce) {
   .victory-header, .celebration-stage, .victory-actions, .victory-jump, .victory-rays, .victory-spark, .victory-trophy { animation: none; }
+}
+
+/* 집은 정원 뒤쪽, 우승 캐릭터와 단상은 앞쪽에 놓습니다.
+   단상 너비에 비례해 발 위치를 맞춰 화면 높이가 바뀌어도 떠 보이지 않게 합니다. */
+.celebration-stage.victory-homecoming { container-type: inline-size; width: min(650px, 94vw, 75dvh); }
+.victory-homecoming .victory-podium { z-index: 1; width: 58%; left: 30%; }
+.victory-homecoming .victory-figures { z-index: 2; display: block; width: 42%; height: auto; left: 30%; bottom: 15cqw; }
+.victory-homecoming .victory-jump { width: 100%; animation-name: victory-homecoming-cheer; transform-origin: 50% 97%; }
+.garden-result .victory-homecoming .victory-figures .victory-avatar { display: block; width: 100%; height: auto; }
+.victory-home { position: absolute; z-index: 0; right: 0; bottom: 9%; display: block; width: 54%; height: auto; max-height: 88%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 9px 9px #354c3633); }
+.victory-homecoming .victory-trophy { right: auto; left: 0; top: auto; bottom: 45cqw; }
+.victory-homecoming .victory-trophy-icon { width: 16cqw; height: 16cqw; }
+@keyframes victory-homecoming-cheer {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .victory-homecoming .victory-jump { animation: none; }
 }

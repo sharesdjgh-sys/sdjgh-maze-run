@@ -1,7 +1,8 @@
 ﻿// 결과 화면은 승리 캐릭터와 축하 연출을 중심으로 보여 줍니다.
 import { PLAYERS } from '../config.js';
 import { seriesWinner, winsNeeded } from '../game/series.js';
-import { getCharacter, iconImg, animatedCharacterImg } from '../render/characters.js';
+import { getCharacter, homeImageUrl, iconImg, animatedCharacterImg } from '../render/characters.js';
+import { HOMES } from '../data/homes.js';
 import podiumUrl from '../assets/garden/victory-podium.webp';
 
 export function resultScreen({ match, series, idleLeft }) {
@@ -11,14 +12,13 @@ export function resultScreen({ match, series, idleLeft }) {
   const winner = champion ?? match.result.winner;
   const characters = match.players.map(p => getCharacter(p.character));
   const winnerCharacter = winner === null ? null : characters[winner];
-  const headline = draw ? '나란히 도착!' : final && series.bestOf > 1 ? '최종 우승!' : `${PLAYERS[winner].label} 승리!`;
+  const headline = draw ? '나란히 도착!' : `${PLAYERS[winner].label} ${winnerCharacter.name} ${final && series.bestOf > 1 ? '최종 우승!' : '승리!'}`;
   const subtitle = draw ? '이번엔 무승부! 다음엔 누가 먼저일까요?' : `${winnerCharacter.name}, 학교 다녀왔습니다!`;
   const hero = (id) => `<div class="victory-jump">${animatedCharacterImg(id, 'victory-avatar')}</div>`;
   const score = series.bestOf > 1 ? `<div class="victory-series" aria-label="시리즈 점수 1P ${series.wins[0]}승, 2P ${series.wins[1]}승">
     ${PLAYERS.map((p, i) => `<div class="victory-score-side p${i + 1}"><b>${p.label}</b><span class="victory-score-stars" aria-hidden="true">${Array.from({ length: winsNeeded(series) }, (_, j) => `<span class="${series.wins[i] > j ? 'is-won' : ''}">★</span>`).join('')}</span></div>`).join('<span class="victory-score-divider">:</span>')}
     <span class="victory-series-note">${final ? '먼저 두 번 이겼어요!' : '먼저 두 번 이기면 우승!'}</span>
   </div>` : '';
-  const label = draw ? '둘 다 멋진 레이스였어요!' : `${PLAYERS[winner].label} · ${winnerCharacter.name}`;
   return `<main class="garden-result result-card${draw ? ' is-draw' : ` p${winner + 1}`}" data-result-winner="${winner ?? 'draw'}" aria-labelledby="victory-title">
     <span class="victory-warmth" aria-hidden="true"></span>
     <header class="victory-header">
@@ -26,13 +26,13 @@ export function resultScreen({ match, series, idleLeft }) {
       <h1 id="victory-title">${headline}</h1>
       <p class="victory-subtitle">${subtitle}</p>
     </header>
-    <div class="celebration-stage">
+    <div class="celebration-stage${draw ? '' : ' victory-homecoming'}">
       <span class="victory-rays" aria-hidden="true"></span>
       <span class="victory-spark victory-spark-one" aria-hidden="true">✦</span><span class="victory-spark victory-spark-two" aria-hidden="true">✦</span><span class="victory-spark victory-spark-three" aria-hidden="true">✧</span>
+      ${draw ? '' : `<img class="victory-home" src="${homeImageUrl(winnerCharacter.id)}" alt="${winnerCharacter.name}의 ${HOMES[winnerCharacter.id].name}" draggable="false" />`}
       <img class="victory-podium" src="${podiumUrl}" alt="" draggable="false" />
       <div class="victory-figures${draw ? ' victory-duo' : ''}">${draw ? characters.map(c => hero(c.id)).join('') : hero(winnerCharacter.id)}</div>
       <div class="victory-trophy" aria-hidden="true">${iconImg(draw ? 'sparkles' : 'trophy', 'victory-trophy-icon')}</div>
-      <p class="victory-winner-name">${label}</p>
     </div>
     <div class="victory-actions">
       ${score}

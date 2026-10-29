@@ -28,7 +28,7 @@ describe('축하 화면의 승패와 재대결', () => {
     const wins = winner === 0 ? [1, 0] : [0, 1];
     const html = resultScreen({ match: match(winner), series: series(wins), idleLeft: 30 });
     expect(html).toContain('data-result-winner="' + winner + '"');
-    expect(html).toContain((winner + 1) + 'P 승리!');
+    expect(html).toContain(`<h1 id="victory-title">${winner + 1}P ${winner === 0 ? '멜로' : '토크'} 승리!</h1>`);
     expect(html).toContain('data-action="next"');
     expect(html).not.toContain('<table');
     expect(html).not.toContain('헤맨 칸');
@@ -48,7 +48,7 @@ describe('축하 화면의 승패와 재대결', () => {
     expect(round).toContain('시리즈 점수 1P 1승, 2P 0승');
     expect(round).not.toContain('최종 우승!');
     const final = resultScreen({ match: match(1), series: series([1, 2], 3), idleLeft: 9 });
-    expect(final).toContain('최종 우승!');
+    expect(final).toContain('<h1 id="victory-title">2P 토크 최종 우승!</h1>');
     expect(final).toContain('data-result-winner="1"');
     expect(final).toContain('한 판 더!');
     expect(final).toContain('data-result-idle >9초');
