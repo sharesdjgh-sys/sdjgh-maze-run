@@ -23,6 +23,12 @@ const imageUrls = import.meta.glob('../assets/characters/*.webp', { eager: true,
 const animationUrls = import.meta.glob('../assets/animations/*.webp', { eager: true, query: '?url', import: 'default' });
 const iconUrls = import.meta.glob('../assets/icons/*.webp', { eager: true, query: '?url', import: 'default' });
 const homeUrls = import.meta.glob('../assets/homes/*.webp', { eager: true, query: '?url', import: 'default' });
+// 승리 애니메이션은 결과 화면의 해당 캐릭터만 요청합니다.
+const victoryUrls = import.meta.glob('../assets/victory/*.webp', { eager: true, query: '?url', import: 'default' });
+
+export function victoryAnimationUrl(id) {
+  return victoryUrls[`../assets/victory/${getCharacter(id).id}.webp`];
+}
 
 export function homeImageUrl(id) {
   return homeUrls[`../assets/homes/${getCharacter(id).id}.webp`];

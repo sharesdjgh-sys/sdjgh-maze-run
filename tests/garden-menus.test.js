@@ -38,7 +38,7 @@ describe('축하 화면의 승패와 재대결', () => {
     expect(html).toContain('data-result-winner="draw"');
     expect(html).toContain('나란히 도착!');
     expect(html).toContain('victory-duo');
-    expect(html.match(/class="victory-jump"/g)).toHaveLength(2);
+    expect(html.match(/class="victory-jump(?: has-victory-motion)?"/g)).toHaveLength(2);
     expect(html).toContain('다시 대결!');
     expect(html).not.toContain('data-result-idle');
   });

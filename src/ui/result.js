@@ -1,7 +1,7 @@
 ﻿// 결과 화면은 승리 캐릭터와 축하 연출을 중심으로 보여 줍니다.
 import { PLAYERS } from '../config.js';
 import { seriesWinner, winsNeeded } from '../game/series.js';
-import { getCharacter, homeImageUrl, iconImg, animatedCharacterImg } from '../render/characters.js';
+import { getCharacter, homeImageUrl, iconImg, animatedCharacterImg, characterImg, victoryAnimationUrl } from '../render/characters.js';
 import { HOMES } from '../data/homes.js';
 import podiumUrl from '../assets/garden/victory-podium.webp';
 
@@ -14,7 +14,12 @@ export function resultScreen({ match, series, idleLeft }) {
   const winnerCharacter = winner === null ? null : characters[winner];
   const headline = draw ? '나란히 도착!' : `${PLAYERS[winner].label} ${winnerCharacter.name} ${final && series.bestOf > 1 ? '최종 우승!' : '승리!'}`;
   const subtitle = draw ? '이번엔 무승부! 다음엔 누가 먼저일까요?' : `${winnerCharacter.name}, 학교 다녀왔습니다!`;
-  const hero = (id) => `<div class="victory-jump">${animatedCharacterImg(id, 'victory-avatar')}</div>`;
+  const hero = (id) => {
+    const motion = victoryAnimationUrl(id);
+    return motion
+      ? `<div class="victory-jump has-victory-motion"><picture class="victory-motion"><source media="(prefers-reduced-motion: no-preference)" type="image/webp" srcset="${motion}" />${characterImg(id, 'victory-avatar')}</picture></div>`
+      : `<div class="victory-jump">${animatedCharacterImg(id, 'victory-avatar')}</div>`;
+  };
   const score = series.bestOf > 1 ? `<div class="victory-series" aria-label="시리즈 점수 1P ${series.wins[0]}승, 2P ${series.wins[1]}승">
     ${PLAYERS.map((p, i) => `<div class="victory-score-side p${i + 1}"><b>${p.label}</b><span class="victory-score-stars" aria-hidden="true">${Array.from({ length: winsNeeded(series) }, (_, j) => `<span class="${series.wins[i] > j ? 'is-won' : ''}">★</span>`).join('')}</span></div>`).join('<span class="victory-score-divider">:</span>')}
     <span class="victory-series-note">${final ? '먼저 두 번 이겼어요!' : '먼저 두 번 이기면 우승!'}</span>

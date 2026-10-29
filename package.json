@@ -15,6 +15,8 @@
     "maze-pool": "node scripts/build-maze-pool.mjs",
     "icons": "node scripts/build-icons.mjs",
     "homes": "node scripts/build-homes.mjs",
+    "victories": "node scripts/build-victory-animations.mjs",
+    "victories:preview": "node scripts/build-victory-preview.mjs",
     "animations": "node scripts/build-character-animations.mjs",
     "animations:preview": "node scripts/build-character-animation-preview.mjs"
   },
