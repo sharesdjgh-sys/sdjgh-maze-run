@@ -37,7 +37,7 @@ export function resultScreen({ match, series, idleLeft }) {
       ${draw ? '' : `<img class="victory-home" src="${homeImageUrl(winnerCharacter.id)}" alt="${winnerCharacter.name}의 ${HOMES[winnerCharacter.id].name}" draggable="false" />`}
       <img class="victory-podium" src="${podiumUrl}" alt="" draggable="false" />
       <div class="victory-figures${draw ? ' victory-duo' : ''}">${draw ? characters.map(c => hero(c.id)).join('') : hero(winnerCharacter.id)}</div>
-      <div class="victory-trophy" aria-hidden="true">${iconImg(draw ? 'sparkles' : 'trophy', 'victory-trophy-icon')}</div>
+      ${draw ? `<div class="victory-trophy" aria-hidden="true">${iconImg('sparkles', 'victory-trophy-icon')}</div>` : ''}
     </div>
     <div class="victory-actions">
       ${score}

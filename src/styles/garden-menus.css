@@ -347,8 +347,6 @@ body:has(.garden-select) #sound-toggle, body:has(.garden-result) #sound-toggle {
 .victory-homecoming .victory-jump { width: 100%; animation-name: victory-homecoming-cheer; transform-origin: 50% 97%; }
 .garden-result .victory-homecoming .victory-figures .victory-avatar { display: block; width: 100%; height: auto; }
 .victory-home { position: absolute; z-index: 0; right: 0; bottom: 9%; display: block; width: 54%; height: auto; max-height: 88%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 9px 9px #354c3633); }
-.victory-homecoming .victory-trophy { right: auto; left: 0; top: auto; bottom: 45cqw; }
-.victory-homecoming .victory-trophy-icon { width: 16cqw; height: 16cqw; }
 .victory-motion { display: block; }
 .garden-result .victory-jump.has-victory-motion { animation: none; }
 @keyframes victory-homecoming-cheer {
