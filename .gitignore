@@ -14,3 +14,8 @@ ref/*.jpeg
 ref/*.webp
 ref/*.html
 ref/character-animation-build.json
+ref/victory-animation-build.json
+
+# 제공 영상은 로컬 변환 입력으로 보관하고 게임용 WebP만 버전 관리합니다.
+ref/VictoryVideos/
+ref/VictoryVideos.meta
