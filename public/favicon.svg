@@ -1,1 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="54" font-size="84" text-anchor="middle" dominant-baseline="middle">💎</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="15" fill="#234c38"/>
+  <path d="M12 14h40v36H12zM22 14v12h12V14M12 36h12v14M34 26h18M34 36v14M44 36h8" fill="none" stroke="#f8efd5" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M17 20v10h11v12h12v-9h7" fill="none" stroke="#f3bd50" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="17" cy="20" r="3.5" fill="#ff8d7a"/>
+  <circle cx="47" cy="33" r="3.5" fill="#f3bd50"/>
+</svg>

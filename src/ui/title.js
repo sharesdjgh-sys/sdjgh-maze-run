@@ -16,7 +16,7 @@ export function titleScreen({ settings, muted, record }) {
       <header class="title-brand">
         <p class="title-eyebrow"><span></span>둘이서 떠나는 등하굣길 미로 대결<span></span></p>
         <h1 id="garden-title" class="title-logo-heading">
-          <img class="title-logo" src="${titleLogoUrl}" alt="StudyCrew × MazeRun — 귀염뽀짝 미로 레이스" width="1681" height="935" draggable="false" fetchpriority="high" />
+          <img class="title-logo" src="${titleLogoUrl}" alt="StudyCrew × MazeRun — 둘이서 떠나는 등하굣길 미로 대결" width="1681" height="935" draggable="false" fetchpriority="high" />
         </h1>
         <p class="title-description">학교에 들렀다가 우리 집에 먼저 도착하면 승리!</p>
       </header>

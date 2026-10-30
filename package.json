@@ -2,7 +2,7 @@
   "name": "lifeprof-maze-run",
   "private": true,
   "version": "1.0.0",
-  "description": "귀염뽀짝 미로 레이스 — 2인 로컬 대결 미로 웹게임",
+  "description": "StudyCrew × MazeRun — 둘이서 떠나는 등하굣길 미로 대결",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "characters": "node scripts/build-characters.mjs",
     "maze-pool": "node scripts/build-maze-pool.mjs",
+    "branding": "node scripts/build-branding.mjs",
     "icons": "node scripts/build-icons.mjs",
     "homes": "node scripts/build-homes.mjs",
     "victories": "node scripts/build-victory-animations.mjs",
