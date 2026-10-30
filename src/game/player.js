@@ -5,7 +5,7 @@ import { TRAPS } from '../config.js';
 import { DIRS } from './dir.js';
 import { createEffects, isFrozen, speedMultiplier } from './effects.js';
 import { createBag } from './items.js';
-import { canMove } from './maze.js';
+import { canMove, inBounds } from './maze.js';
 import { TRAP, trapAt } from './placement.js';
 import { createSeen } from './vision.js';
 
@@ -91,8 +91,12 @@ export function stepPlayer(player, world, command, dt, time) {
     player.slideDir = null;
   }
 
-  const dir = candidates.find((d) => canMove(maze, player.x, player.y, d));
+  const ghostStep = (d) => player.effects.ghost > 0 && DIRS[d]
+    && inBounds(maze.width, maze.height, player.x + DIRS[d].dx, player.y + DIRS[d].dy);
+  const dir = candidates.find((d) => canMove(maze, player.x, player.y, d) || ghostStep(d));
   if (dir) {
+    // 내부 벽 한 겹을 넘을 때만 소모하며, 학교·집·함정 도착은 일반 이동과 같습니다.
+    if (!canMove(maze, player.x, player.y, dir)) player.effects.ghost = 0;
     const slide = sliding ? TRAPS.ice.slideSpeed : 1;
     const interval = 1 / (move.cellsPerSecond * speedMultiplier(player.effects) * slide);
     player.prevX = player.x;

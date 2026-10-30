@@ -56,8 +56,16 @@ export const VISION = {
   trailStrength: 0.7, // 방금 지나온 길의 밝기 (0~1). 시간이 지나며 0으로 줄어듦
 };
 
-// 아이템 6종 (기획서 6장). weight는 상자에서 나올 비율입니다. fogOnly는 안개 모드에서만 상자에서 나옵니다.
+// 기본 6종 + 어려움 전용 2종. weight는 상자에서 나올 비율, fogOnly는 안개 모드 전용입니다.
 export const ITEMS = {
+  compass: {
+    emoji: '🧭', name: '반짝 나침반', target: 'self', duration: 3, weight: 20, hardOnly: true,
+    shout: '이쪽이야!', desc: '어려움 전용 · 3초 동안 학교, 등교 후에는 내 집으로 가는 방향을 알려줘요',
+  },
+  ghost: {
+    emoji: '👻', name: '유령 망토', target: 'self', duration: 5, weight: 12, hardOnly: true,
+    shout: '스르륵!', desc: '어려움 전용 · 5초 안에 벽 쪽으로 움직이면 벽 하나를 통과해요. 바깥벽은 통과할 수 없어요',
+  },
   speedUp: {
     emoji: '⚡', name: '번개 신발', target: 'self', duration: 5, multiplier: 1.5, weight: 20,
     shout: '슝슝!', desc: '5초 동안 내 속도 1.5배',

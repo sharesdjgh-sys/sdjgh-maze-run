@@ -15,6 +15,7 @@ export const CLOUD_EMOJI = '🌑';
 
 // 아이콘 그림을 아직 못 불러왔을 때 대신 쓸 이모지
 const ICON_FALLBACK = {
+  compass: '🧭', ghost: '👻',
   school: '🏫', backpack: '🎒', box: '🎁', web: '🕸️', ice: '🧊', speedUp: '⚡', flashlight: '🔦',
   slowDown: '🐌', freeze: '❄️', reverse: '😵', dark: '🌑', dizzy: '💫', trophy: '🏆', sparkles: '✨', home: '🏡',
 };

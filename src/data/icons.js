@@ -4,6 +4,8 @@
 // 저작권 표시: licenses/fluentui-emoji.txt
 
 export const ICONS = {
+  compass: 'Compass/3D/compass_3d.png',
+  ghost: 'Ghost/3D/ghost_3d.png',
   school: null, // Custom school icon, generated from the user's Seodaejeon school photo.
   backpack: 'Backpack/3D/backpack_3d.png',
   box: 'Wrapped gift/3D/wrapped_gift_3d.png',

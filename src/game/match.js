@@ -6,9 +6,10 @@
 
 import { DIFFICULTIES, ITEMS, ITEM_RULES, MATCH, MAZE, MOVE, TRAPS } from '../config.js';
 import { createRng } from '../core/rng.js';
+import { DIR_LIST } from './dir.js';
 import { applyEffect, tickEffects } from './effects.js';
 import { addToBag, rollItem, takeFromBag } from './items.js';
-import { cellIndex, distanceAt, distancesFrom, generateMaze } from './maze.js';
+import { canMove, cellIndex, distanceAt, distancesFrom, generateMaze } from './maze.js';
 import { TRAP, pickEnds, placeSpecials } from './placement.js';
 import { EMPTY_COMMAND, createPlayer, stepPlayer } from './player.js';
 import { markSeen, visionFor, visionRadius } from './vision.js';
@@ -209,7 +210,7 @@ function pickUpBox(match, player, box) {
     }
     return;
   }
-  const item = rollItem(match.rng, { behind, fog: match.fog });
+  const item = rollItem(match.rng, { behind, fog: match.fog, difficulty: match.difficulty });
   const slot = addToBag(player.bag, item);
   box.active = false;
   box.respawnIn = ITEM_RULES.boxRespawn;
@@ -291,6 +292,17 @@ export function journeyLeft(match, playerIndex) {
   if (p.visitedSchool) return match.homeDist[playerIndex][here];
   const home = match.homes[playerIndex];
   return maze.distToTreasure[here] + distanceAt(maze, home.x, home.y);
+}
+
+/** 현재 목표까지 실제 통로로 이어지는 최단 경로의 다음 방향 */
+export function compassDirection(match, playerIndex) {
+  const p = match.players[playerIndex];
+  const { maze } = match;
+  const dist = p.visitedSchool ? match.homeDist[playerIndex] : maze.distToTreasure;
+  const remaining = dist[cellIndex(maze.width, p.x, p.y)];
+  if (remaining <= 0) return null;
+  return DIR_LIST.find(d => canMove(maze, p.x, p.y, d.name)
+    && dist[cellIndex(maze.width, p.x + d.dx, p.y + d.dy)] === remaining - 1)?.name ?? null;
 }
 
 /** 출발 → 학교 → 집 최단 거리 (두 사람이 같음) */

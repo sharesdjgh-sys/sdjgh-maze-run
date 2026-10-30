@@ -72,6 +72,8 @@ export function createAudio({ muted = false } = {}) {
     school: () => notes([659, 523, 587, 392], { gap: 0.16, time: 0.3, type: 'triangle', gain: 0.2 }), // 딩동댕동 학교 종
     bagFull: () => tone({ freq: 190, time: 0.2, type: 'sawtooth', gain: 0.1 }),
     shoot: () => noise({ time: 0.3, freq: 500, to: 3200, gain: 0.14 }),
+    compass: () => notes([880, 1175, 1568], { gap: 0.08, time: 0.2, type: 'triangle', gain: 0.14 }),
+    ghost: () => tone({ freq: 320, to: 960, time: 0.45, type: 'sine', gain: 0.16 }),
     speedUp: () => tone({ freq: 380, to: 1300, time: 0.3, type: 'sawtooth', gain: 0.1 }),
     flashlight: () => notes([880, 1320, 1760], { gap: 0.06, time: 0.18, type: 'triangle', gain: 0.14 }),
     slowDown: () => tone({ freq: 520, to: 110, time: 0.55, type: 'triangle', gain: 0.25 }),

@@ -9,6 +9,7 @@ import { characterAnimation } from './character-animation.js';
 import { loadGardenAssets, texturePattern } from './garden.js';
 import { DIRS } from '../game/dir.js';
 import { shortestPath } from '../game/maze.js';
+import { compassDirection } from '../game/match.js';
 import { TRAP } from '../game/placement.js';
 import { playerRenderPosition } from '../game/player.js';
 import { trailBrightness, visionRadius } from '../game/vision.js';
@@ -230,6 +231,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     drawHomes(match, cell, now);
     drawStarts(match, cell, now);
     for (const player of match.players) drawPlayer(player, cell, extraTime, now, match.time + extraTime);
+    for (const player of match.players) drawNavigationAid(match, player, cell, extraTime);
     for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
     if (vfx) {
       drawParticles(vfx, cell);
@@ -239,6 +241,40 @@ export function createRenderer(canvas, { debug = false } = {}) {
   }
 
   // ── 캐릭터 발밑의 아이템 칸 2개 (v8: 위쪽 표시줄 대신) ──
+  function drawNavigationAid(match, player, cell, extraTime) {
+    const pos = toPxOf(player, extraTime);
+    if (player.effects.ghost > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#dac4ff';
+      ctx.lineWidth = Math.max(2, cell * 0.07);
+      ctx.setLineDash([cell * 0.12, cell * 0.1]);
+      ctx.beginPath();
+      ctx.ellipse(pos.x, pos.y, cell * 0.55, cell * 0.55, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (player.effects.compass <= 0) return;
+    const direction = compassDirection(match, player.index);
+    if (!direction) return;
+    const d = DIRS[direction];
+    const tip = toPx(player.x + d.dx * 0.8, player.y + d.dy * 0.8);
+    ctx.save();
+    ctx.translate(tip.x, tip.y);
+    ctx.rotate(Math.atan2(d.dy, d.dx));
+    ctx.fillStyle = '#ffe66d';
+    ctx.strokeStyle = '#644212';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cell * 0.2, 0);
+    ctx.lineTo(-cell * 0.14, -cell * 0.18);
+    ctx.lineTo(-cell * 0.07, 0);
+    ctx.lineTo(-cell * 0.14, cell * 0.18);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
   function slotPositions(player, cell, extraTime) {
     const p = toPxOf(player, extraTime);
     const f = figure(cell);

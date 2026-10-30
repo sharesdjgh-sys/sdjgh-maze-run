@@ -7,10 +7,10 @@
 import { ITEMS, ITEM_RULES } from '../config.js';
 
 const EPSILON = 1e-9;
-export const EFFECT_KEYS = ['speedUp', 'flashlight', 'slowDown', 'freeze', 'reverse', 'dark'];
+export const EFFECT_KEYS = ['speedUp', 'flashlight', 'slowDown', 'freeze', 'reverse', 'dark', 'compass', 'ghost'];
 
 export function createEffects() {
-  return { speedUp: 0, flashlight: 0, slowDown: 0, freeze: 0, reverse: 0, dark: 0, freezeImmune: 0 };
+  return { speedUp: 0, flashlight: 0, slowDown: 0, freeze: 0, reverse: 0, dark: 0, compass: 0, ghost: 0, freezeImmune: 0 };
 }
 
 /** 효과를 겁니다. 반환: 'applied'(새로 걸림) | 'refreshed'(시간 초기화) | 'immune'(안 통함) */

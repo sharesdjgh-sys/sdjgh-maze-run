@@ -29,7 +29,7 @@ describe('가방', () => {
     const rng = createRng(9);
     const count = (behind) => {
       const tally = Object.fromEntries(ITEM_KEYS.map((k) => [k, 0]));
-      for (let i = 0; i < 20000; i++) tally[rollItem(rng, { behind })] += 1;
+      for (let i = 0; i < 20000; i++) tally[rollItem(rng, { behind, difficulty: 'hard' })] += 1;
       return tally;
     };
     const normal = count(false);
@@ -87,7 +87,7 @@ describe('효과 규칙', () => {
 
   it('안개를 끈 판에서는 손전등이 상자에서 나오지 않는다', () => {
     const rng = createRng(3);
-    const items = new Set(Array.from({ length: 3000 }, () => rollItem(rng, { fog: false })));
+    const items = new Set(Array.from({ length: 3000 }, () => rollItem(rng, { fog: false, difficulty: 'hard' })));
     expect(items.has('flashlight')).toBe(false);
     expect(items.size).toBe(ITEM_KEYS.length - 1);
   });
