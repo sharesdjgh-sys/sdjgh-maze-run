@@ -347,6 +347,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
   function drawTraps(cell) {
     const web = getIconSprite('web', cell * 0.82, dpr);
     for (const t of trapCells) {
+      if (traps.kind[t.y * maze.width + t.x] !== TRAP.WEB) continue; // 밟혀서 끊어진 거미줄
       const p = toPx(t.x, t.y);
       drawSprite(web, p.x, p.y, 1, 0.9);
     }

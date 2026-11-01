@@ -186,6 +186,7 @@ function handleArrival(match, player) {
     case TRAP.WEB:
       player.stuck = TRAPS.web.stuckTime;
       player.stats.trapsHit += 1;
+      traps.kind[here] = TRAP.NONE; // 거미줄은 한 번 걸리면 끊어져 사라집니다.
       emit(match, 'trap', { player: player.index, trap: 'web' });
       break;
     case TRAP.ICE: {

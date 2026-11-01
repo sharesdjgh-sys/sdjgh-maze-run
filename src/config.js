@@ -87,14 +87,14 @@ export const ITEMS = {
     shout: '빙글빙글!', desc: '5초 동안 상대 방향키 반대 + 어질어질',
   },
   dark: {
-    emoji: '🌑', name: '깜깜 먹구름', target: 'enemy', duration: 5, weight: 15,
+    emoji: '🌑', name: '깜깜 먹구름', target: 'enemy', duration: 5, weight: 15, fogOnly: true,
     shout: '깜깜!', desc: '5초 동안 상대 시야를 자기 칸만 보이게 좁힘',
   },
 };
 
 export const ITEM_RULES = {
   bagSize: 2,
-  boxRespawn: 10, // 먹은 상자가 다시 생기는 시간 (초)
+  boxRespawn: 20, // 먹은 상자가 다시 생기는 시간 (초)
   deadEndShare: 0.5, // 상자 중 막다른 길 끝에 두는 비율
   freezeImmunity: 2, // 얼음이 풀린 뒤 얼음이 통하지 않는 시간 (초)
   projectileTime: 0.4, // 아이템이 상대에게 날아가는 시간 (초)
@@ -104,7 +104,7 @@ export const ITEM_RULES = {
 
 // 함정 2종. 안개 속에 숨어 있다가 가까이 가면 보입니다. (v12: 소용돌이 순간이동은 없앰)
 export const TRAPS = {
-  web: { emoji: '🕸️', name: '거미줄', stuckTime: 1.2, shout: '끈적!', desc: '밟으면 1.2초 동안 묶여요' },
+  web: { emoji: '🕸️', name: '거미줄', stuckTime: 1.2, shout: '끈적!', desc: '밟으면 1.2초 동안 묶이고 사라져요' },
   ice: { emoji: '🧊', name: '얼음 바닥', slideSpeed: 1.8, length: [3, 4], shout: '미끄덩!', desc: '빠르게 미끄러져서 멈추거나 뒤로 돌 수 없어요. 갈림길에서 옆으로 꺾는 것만 가능!' },
 };
 

@@ -85,11 +85,12 @@ describe('효과 규칙', () => {
     expect(VISION.flashlightRadius).toBeGreaterThan(VISION.radius);
   });
 
-  it('안개를 끈 판에서는 손전등이 상자에서 나오지 않는다', () => {
+  it('안개를 끈 판에서는 손전등과 먹구름이 상자에서 나오지 않는다', () => {
     const rng = createRng(3);
     const items = new Set(Array.from({ length: 3000 }, () => rollItem(rng, { fog: false, difficulty: 'hard' })));
     expect(items.has('flashlight')).toBe(false);
-    expect(items.size).toBe(ITEM_KEYS.length - 1);
+    expect(items.has('dark')).toBe(false);
+    expect(items.size).toBe(ITEM_KEYS.length - 2);
   });
 });
 
@@ -114,13 +115,15 @@ describe('지나온 길 (서서히 어두워짐)', () => {
 });
 
 describe('아이템 상자', () => {
-  it('상자를 밟으면 가방 빈 칸에 아이템이 들어가고 상자는 10초 뒤 다시 생긴다', () => {
+  it(`상자를 밟으면 가방 빈 칸에 아이템이 들어가고 상자는 ${ITEM_RULES.boxRespawn}초 뒤 다시 생긴다`, () => {
     const match = corridorMatch({ boxes: [[2, 0]] });
     run(match, ticks(0.5), [hold('right'), idle()]);
     expect(match.players[0].bag[0]).not.toBeNull();
     expect(match.boxes[0].active).toBe(false);
     expect(eventsOf(match, 'pickup')).toHaveLength(1);
-    run(match, ticks(ITEM_RULES.boxRespawn) + 2);
+    run(match, ticks(ITEM_RULES.boxRespawn) - ticks(1));
+    expect(match.boxes[0].active).toBe(false);
+    run(match, ticks(1) + 2);
     expect(match.boxes[0].active).toBe(true);
     expect(eventsOf(match, 'boxRespawn')).toHaveLength(1);
   });
@@ -196,6 +199,16 @@ describe('함정', () => {
     run(match, 10, [hold('right'), idle()]);
     expect(match.players[0].x).toBe(2);
     expect(eventsOf(match, 'trap')[0]).toMatchObject({ trap: 'web', player: 0 });
+  });
+
+  it('거미줄은 한 번 걸리면 사라져서 다시 밟아도 묶이지 않는다', () => {
+    const match = corridorMatch({ traps: { web: [[1, 0]] } });
+    run(match, ticks(0.2), [hold('right'), idle()]); // (1,0) 거미줄에 걸림
+    expect(match.traps.kind[1]).toBe(TRAP.NONE);
+    run(match, ticks(TRAPS.web.stuckTime) + 10, [hold('right'), idle()]);
+    run(match, ticks(1), [hold('left'), idle()]); // 출발점으로 돌아갔다가
+    run(match, ticks(1), [hold('right'), idle()]); // 같은 칸을 다시 지나감
+    expect(eventsOf(match, 'trap').filter((e) => e.trap === 'web')).toHaveLength(1);
   });
 
   it('얼음 바닥에서는 키를 떼도 얼음이 끝날 때까지 미끄러진다', () => {

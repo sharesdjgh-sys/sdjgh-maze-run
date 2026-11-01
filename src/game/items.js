@@ -24,7 +24,7 @@ export function takeFromBag(bag, slot) {
 
 /**
  * 상자에서 나올 아이템을 뽑습니다. behind(뒤처짐)이면 공격 아이템이 더 잘 나옵니다.
- * 안개를 끈 판(fog: false)에서는 손전등처럼 안개 모드 전용 아이템이 나오지 않습니다.
+ * 안개를 끈 판(fog: false)에서는 손전등·먹구름처럼 안개 모드 전용 아이템이 나오지 않습니다.
  */
 export function rollItem(rng, { behind = false, fog = true, difficulty = 'easy' } = {}) {
   const boost = behind ? ITEM_RULES.catchUp.attackBoost : 1;
