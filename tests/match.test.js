@@ -83,6 +83,24 @@ describe('이동', () => {
 });
 
 describe('한 판 진행', () => {
+  it('집 바로 위의 벽에서는 끝나지 않고, 열린 입구로 실제 집 칸에 들어가면 끝난다', () => {
+    const maze = buildMaze(5, 5, [
+      [[2, 1], [1, 1]], [[1, 1], [1, 2]], [[1, 2], [2, 2]],
+    ]);
+    maze.treasure = { x: 1, y: 1 };
+    maze.distToTreasure = distancesFrom(maze, maze.treasure);
+    const match = assembleMatch({ maze, boxes: [], traps: emptyTraps(25), rng: createRng(1),
+      starts: [{ x: 2, y: 1 }, { x: 4, y: 4 }], homes: [{ x: 2, y: 2 }, { x: 4, y: 3 }] });
+    match.phase = 'playing';
+    match.players[0].visitedSchool = true;
+    run(match, 30, [hold('down'), idle()]);
+    expect(match.players[0]).toMatchObject({ x: 2, y: 1, finished: false });
+    expect(match.phase).toBe('playing');
+    for (const dir of ['left', 'down', 'right']) run(match, 20, [hold(dir), idle()]);
+    expect(match.players[0]).toMatchObject({ x: 2, y: 2, finished: true });
+    expect(match.result.winner).toBe(0);
+  });
+
   it('카운트다운 동안에는 움직이지 않고, 3·2·1·GO 사건이 차례로 나온다', () => {
     const match = createMatch({ difficulty: 'easy', seed: 42 });
     run(match, 60, [hold('right', 'down'), hold('left', 'up')]);

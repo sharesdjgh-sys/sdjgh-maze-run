@@ -17,8 +17,23 @@ describe('캐릭터', () => {
     for (const id of DEFAULT_SETTINGS.characters) expect(CHARACTERS.some((c) => c.id === id)).toBe(true);
   });
 });
-import { computeLayout, figure } from '../src/render/renderer.js';
+import { computeLayout, figure, homeLabelOpacity } from '../src/render/renderer.js';
 import { formatTime } from '../src/ui/format.js';
+
+describe('집 이름표 페이드', () => {
+  it('1.5초에 걸쳐 사라지고 2초간 숨긴 뒤 1.5초에 걸쳐 다시 표시한다', () => {
+    expect(homeLabelOpacity(0)).toBe(1);
+    expect(homeLabelOpacity(1.75)).toBeCloseTo(0.5);
+    for (const t of [2.5, 3, 4, 4.5]) expect(homeLabelOpacity(t)).toBeCloseTo(0);
+    expect(homeLabelOpacity(5.25)).toBeCloseTo(0.5);
+    expect(homeLabelOpacity(6)).toBe(1);
+    for (const t of [0.5, 1.75, 3, 5.25]) expect(homeLabelOpacity(t + 6)).toBeCloseTo(homeLabelOpacity(t));
+  });
+
+  it('동작 줄이기 설정에서는 벽이 비치는 옅은 상태를 유지한다', () => {
+    for (const t of [0, 1, 2, 3]) expect(homeLabelOpacity(t, true)).toBe(0.3);
+  });
+});
 
 describe('시간 표시', () => {
   it('분:초.0 형식', () => {
@@ -30,6 +45,20 @@ describe('시간 표시', () => {
 });
 
 describe('화면 배치', () => {
+  it.each([
+    [390, 844, { top: 182, bottom: 182 }],
+    [320, 568, { top: 182, bottom: 182 }],
+    [844, 390, { left: 152, right: 152 }],
+    [1024, 768, { left: 152, right: 152 }],
+  ])('%i×%i: 터치 조작판 밖에 모든 난이도의 미로를 배치한다', (width, height, insets) => {
+    for (const diff of Object.values(DIFFICULTIES)) {
+      const { maze } = computeLayout(width, height, diff.width, diff.height, insets);
+      expect(maze.x).toBeGreaterThanOrEqual(insets.left ?? 0);
+      expect(maze.y).toBeGreaterThanOrEqual(insets.top ?? 0);
+      expect(maze.x + maze.width).toBeLessThanOrEqual(width - (insets.right ?? 0));
+      expect(maze.y + maze.height).toBeLessThanOrEqual(height - (insets.bottom ?? 0));
+    }
+  });
   const SCREENS = [
     [1920, 1080], // 큰 모니터·프로젝터
     [1366, 768], // 학교 노트북

@@ -54,7 +54,8 @@ export function howtoScreen({ characters = DEFAULT_SETTINGS.characters } = {}) {
             <p class="guide-fairness">출발 자리와 집은 매판 달라져도, 두 사람의 거리는 같아요.</p>
           </section>
           <section class="guide-section" aria-labelledby="guide-controls-title">
-            <h2 id="guide-controls-title"><span>02</span>키보드 하나로 둘이서</h2>
+            <h2 id="guide-controls-title"><span>02</span>키보드 또는 터치로 둘이서</h2>
+            <p class="guide-section-intro">모바일·태블릿은 투명 방향키를 꾹 눌러 이동해요. 세로 화면에서는 아래쪽 1P와 위쪽 2P가 마주 보고, 가로 화면에서는 왼쪽 1P·오른쪽 2P가 함께 즐겨요. 각자의 아이템 1·2와 ‘멈춤’ 버튼을 눌러 보세요.</p>
             <div class="guide-players">${players}</div>
           </section>
         </div>

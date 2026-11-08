@@ -1,6 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { PLAYERS } from '../src/config.js';
-import { toCommand } from '../src/core/controls.js';
+import { toCommand, touchCodeOf } from '../src/core/controls.js';
+
+describe('마주 보는 터치 조작', () => {
+  it.each([['up', 'down'], ['down', 'up'], ['left', 'right'], ['right', 'left']])('맞은편의 %s 화살표는 화면의 %s 방향으로 이동한다', (local, screen) => {
+    const keys = PLAYERS[1].keys;
+    const code = touchCodeOf(keys, local, true);
+    expect(toCommand({ keys, heldCodes: [code], presses: [code] }).held).toEqual([screen]);
+    expect(toCommand({ keys, heldCodes: [code], presses: [], reversed: true }).held).toEqual([local]);
+    expect(touchCodeOf(keys, local, false)).toBe(keys[local][0]);
+  });
+
+  it('맞은편에서도 아이템 칸 순서는 바뀌지 않는다', () => {
+    for (const control of ['item1', 'item2']) {
+      expect(touchCodeOf(PLAYERS[1].keys, control, true)).toBe(PLAYERS[1].keys[control][0]);
+    }
+  });
+});
 
 describe('키 입력 → 명령', () => {
   const [p1, p2] = PLAYERS;

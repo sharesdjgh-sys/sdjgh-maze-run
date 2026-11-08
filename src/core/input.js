@@ -12,30 +12,44 @@ const CAPTURED_CODES = new Set([
 ]);
 
 export function createInput({ onBlur } = {}) {
-  const held = new Map(); // code → 누른 순서 번호
+  const held = new Map(); // 입력 출처 → 키와 누른 순서 (키보드·여러 손가락을 독립적으로 관리)
   let order = 0;
   let presses = [];
+
+  function press(code, source = `keyboard:${code}`) {
+    if (held.get(source)?.code === code) return;
+    held.set(source, { code, order: ++order });
+    presses.push(code);
+  }
+
+  function release(source) {
+    held.delete(source);
+  }
+
+  function reset() {
+    held.clear();
+    presses = [];
+  }
 
   function onKeyDown(event) {
     if (event.ctrlKey || event.metaKey || event.altKey) return; // 브라우저 단축키는 건드리지 않음
     if (CAPTURED_CODES.has(event.code)) event.preventDefault();
     if (event.repeat) {
       // 자동 반복 입력은 새 입력으로 치지 않습니다. 창 전환으로 초기화된 경우에만 다시 기록합니다.
-      if (!held.has(event.code)) held.set(event.code, ++order);
+      const source = `keyboard:${event.code}`;
+      if (!held.has(source)) held.set(source, { code: event.code, order: ++order });
       return;
     }
-    held.set(event.code, ++order);
-    presses.push(event.code);
+    press(event.code);
   }
 
   function onKeyUp(event) {
-    held.delete(event.code);
+    release(`keyboard:${event.code}`);
   }
 
   // 창을 벗어나면 keyup을 못 받아서 키가 눌린 채로 남으므로 모두 초기화합니다.
   function onLeave() {
-    held.clear();
-    presses = [];
+    reset();
     onBlur?.();
   }
 
@@ -47,6 +61,9 @@ export function createInput({ onBlur } = {}) {
   });
 
   return {
+    press,
+    release,
+    reset,
     /** 지난번 호출 이후 새로 누른 키 (누른 순서대로) */
     takePresses() {
       const taken = presses;
@@ -55,7 +72,7 @@ export function createInput({ onBlur } = {}) {
     },
     /** 지금 누르고 있는 키 (최근에 누른 것부터) */
     heldCodes() {
-      return [...held.entries()].sort((a, b) => b[1] - a[1]).map(([code]) => code);
+      return [...new Set([...held.values()].sort((a, b) => b.order - a.order).map(({ code }) => code))];
     },
   };
 }

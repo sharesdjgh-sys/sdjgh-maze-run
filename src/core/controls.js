@@ -5,6 +5,11 @@ import { DIR_NAMES } from '../game/dir.js';
 
 const FLIP = { up: 'down', down: 'up', left: 'right', right: 'left' };
 
+// 맞은편 사람이 보는 방향키는 180도 돌아가므로 화면상 화살표 방향에 맞춥니다.
+export function touchCodeOf(keys, control, opposed = false) {
+  return keys[opposed && FLIP[control] ? FLIP[control] : control][0];
+}
+
 export function screenDirOf(keys, code) {
   return DIR_NAMES.find((dir) => keys[dir].includes(code)) ?? null;
 }

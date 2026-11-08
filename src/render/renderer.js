@@ -65,16 +65,31 @@ export function figure(cell) {
   return { r, size, ringDy, centerDy, headDy: centerDy - size * 0.4 };
 }
 
+// 이름표 아래의 벽을 볼 수 있도록 6초마다 2초는 완전히 숨깁니다.
+// 동작 줄이기를 선택한 경우에는 움직임 없이 옅게 표시합니다.
+export function homeLabelOpacity(now, reducedMotion = false) {
+  if (reducedMotion) return 0.3;
+  const t = ((now % 6) + 6) % 6;
+  const smooth = value => value * value * (3 - 2 * value);
+  if (t < 1) return 1;
+  if (t < 2.5) return 1 - smooth((t - 1) / 1.5);
+  if (t < 4.5) return 0;
+  return smooth((t - 4.5) / 1.5);
+}
+
 /**
  * 창 크기와 미로 크기(칸 수)로 화면 배치를 계산합니다. (v8)
  * 위쪽 정보 표시줄 없이 미로를 화면 가득 채웁니다. 아이템 칸은 캐릭터 발밑에 그리고, 시간은 결과 화면에만 보여 줍니다.
  * 캐릭터가 칸보다 크게 그려지므로 미로 위쪽에 머리가 들어갈 자리(HEADROOM)를 조금 남깁니다. (v11)
  */
-export function computeLayout(width, height, mazeWidth, mazeHeight) {
+export function computeLayout(width, height, mazeWidth, mazeHeight, insets = {}) {
+  const { left = 0, right = 0, top = 0, bottom = 0 } = insets;
+  const availableWidth = width - left - right;
+  const availableHeight = height - top - bottom;
   const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
   const margin = Math.round(clamp(Math.min(width, height) * 0.015, 8, 18));
-  const availW = Math.max(0, width - margin * 2);
-  const availH = Math.max(0, height - margin * 2);
+  const availW = Math.max(0, availableWidth - margin * 2);
+  const availH = Math.max(0, availableHeight - margin * 2);
   const cell = Math.max(4, Math.floor(Math.min(availW / mazeWidth, availH / (mazeHeight + HEADROOM))));
   const mazePxW = cell * mazeWidth;
   const mazePxH = cell * mazeHeight;
@@ -84,8 +99,8 @@ export function computeLayout(width, height, mazeWidth, mazeHeight) {
     height,
     cell,
     maze: {
-      x: Math.round((width - mazePxW) / 2),
-      y: Math.round((height - mazePxH + headroom) / 2),
+      x: left + Math.round((availableWidth - mazePxW) / 2),
+      y: top + Math.round((availableHeight - mazePxH + headroom) / 2),
       width: mazePxW,
       height: mazePxH,
       cell,
@@ -98,6 +113,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   let dpr = 1;
   let layout = null;
+  let viewportInsets = {};
   let maze = null;
   let traps = null;
   let trapCells = [];
@@ -124,7 +140,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
   }
 
   function relayout() {
-    layout = computeLayout(window.innerWidth, window.innerHeight, maze?.width ?? 33, maze?.height ?? 19);
+    layout = computeLayout(window.innerWidth, window.innerHeight, maze?.width ?? 33, maze?.height ?? 19, viewportInsets);
     mazeImage = maze ? buildMazeImage(maze, traps, layout.cell, dpr, garden) : null;
     staticLayer = null;
     menuDirty = true;
@@ -489,7 +505,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     }
   }
 
-  // 집 표시: 집은 판마다 다른 곳에 있습니다. 안개 위에도 보이게 그리고 '1P 집'처럼 이름표를 붙입니다.
+  // 집 아이콘은 계속 표시하고, 이름표만 천천히 사라졌다 나타나 가려진 벽을 보여 줍니다.
   // 학교에 들른 뒤에는 크게 반짝이며 '여기로 와!'
   function drawHomes(match, cell, now) {
     match.homes.forEach((home, i) => {
@@ -522,7 +538,10 @@ export function createRenderer(canvas, { debug = false } = {}) {
       // 이름표: 위쪽 모서리 집은 아래에, 아래쪽 모서리 집은 위에 (화면 밖으로 잘리지 않게)
       const below = home.y < match.maze.height / 2;
       const labelBottom = below ? p.y + cell * 0.95 : p.y - cell * 0.42;
+      ctx.save();
+      ctx.globalAlpha = homeLabelOpacity(now, motionPreference.matches);
       drawBadge(`${config.label} 집`, p.x, labelBottom, config.color, cell);
+      ctx.restore();
     });
   }
 
@@ -959,7 +978,10 @@ export function createRenderer(canvas, { debug = false } = {}) {
 
   window.addEventListener('resize', resize);
   resize();
-  return { setMaze, setSeries, render, celebrate };
+  return { setMaze, setSeries, render, celebrate, setViewportInsets(insets) {
+    viewportInsets = insets;
+    relayout();
+  } };
 }
 
 /** 칸 번호 등으로 정해지는 0~1 사이 값 (매번 같은 무늬가 나오도록) */

@@ -1,0 +1,78 @@
+/* 정원 배경 위에 투명 버튼만 얹고, 세로 화면은 양 끝에서 마주 보고 조작합니다. */
+.touch-controls {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  --touch-edge: 12px;
+}
+.touch-controls[hidden] { display: none; }
+.touch-player {
+  position: absolute;
+  left: 50%;
+  display: grid;
+  grid-template-columns: 140px 112px;
+  gap: 6px 18px;
+  align-items: center;
+  transform: translateX(-50%);
+}
+.touch-player.p1 { bottom: max(var(--touch-edge), env(safe-area-inset-bottom)); }
+.touch-player.p2 {
+  top: max(var(--touch-edge), env(safe-area-inset-top));
+  transform: translateX(-50%) rotate(180deg);
+}
+.touch-player > strong {
+  grid-column: 1 / -1;
+  justify-self: center;
+  color: var(--player);
+  font-size: 20px;
+  line-height: 24px;
+  text-shadow: 0 1px 3px #183122, 0 0 5px #183122;
+}
+.touch-controls button {
+  pointer-events: auto;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 2px solid var(--player);
+  border-radius: 15px;
+  color: #fff;
+  background: rgb(255 255 255 / 10%);
+  text-shadow: 0 1px 3px #183122, 0 0 4px #183122;
+  box-shadow: 0 2px 5px rgb(20 48 30 / 20%), inset 0 0 0 1px rgb(255 255 255 / 28%);
+}
+.touch-controls button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.touch-controls button.is-held, .touch-controls button:active {
+  background: rgb(255 255 255 / 32%);
+  box-shadow: 0 0 0 2px var(--player), 0 0 14px var(--player-soft);
+}
+.touch-dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 44px);
+  grid-template-rows: repeat(3, 44px);
+  gap: 4px;
+}
+.touch-direction { font-size: 23px; }
+.touch-up { grid-column: 2; grid-row: 1; }
+.touch-left { grid-column: 1; grid-row: 2; }
+.touch-down { grid-column: 2; grid-row: 3; }
+.touch-right { grid-column: 3; grid-row: 2; }
+.touch-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 6px; }
+.touch-items button { min-height: 52px; font-size: 23px; }
+.touch-items small { display: block; font-size: 11px; }
+.touch-items .touch-pause { grid-column: 1 / -1; min-height: 44px; font-size: 14px; }
+@media (orientation: landscape) {
+  .touch-player {
+    top: 50%;
+    grid-template-columns: 140px;
+    transform: translateY(-50%);
+  }
+  .touch-player.p1 { left: max(var(--touch-edge), env(safe-area-inset-left)); bottom: auto; }
+  .touch-player.p2 {
+    top: 50%;
+    left: auto;
+    right: max(var(--touch-edge), env(safe-area-inset-right));
+    transform: translateY(-50%);
+  }
+}

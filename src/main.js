@@ -7,6 +7,7 @@ import './styles/title.css';
 import './styles/character-animation.css';
 import './styles/garden-menus.css';
 import './styles/guide.css';
+import './styles/touch.css';
 import {
   DEFAULT_SETTINGS,
   DIFFICULTIES,
@@ -39,6 +40,7 @@ import { pauseScreen } from './ui/pause.js';
 import { resultScreen } from './ui/result.js';
 import { GRID_COLUMNS, selectScreen } from './ui/select.js';
 import { titleScreen } from './ui/title.js';
+import { createTouchControls } from './ui/touch.js';
 
 const params = new URLSearchParams(window.location.search);
 const DEBUG = params.has('debug');
@@ -72,6 +74,7 @@ const overlay = createOverlay(document.getElementById('overlay'), (action) => {
   runAction(action);
 });
 const input = createInput({ onBlur: () => runAction('pause') });
+const touchControls = createTouchControls({ input, onAction: runAction, onLayout: renderer.setViewportInsets });
 let vfx = createVfx();
 const mazeDeck = createMazeDeck(MAZE_POOL);
 const backdrop = createMatch({ difficulty: 'easy', seed: MAZE_POOL.easy[0].seed });
@@ -126,7 +129,9 @@ function addToRecord(match) {
 
 // ── 화면 전환 ──
 function setScene(scene) {
+  input.reset();
   app.scene = scene;
+  touchControls.setScene(scene);
   app.sceneSince = performance.now();
   // 게임 중에는 소리 버튼이 미로 오른쪽 아래(2P 출발점)를 가리지 않게 숨깁니다. (M 키는 계속 동작)
   soundButton.hidden = scene === 'game';
