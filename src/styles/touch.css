@@ -50,19 +50,41 @@
 .touch-dpad {
   display: grid;
   grid-template-columns: repeat(3, 44px);
-  grid-template-rows: repeat(3, 44px);
+  grid-template-rows: repeat(2, 44px);
   gap: 4px;
 }
 .touch-direction { font-size: 23px; }
 .touch-up { grid-column: 2; grid-row: 1; }
 .touch-left { grid-column: 1; grid-row: 2; }
-.touch-down { grid-column: 2; grid-row: 3; }
+.touch-down { grid-column: 2; grid-row: 2; }
 .touch-right { grid-column: 3; grid-row: 2; }
 .touch-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 6px; }
 .touch-items button { min-height: 52px; font-size: 23px; }
 .touch-items small { display: block; font-size: 11px; }
 .touch-items .touch-pause { grid-column: 1 / -1; min-height: 44px; font-size: 14px; }
+.touch-items .touch-item { position: relative; height: 72px; }
+.touch-item-content { display: grid; justify-items: center; align-content: center; gap: 3px; height: 100%; padding: 7px 2px 2px; pointer-events: none; }
+.touch-item-icon { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 1px 2px #183122); }
+.touch-item-name { font-size: 10px; line-height: 12px; }
+.touch-item-empty { font-size: 11px; opacity: 0.75; }
+.touch-slot-number { position: absolute; top: 2px; left: 5px; font-size: 11px; }
+.touch-item.has-item { background: rgb(255 255 255 / 20%); }
+.touch-landscape-hint {
+  position: absolute;
+  top: var(--touch-hint-top, 180px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(310px, calc(100% - 24px));
+  margin: 0;
+  text-align: center;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.4;
+  text-shadow: 0 1px 3px #183122, 0 0 4px #183122;
+}
+.touch-landscape-hint small { font-size: 11px; }
 @media (orientation: landscape) {
+  .touch-landscape-hint { display: none; }
   .touch-player {
     top: 50%;
     grid-template-columns: 140px;

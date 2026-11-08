@@ -57,10 +57,11 @@ const FEET = 0.83; // 캐릭터 그림에서 발이 있는 높이 (위에서부�
  * 캐릭터 한 명을 그릴 때 쓰는 크기와 위치 (칸 가운데 기준, 아래가 +)
  * r: 기준 반지름, size: 그림 크기, ringDy: 발밑 고리, centerDy: 그림 가운데, headDy: 머리 꼭대기
  */
-export function figure(cell) {
-  const r = Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
+export function figure(cell, compact = false) {
+  // 터치 화면은 최소 픽셀 크기를 강제하지 않아 작은 미로에서도 한 칸 안에 들어갑니다.
+  const r = compact ? cell * 0.32 : Math.max(cell * 0.44, MIN_PLAYER_RADIUS);
   const size = r * CHARACTER_SCALE;
-  const ringDy = r * 0.55;
+  const ringDy = compact ? cell * 0.32 : r * 0.55;
   const centerDy = ringDy - (FEET - 0.5) * size;
   return { r, size, ringDy, centerDy, headDy: centerDy - size * 0.4 };
 }
@@ -114,6 +115,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
   let dpr = 1;
   let layout = null;
   let viewportInsets = {};
+  let touchMode = false;
   let maze = null;
   let traps = null;
   let trapCells = [];
@@ -248,7 +250,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     drawStarts(match, cell, now);
     for (const player of match.players) drawPlayer(player, cell, extraTime, now, match.time + extraTime);
     for (const player of match.players) drawNavigationAid(match, player, cell, extraTime);
-    for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
+    if (!touchMode) for (const player of match.players) drawItemSlots(player, cell, extraTime, now);
     if (vfx) {
       drawParticles(vfx, cell);
       drawBubbles(vfx, match, cell, extraTime);
@@ -293,7 +295,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
 
   function slotPositions(player, cell, extraTime) {
     const p = toPxOf(player, extraTime);
-    const f = figure(cell);
+    const f = figure(cell, touchMode);
     const size = Math.max(cell * 0.56, 22);
     const gap = size * 0.16;
     let y = p.y + f.r + size * 0.62;
@@ -608,7 +610,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
     const stepT = player.moveTimer > 0 ? 1 - Math.max(0, player.moveTimer - extraTime) / player.moveDuration : 0;
     const pose = characterAnimation(player, animationTime, extraTime, { reducedMotion: motionPreference.matches });
     const hop = pose.walking ? Math.sin(stepT * Math.PI) * cell * 0.06 : 0;
-    const f = figure(cell);
+    const f = figure(cell, touchMode);
     const { r } = f;
     const top = y - hop;
 
@@ -656,7 +658,9 @@ export function createRenderer(canvas, { debug = false } = {}) {
       ctx.save();
       ctx.translate(x, ringY);
       ctx.scale((pose.flip ? -1 : 1) * (1 - breathe * 0.5), 1 + breathe);
-      drawSprite(sprite, 0, centerY - ringY, 1, blink);
+      // 캐시의 최소 8px·픽셀 반올림 때문에 작은 터치 미로에서 다시 커지지 않게 맞춥니다.
+      const spriteScale = touchMode ? f.size / (sprite.width / dpr) : 1;
+      drawSprite(sprite, 0, centerY - ringY, spriteScale, blink);
       ctx.restore();
     }
     ctx.globalAlpha = 1;
@@ -692,7 +696,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       drawSprite(getIconSprite('dark', r * 1.05, dpr), x + Math.sin(now * 2) * r * 0.2, headY - r * 0.35);
       badgeLift = r * 0.85;
     }
-    drawBadge(config.label, x, headY - r * 0.05 - badgeLift, config.color, cell);
+    drawBadge(config.label, x, headY - r * 0.05 - badgeLift, config.color, cell, touchMode);
   }
 
   function drawIceBlock(x, y, r, remaining) {
@@ -727,8 +731,8 @@ export function createRenderer(canvas, { debug = false } = {}) {
     ctx.fill();
   }
 
-  function drawBadge(label, x, bottom, color, cell) {
-    const fontSize = Math.min(22, Math.max(10, cell * 0.34));
+  function drawBadge(label, x, bottom, color, cell, compact = false) {
+    const fontSize = compact ? Math.min(10, cell * 0.3) : Math.min(22, Math.max(10, cell * 0.34));
     ctx.font = `${fontSize}px ${UI_FONT}`;
     const w = ctx.measureText(label).width + fontSize * 0.7;
     const h = fontSize * 1.15;
@@ -772,7 +776,7 @@ export function createRenderer(canvas, { debug = false } = {}) {
       const t = 1 - b.life / b.maxLife;
       const scale = t < 0.15 ? 0.6 + (t / 0.15) * 0.4 : 1;
       const fontSize = Math.min(26, Math.max(13, cell * 0.42)) * scale;
-      const f = figure(cell);
+      const f = figure(cell, touchMode);
       ctx.font = `${fontSize}px ${UI_FONT}`;
       const iconSize = b.icon ? fontSize * 1.35 : 0;
       const textW = ctx.measureText(b.text).width;
@@ -978,8 +982,9 @@ export function createRenderer(canvas, { debug = false } = {}) {
 
   window.addEventListener('resize', resize);
   resize();
-  return { setMaze, setSeries, render, celebrate, setViewportInsets(insets) {
+  return { setMaze, setSeries, render, celebrate, setViewportInsets(insets, touch = false) {
     viewportInsets = insets;
+    touchMode = touch;
     relayout();
   } };
 }

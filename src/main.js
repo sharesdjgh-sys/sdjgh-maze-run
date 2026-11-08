@@ -489,6 +489,7 @@ startLoop({
     const frameDt = lastFrame === null ? 0 : Math.min(0.1, now - lastFrame);
     lastFrame = now;
     if (app.scene === 'game' || app.scene === 'result') updateVfx(vfx, frameDt);
+    touchControls.update(app.match);
     renderer.render(app.scene === 'result' ? null : app.match, app.scene === 'game' ? alpha : 0, now, vfx, frameDt);
     if (DEBUG) updateDebugBox(now * 1000);
   },

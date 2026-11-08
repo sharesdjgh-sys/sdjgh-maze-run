@@ -102,6 +102,17 @@ describe('화면 배치', () => {
       expect(f.headDy / cell).toBeGreaterThanOrEqual(-0.75);
     }
   });
+
+  it('터치 화면은 작은 미로에서도 캐릭터가 한 칸보다 작고 최소 픽셀 크기로 커지지 않는다', () => {
+    for (const cell of [6, 9, 13, 19, 26, 40]) {
+      const f = figure(cell, true);
+      expect(f.size).toBeCloseTo(cell * 0.96);
+      expect(f.size).toBeLessThan(cell);
+      expect(f.centerDy - f.size / 2).toBeGreaterThanOrEqual(-cell / 2);
+      expect(f.centerDy + f.size / 2).toBeLessThanOrEqual(cell / 2);
+      expect(f.size).toBeLessThan(figure(cell).size);
+    }
+  });
 });
 
 describe('난이도', () => {

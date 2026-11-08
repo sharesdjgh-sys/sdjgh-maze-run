@@ -18,6 +18,7 @@
 - 주소 옵션: `?debug=1`(FPS·시드·최단 경로 표시, `window.__app`으로 상태 확인), `?seed=1234`(같은 미로 재현), `?play=easy|normal|hard`(준비 화면 건너뛰기)
 
 ## 구조 원칙
+- 터치 화면에서는 캐릭터의 최소 픽셀 크기를 없애 그림을 한 칸의 96%로 맞추고, 획득 아이템은 `touchControls.update`로 패드에만 표시합니다. 가로 플레이를 안내하며 방향키는 키보드식 두 줄 배열입니다. 데스크톱의 캐릭터 크기·발밑 아이템 표시는 유지합니다.
 - `src/game/`은 순수 로직입니다. 미로 좌표만 쓰고 Canvas나 DOM을 건드리지 않습니다. 화면·소리가 필요한 일은 `match.events`에 사건으로 남기고, `main.js`가 꺼내서 `render/vfx.js`와 `core/audio.js`로 넘깁니다.
 - 규칙을 바꾸면 `tests/`에 테스트를 추가합니다. 직접 만든 미로로 판을 짜려면 `tests/helpers.js`의 `corridorMatch`와 `game/match.js`의 `assembleMatch`를 씁니다.
 - 화면은 하나를 같이 봅니다(v4). 미로는 16:9에 가까운 직사각형(가로·세로 홀수)이고, 크기는 `maze.width`·`maze.height`로 다룹니다. 칸 번호는 `y * width + x`입니다.

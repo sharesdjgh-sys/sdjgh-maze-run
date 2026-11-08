@@ -55,7 +55,7 @@ export function howtoScreen({ characters = DEFAULT_SETTINGS.characters } = {}) {
           </section>
           <section class="guide-section" aria-labelledby="guide-controls-title">
             <h2 id="guide-controls-title"><span>02</span>키보드 또는 터치로 둘이서</h2>
-            <p class="guide-section-intro">모바일·태블릿은 투명 방향키를 꾹 눌러 이동해요. 세로 화면에서는 아래쪽 1P와 위쪽 2P가 마주 보고, 가로 화면에서는 왼쪽 1P·오른쪽 2P가 함께 즐겨요. 각자의 아이템 1·2와 ‘멈춤’ 버튼을 눌러 보세요.</p>
+            <p class="guide-section-intro">모바일·태블릿은 가로로 돌려 왼쪽 1P·오른쪽 2P가 함께 즐겨요. 투명 방향키를 꾹 눌러 이동하고, 패드에 표시된 아이템 그림을 눌러 사용해요. 아래 방향키는 왼쪽·오른쪽 키 사이에 있어요. 각자의 ‘멈춤’ 버튼으로 잠깐 쉴 수 있어요.</p>
             <div class="guide-players">${players}</div>
           </section>
         </div>
