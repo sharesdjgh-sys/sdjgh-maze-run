@@ -5,7 +5,7 @@ import { iconImg } from '../render/characters.js';
 
 const DIRECTIONS = { up: ['▲', '위'], left: ['◀', '왼쪽'], down: ['▼', '아래'], right: ['▶', '오른쪽'] };
 
-export function createTouchControls({ input, onAction, onLayout }) {
+export function createTouchControls({ input, onLayout }) {
   const root = document.createElement('section');
   root.className = 'touch-controls';
   root.setAttribute('aria-label', '터치 조작판');
@@ -13,10 +13,9 @@ export function createTouchControls({ input, onAction, onLayout }) {
   root.innerHTML = PLAYERS.map((p, i) => `
     <div class="touch-player p${i + 1}" aria-label="${p.label} 터치 조작">
       <strong>${p.label}</strong>
-      <div class="touch-dpad">${Object.entries(DIRECTIONS).map(([dir, [symbol, label]]) => `<button type="button" class="touch-direction touch-${dir}" data-control="${dir}" data-code="${p.keys[dir][0]}" aria-label="${p.label} 내 기준 ${label} 이동">${symbol}</button>`).join('')}</div>
       <div class="touch-items">${[0, 1].map(slot => `<button type="button" class="touch-item" data-control="item${slot + 1}" data-code="${p.keys[`item${slot + 1}`][0]}" aria-label="${p.label} 아이템 ${slot + 1} 비어 있음"><span class="touch-slot-number">${slot + 1}</span><span class="touch-item-content"><span class="touch-item-empty">비어 있음</span></span></button>`).join('')}
-        <button class="touch-pause" type="button" data-touch-action="pause" aria-label="${p.label} 일시정지">Ⅱ 멈춤</button>
       </div>
+      <div class="touch-dpad">${Object.entries(DIRECTIONS).map(([dir, [symbol, label]]) => `<button type="button" class="touch-direction touch-${dir}" data-control="${dir}" data-code="${p.keys[dir][0]}" aria-label="${p.label} 내 기준 ${label} 이동">${symbol}</button>`).join('')}</div>
     </div>`).join('') + '<p class="touch-landscape-hint">휴대폰을 가로로 돌려 주세요<br /><small>왼쪽 1P · 오른쪽 2P로 미로를 더 넓게 봐요</small></p>';
   document.body.append(root);
   const itemButtons = PLAYERS.map((_, i) => [...root.querySelectorAll(`.p${i + 1} .touch-item`)]);
@@ -52,8 +51,6 @@ export function createTouchControls({ input, onAction, onLayout }) {
   }
   root.addEventListener('contextmenu', event => event.preventDefault());
   root.addEventListener('click', event => {
-    const action = event.target.closest('[data-touch-action]')?.dataset.touchAction;
-    if (action) onAction(action);
     // 보조 기술이나 키보드로 버튼을 활성화한 경우에도 한 번 입력합니다.
     const button = event.target.closest('[data-code]');
     if (button && event.detail === 0 && !root.hidden) {

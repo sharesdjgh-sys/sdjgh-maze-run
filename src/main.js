@@ -74,7 +74,7 @@ const overlay = createOverlay(document.getElementById('overlay'), (action) => {
   runAction(action);
 });
 const input = createInput({ onBlur: () => runAction('pause') });
-const touchControls = createTouchControls({ input, onAction: runAction, onLayout: renderer.setViewportInsets });
+const touchControls = createTouchControls({ input, onLayout: renderer.setViewportInsets });
 let vfx = createVfx();
 const mazeDeck = createMazeDeck(MAZE_POOL);
 const backdrop = createMatch({ difficulty: 'easy', seed: MAZE_POOL.easy[0].seed });

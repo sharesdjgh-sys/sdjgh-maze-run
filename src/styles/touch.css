@@ -10,8 +10,8 @@
   position: absolute;
   left: 50%;
   display: grid;
-  grid-template-columns: 140px 112px;
-  gap: 6px 18px;
+  grid-template-columns: 140px;
+  gap: 6px;
   align-items: center;
   transform: translateX(-50%);
 }
@@ -48,6 +48,7 @@
   box-shadow: 0 0 0 2px var(--player), 0 0 14px var(--player-soft);
 }
 .touch-dpad {
+  margin-top: 12px;
   display: grid;
   grid-template-columns: repeat(3, 44px);
   grid-template-rows: repeat(2, 44px);
@@ -61,8 +62,7 @@
 .touch-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 6px; }
 .touch-items button { min-height: 52px; font-size: 23px; }
 .touch-items small { display: block; font-size: 11px; }
-.touch-items .touch-pause { grid-column: 1 / -1; min-height: 44px; font-size: 14px; }
-.touch-items .touch-item { position: relative; height: 72px; }
+.touch-items .touch-item { position: relative; height: 56px; }
 .touch-item-content { display: grid; justify-items: center; align-content: center; gap: 3px; height: 100%; padding: 7px 2px 2px; pointer-events: none; }
 .touch-item-icon { width: 32px; height: 32px; object-fit: contain; filter: drop-shadow(0 1px 2px #183122); }
 .touch-item-name { font-size: 10px; line-height: 12px; }
@@ -85,9 +85,9 @@
 .touch-landscape-hint small { font-size: 11px; }
 @media (orientation: landscape) {
   .touch-landscape-hint { display: none; }
+  .touch-items .touch-item { height: 72px; }
   .touch-player {
     top: 50%;
-    grid-template-columns: 140px;
     transform: translateY(-50%);
   }
   .touch-player.p1 { left: max(var(--touch-edge), env(safe-area-inset-left)); bottom: auto; }
